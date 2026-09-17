@@ -1,0 +1,460 @@
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.db import transaction
+from django.shortcuts import get_object_or_404, redirect, render
+
+from .models import (
+    LQASAssessment,
+    LQASResponse,
+)
+
+
+def get_active_profile(request):
+
+    profile = getattr(request.user, "profile", None)
+
+    if not profile or not profile.active:
+        messages.error(
+            request,
+            "Your account does not have an active user profile.",
+        )
+        return None
+
+    return profile
+
+
+@login_required
+def lqas_dashboard(request):
+
+    profile = get_active_profile(request)
+
+    if not profile:
+        return redirect("assessments:dashboard")
+
+    assessments = (
+        LQASAssessment.objects
+        .filter(
+            facility__in=profile.accessible_facilities()
+        )
+        .select_related(
+            "facility",
+            "facility__organization",
+            "created_by",
+        )
+        .order_by(
+            "-year",
+            "-created_at",
+        )
+    )
+
+    return render(
+        request,
+        "lqas/dashboard.html",
+        {
+            "profile": profile,
+            "assessments": assessments,
+        },
+    )
+
+
+@login_required
+def lqas_create(request):
+
+    profile = get_active_profile(request)
+
+    if not profile:
+        return redirect("assessments:dashboard")
+
+    facilities = (
+        profile.accessible_facilities()
+        .select_related("organization")
+        .order_by("name")
+    )
+
+    if not facilities.exists():
+
+        messages.error(
+            request,
+            "No facility is available for your account.",
+        )
+
+        return redirect("lqas:dashboard")
+
+    if request.method == "POST":
+
+        # --------------------------------------------------
+        # FACILITY
+        # --------------------------------------------------
+
+        facility_id = request.POST.get(
+            "facility"
+        )
+
+        if profile.is_facility_user():
+
+            facility = facilities.first()
+
+            if not facility:
+
+                messages.error(
+                    request,
+                    "Your account is not assigned to a facility.",
+                )
+
+                return redirect("lqas:dashboard")
+
+        else:
+
+            facility = get_object_or_404(
+                facilities,
+                id=facility_id,
+            )
+
+        # --------------------------------------------------
+        # YEAR AND PERIOD
+        # --------------------------------------------------
+
+        year = request.POST.get("year", "").strip()
+
+        period = request.POST.get("period", "").strip()
+
+        if not year or not period:
+
+            messages.error(
+                request,
+                "Year and period are required.",
+            )
+
+            return render(
+                request,
+                "lqas/create.html",
+                {
+                    "profile": profile,
+                    "facilities": facilities,
+                },
+            )
+
+        try:
+
+            year = int(year)
+
+        except ValueError:
+
+            messages.error(
+                request,
+                "Year must be a valid number.",
+            )
+
+            return render(
+                request,
+                "lqas/create.html",
+                {
+                    "profile": profile,
+                    "facilities": facilities,
+                },
+            )
+
+        if year <= 0:
+
+            messages.error(
+                request,
+                "Year must be greater than zero.",
+            )
+
+            return render(
+                request,
+                "lqas/create.html",
+                {
+                    "profile": profile,
+                    "facilities": facilities,
+                },
+            )
+
+        # --------------------------------------------------
+        # READ DYNAMIC DATA ELEMENTS
+        # --------------------------------------------------
+
+        element_names = request.POST.getlist(
+            "data_element_name"
+        )
+
+        tally_values = request.POST.getlist(
+            "tally_sheet"
+        )
+
+        register_values = request.POST.getlist(
+            "register"
+        )
+
+        report_values = request.POST.getlist(
+            "report"
+        )
+
+        # --------------------------------------------------
+        # CHECK THAT AT LEAST ONE ELEMENT EXISTS
+        # --------------------------------------------------
+
+        if not element_names:
+
+            messages.error(
+                request,
+                "Please add at least one LQAS data element.",
+            )
+
+            return render(
+                request,
+                "lqas/create.html",
+                {
+                    "profile": profile,
+                    "facilities": facilities,
+                },
+            )
+
+        # --------------------------------------------------
+        # CHECK ROW COUNTS
+        # --------------------------------------------------
+
+        if not (
+            len(element_names)
+            == len(tally_values)
+            == len(register_values)
+            == len(report_values)
+        ):
+
+            messages.error(
+                request,
+                "Invalid LQAS data. Please check the data-element rows.",
+            )
+
+            return render(
+                request,
+                "lqas/create.html",
+                {
+                    "profile": profile,
+                    "facilities": facilities,
+                },
+            )
+
+        submitted_values = []
+
+        # --------------------------------------------------
+        # VALIDATE EACH DATA ELEMENT
+        # --------------------------------------------------
+
+        for index, element_name in enumerate(
+            element_names
+        ):
+
+            element_name = element_name.strip()
+
+            if not element_name:
+
+                messages.error(
+                    request,
+                    f"Data element #{index + 1} name is required.",
+                )
+
+                return render(
+                    request,
+                    "lqas/create.html",
+                    {
+                        "profile": profile,
+                        "facilities": facilities,
+                    },
+                )
+
+            tally = tally_values[index].strip()
+            register = register_values[index].strip()
+            report = report_values[index].strip()
+
+            if (
+                tally == ""
+                or register == ""
+                or report == ""
+            ):
+
+                messages.error(
+                    request,
+                    f"Please complete all values for: {element_name}",
+                )
+
+                return render(
+                    request,
+                    "lqas/create.html",
+                    {
+                        "profile": profile,
+                        "facilities": facilities,
+                    },
+                )
+
+            try:
+
+                tally = int(tally)
+                register = int(register)
+                report = int(report)
+
+            except ValueError:
+
+                messages.error(
+                    request,
+                    f"Counts for '{element_name}' must be numbers.",
+                )
+
+                return render(
+                    request,
+                    "lqas/create.html",
+                    {
+                        "profile": profile,
+                        "facilities": facilities,
+                    },
+                )
+
+            if (
+                tally < 0
+                or register < 0
+                or report < 0
+            ):
+
+                messages.error(
+                    request,
+                    f"Counts cannot be negative for: {element_name}",
+                )
+
+                return render(
+                    request,
+                    "lqas/create.html",
+                    {
+                        "profile": profile,
+                        "facilities": facilities,
+                    },
+                )
+
+            submitted_values.append(
+                (
+                    element_name,
+                    tally,
+                    register,
+                    report,
+                )
+            )
+
+        # --------------------------------------------------
+        # SAVE ASSESSMENT
+        # --------------------------------------------------
+
+        with transaction.atomic():
+
+            assessment = LQASAssessment.objects.create(
+                facility=facility,
+                year=year,
+                period=period,
+                status=LQASAssessment.Status.DRAFT,
+                created_by=request.user,
+            )
+
+            for (
+                element_name,
+                tally,
+                register,
+                report,
+            ) in submitted_values:
+
+                LQASResponse.objects.create(
+                    assessment=assessment,
+                    data_element_name=element_name,
+                    tally_sheet=tally,
+                    register=register,
+                    report=report,
+                )
+
+            # Calculate automatic result.
+            assessment.calculate_result()
+
+            assessment.status = (
+                LQASAssessment.Status.SUBMITTED
+            )
+
+            assessment.save(
+                update_fields=[
+                    "matched_count",
+                    "total_elements",
+                    "percentage",
+                    "status",
+                    "updated_at",
+                ]
+            )
+
+        messages.success(
+            request,
+            "LQAS assessment submitted successfully.",
+        )
+
+        return redirect(
+            "lqas:result",
+            assessment_id=assessment.id,
+        )
+
+    # --------------------------------------------------
+    # GET
+    # --------------------------------------------------
+
+    return render(
+        request,
+        "lqas/create.html",
+        {
+            "profile": profile,
+            "facilities": facilities,
+        },
+    )
+
+
+@login_required
+def lqas_result(
+    request,
+    assessment_id,
+):
+
+    profile = get_active_profile(request)
+
+    if not profile:
+        return redirect("assessments:dashboard")
+
+    assessment = get_object_or_404(
+        LQASAssessment.objects.select_related(
+            "facility",
+            "facility__organization",
+            "created_by",
+        ),
+        id=assessment_id,
+    )
+
+    # --------------------------------------------------
+    # ACCESS CONTROL
+    # --------------------------------------------------
+
+    if not profile.can_access_facility(
+        assessment.facility
+    ):
+
+        messages.error(
+            request,
+            "You do not have permission to view this LQAS result.",
+        )
+
+        return redirect("lqas:dashboard")
+
+    responses = (
+        assessment.responses
+        .all()
+        .order_by("id")
+    )
+
+    return render(
+        request,
+        "lqas/result.html",
+        {
+            "profile": profile,
+            "assessment": assessment,
+            "responses": responses,
+        },
+    )

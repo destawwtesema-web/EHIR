@@ -1,0 +1,1383 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>EHIRS | Dashboard</title>
+
+    <!-- Bootstrap -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <!-- Bootstrap Icons -->
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    >
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #f4f7f5;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #212529;
+        }
+
+        /* =====================================================
+           SIDEBAR
+        ===================================================== */
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 270px;
+            height: 100vh;
+            background: #146c43;
+            color: white;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 2px 0 12px rgba(0, 0, 0, 0.12);
+        }
+
+        /* =====================================================
+           BRAND
+        ===================================================== */
+
+        .sidebar-brand {
+            padding: 25px 22px;
+            background: #0f5132;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .sidebar-brand h2 {
+            margin: 0;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-brand p {
+            margin: 6px 0 0;
+            font-size: 11px;
+            line-height: 1.5;
+            color: #d1e7dd;
+        }
+
+        /* =====================================================
+           USER INFORMATION
+        ===================================================== */
+
+        .sidebar-user {
+            padding: 18px 22px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .sidebar-user-name {
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .sidebar-user-role {
+            margin-top: 5px;
+            font-size: 12px;
+            color: #d1e7dd;
+        }
+
+        /* =====================================================
+           MENU TITLE
+        ===================================================== */
+
+        .menu-title {
+            padding: 20px 22px 8px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            color: #b7dfc8;
+        }
+
+        /* =====================================================
+           SIDEBAR MENU
+        ===================================================== */
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-menu li {
+            margin: 3px 10px;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: 8px;
+            color: white;
+            text-decoration: none;
+            transition:
+                background 0.2s ease,
+                transform 0.2s ease;
+        }
+
+        .sidebar-menu a:hover {
+            background: #198754;
+            transform: translateX(3px);
+            color: white;
+        }
+
+        .sidebar-menu a.active {
+            background: white;
+            color: #146c43;
+            font-weight: 700;
+        }
+
+        .menu-icon {
+            width: 28px;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        /* =====================================================
+           SIDEBAR FOOTER
+        ===================================================== */
+
+        .sidebar-bottom {
+            padding: 22px;
+            margin-top: 15px;
+        }
+
+        .logout-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 11px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            color: white;
+            text-decoration: none;
+            transition:
+                background 0.2s ease,
+                border-color 0.2s ease;
+        }
+
+        .logout-button:hover {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+
+        /* =====================================================
+           MAIN CONTENT
+        ===================================================== */
+
+        .main-content {
+            margin-left: 270px;
+            min-height: 100vh;
+            padding: 30px;
+        }
+
+        /* =====================================================
+           TOP HEADER
+        ===================================================== */
+
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .page-title h2 {
+            margin: 0;
+            color: #146c43;
+            font-weight: 700;
+        }
+
+        .page-title p {
+            margin: 6px 0 0;
+            color: #6c757d;
+        }
+
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 16px;
+            border-radius: 30px;
+            background: #d1e7dd;
+            color: #0f5132;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        /* =====================================================
+           WELCOME CARD
+        ===================================================== */
+
+        .welcome-card {
+            border: none;
+            border-radius: 16px;
+            background: linear-gradient(
+                135deg,
+                #146c43,
+                #198754
+            );
+            color: white;
+            box-shadow: 0 6px 22px rgba(20, 108, 67, 0.20);
+            margin-bottom: 30px;
+        }
+
+        .welcome-card .card-body {
+            padding: 30px;
+        }
+
+        .welcome-card h3 {
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .welcome-card p {
+            margin: 0;
+            color: #e8f5ee;
+        }
+
+        /* =====================================================
+           SECTION TITLE
+        ===================================================== */
+
+        .section-title {
+            margin-bottom: 18px;
+            color: #146c43;
+            font-weight: 700;
+        }
+
+        /* =====================================================
+           STAT CARDS
+        ===================================================== */
+
+        .stat-card {
+            height: 100%;
+            border: none;
+            border-left: 5px solid #198754;
+            border-radius: 14px;
+            background: white;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.07);
+            transition:
+                transform 0.2s ease,
+                box-shadow 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 22px rgba(0, 0, 0, 0.11);
+        }
+
+        .stat-card .card-body {
+            padding: 21px;
+        }
+
+        .stat-title {
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: #6c757d;
+        }
+
+        .stat-number {
+            color: #146c43;
+            font-size: 30px;
+            font-weight: 700;
+        }
+
+        .stat-description {
+            margin-top: 5px;
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        /* =====================================================
+           SCORE CARDS
+        ===================================================== */
+
+        .score-card {
+            height: 100%;
+            border: none;
+            border-radius: 14px;
+            background: white;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.07);
+        }
+
+        .score-card .card-body {
+            padding: 22px;
+        }
+
+        .score-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #6c757d;
+        }
+
+        .score-value {
+            margin-top: 8px;
+            color: #146c43;
+            font-size: 29px;
+            font-weight: 700;
+        }
+
+        .progress {
+            height: 8px;
+            margin-top: 12px;
+            border-radius: 20px;
+            background: #e9ecef;
+        }
+
+        .progress-bar {
+            background: #198754;
+        }
+
+        /* =====================================================
+           STATUS CARDS
+        ===================================================== */
+
+        .status-card {
+            text-align: center;
+        }
+
+        .status-card .stat-number {
+            font-size: 26px;
+        }
+
+        /* =====================================================
+           SUMMARY CARD
+        ===================================================== */
+
+        .summary-card {
+            border: none;
+            border-radius: 15px;
+            background: white;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.07);
+            margin-bottom: 25px;
+        }
+
+        .summary-card .card-body {
+            padding: 24px;
+        }
+
+        /* =====================================================
+           TABLE
+        ===================================================== */
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table thead th {
+            background: #146c43;
+            color: white;
+            border: none;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        .table tbody td {
+            font-size: 13px;
+            vertical-align: middle;
+        }
+
+        .table tbody tr:hover {
+            background: #f1f8f4;
+        }
+
+        /* =====================================================
+           STATUS BADGES
+        ===================================================== */
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .status-draft {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-submitted {
+            background: #cff4fc;
+            color: #055160;
+        }
+
+        .status-reviewed {
+            background: #cfe2ff;
+            color: #084298;
+        }
+
+        .status-approved {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .status-returned {
+            background: #f8d7da;
+            color: #842029;
+        }
+
+        /* =====================================================
+           EMPTY STATE
+        ===================================================== */
+
+        .empty-state {
+            padding: 35px 20px;
+            text-align: center;
+            color: #6c757d;
+        }
+
+        .empty-state-icon {
+            margin-bottom: 10px;
+            font-size: 34px;
+            opacity: 0.55;
+        }
+
+        /* =====================================================
+           RESPONSIVE
+        ===================================================== */
+
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 230px;
+            }
+
+            .main-content {
+                margin-left: 230px;
+                padding: 24px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            .top-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .role-badge {
+                width: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+    <aside class="sidebar">
+
+        <!-- BRAND -->
+        <div class="sidebar-brand">
+
+            <h2>
+                ðŸŸ¢ EHIRS
+            </h2>
+
+            <p>
+                Ethiopian Health Information Revolution System
+            </p>
+
+        </div>
+
+
+        <!-- USER -->
+        <div class="sidebar-user">
+
+            <div class="sidebar-user-name">
+                {{ request.user.get_full_name|default:request.user.username }}
+            </div>
+
+            <div class="sidebar-user-role">
+                {{ role_dashboard_name }}
+            </div>
+
+        </div>
+
+
+        <!-- MAIN MENU -->
+        <div class="menu-title">
+            MAIN MENU
+        </div>
+
+        <ul class="sidebar-menu">
+
+            <!-- DASHBOARD -->
+            <li>
+                <a
+                    href="{% url 'dashboard:home' %}"
+                    class="active"
+                >
+                    <span class="menu-icon">
+                        <i class="bi bi-speedometer2"></i>
+                    </span>
+
+                    Dashboard
+                </a>
+            </li>
+
+
+            <!-- ASSESSMENTS -->
+            <li>
+                <a href="{% url 'assessments:dashboard' %}">
+                    <span class="menu-icon">
+                        <i class="bi bi-clipboard2-check"></i>
+                    </span>
+
+                    Assessments
+                </a>
+            </li>
+
+
+            <!-- LQAS -->
+            <li>
+                <a href="{% url 'lqas:dashboard' %}">
+                    <span class="menu-icon">
+                        <i class="bi bi-bar-chart-line"></i>
+                    </span>
+
+                    LQAS
+                </a>
+            </li>
+
+
+            <!-- ANALYTICS -->
+            <li>
+                <a href="{% url 'core:analytics' %}">
+                    <span class="menu-icon">
+                        <i class="bi bi-graph-up-arrow"></i>
+                    </span>
+
+                    Analytics
+                </a>
+            </li>
+
+
+            <!-- NOTIFICATIONS -->
+            <li>
+                <a href="{% url 'core:notifications' %}">
+                    <span class="menu-icon">
+                        <i class="bi bi-bell"></i>
+                    </span>
+
+                    Notifications
+                </a>
+            </li>
+
+
+            <!-- FEEDBACK -->
+            <li>
+                <a href="{% url 'feedback:dashboard' %}">
+                    <span class="menu-icon">
+                        <i class="bi bi-chat-left-text"></i>
+                    </span>
+
+                    Feedback
+                </a>
+            </li>
+
+
+            <!-- USER MANAGEMENT -->
+            {% if request.user.is_staff or profile.is_ministry_admin or profile.is_region_admin or profile.is_subcity_admin %}
+            <li>
+                <a href="{% url 'accounts:user_management' %}">
+                    <span class="menu-icon">
+                        <i class="bi bi-people-fill"></i>
+                    </span>
+
+                    User Management
+                </a>
+            </li>
+            {% endif %}
+            </li>
+
+        </ul>
+
+
+        <!-- LOGOUT -->
+        <div class="sidebar-bottom">
+
+            <form
+                method="post"
+                action="{% url 'accounts:logout' %}"
+            >
+
+                {% csrf_token %}
+
+                <button
+                    type="submit"
+                    class="logout-button"
+                    style="background: transparent; cursor: pointer;"
+                >
+                    <i class="bi bi-box-arrow-right"></i>
+
+                    Logout
+                </button>
+
+            </form>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =====================================================
+         MAIN CONTENT
+    ====================================================== -->
+
+    <main class="main-content">
+
+        <!-- TOP HEADER -->
+        <div class="top-header">
+
+            <div class="page-title">
+
+                <h2>
+                    EHIRS Dashboard
+                </h2>
+
+                <p>
+                    Ethiopian Health Information Revolution System Overview
+                </p>
+
+            </div>
+
+
+            <div class="role-badge">
+
+                <i class="bi bi-person-badge"></i>
+
+                {{ role_dashboard_name }}
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             WELCOME
+        ================================================== -->
+
+        <div class="card welcome-card">
+
+            <div class="card-body">
+
+                <h3>
+                    Welcome,
+                    {{ request.user.get_full_name|default:request.user.username }}
+                </h3>
+
+                <p>
+                    Monitor health information performance,
+                    assessments, data quality, LQAS results and
+                    organizational activities from your EHIRS dashboard.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             KEY PERFORMANCE INDICATORS
+        ================================================== -->
+
+        <h4 class="section-title">
+            Key Performance Indicators
+        </h4>
+
+        <div class="row g-4 mb-4">
+
+            <!-- FACILITIES -->
+            <div class="col-xl-3 col-lg-6">
+
+                <div class="card stat-card">
+
+                    <div class="card-body">
+
+                        <div class="stat-title">
+                            Accessible Facilities
+                        </div>
+
+                        <div class="stat-number">
+                            {{ total_facilities|default:0 }}
+                        </div>
+
+                        <div class="stat-description">
+                            Facilities within your access level
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ASSESSMENTS -->
+            <div class="col-xl-3 col-lg-6">
+
+                <div class="card stat-card">
+
+                    <div class="card-body">
+
+                        <div class="stat-title">
+                            Total Assessments
+                        </div>
+
+                        <div class="stat-number">
+                            {{ total_assessments|default:0 }}
+                        </div>
+
+                        <div class="stat-description">
+                            Assessments in your area
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- AVERAGE SCORE -->
+            <div class="col-xl-3 col-lg-6">
+
+                <div class="card stat-card">
+
+                    <div class="card-body">
+
+                        <div class="stat-title">
+                            Average Assessment Score
+                        </div>
+
+                        <div class="stat-number">
+                            {{ average_score|default:0 }}%
+                        </div>
+
+                        <div class="stat-description">
+                            Overall EHIRS assessment performance
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- LQAS -->
+            <div class="col-xl-3 col-lg-6">
+
+                <div class="card stat-card">
+
+                    <div class="card-body">
+
+                        <div class="stat-title">
+                            Total LQAS
+                        </div>
+
+                        <div class="stat-number">
+                            {{ total_lqas|default:0 }}
+                        </div>
+
+                        <div class="stat-description">
+                            LQAS assessments recorded
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             EHIRS SECTION PERFORMANCE
+        ================================================== -->
+
+        <h4 class="section-title">
+            EHIRS Section Performance
+        </h4>
+
+        <div class="row g-4 mb-4">
+
+            <!-- SECTION A -->
+            <div class="col-lg-4">
+
+                <div class="card score-card">
+
+                    <div class="card-body">
+
+                        <div class="score-label">
+                            Section A â€” Health Infrastructure
+                        </div>
+
+                        <div class="score-value">
+                            {{ section_a_score|default:0 }}%
+                        </div>
+
+                        <div class="progress">
+
+                            <div
+                                class="progress-bar score-progress"
+                                role="progressbar"
+                                data-score="{{ section_a_score|default:0 }}"
+                                aria-label="Health Infrastructure score"
+                            ></div>
+
+                        </div>
+
+                        <small class="text-muted">
+                            Weight: 30%
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- SECTION B -->
+            <div class="col-lg-4">
+
+                <div class="card score-card">
+
+                    <div class="card-body">
+
+                        <div class="score-label">
+                            Section B â€” Data Quality
+                        </div>
+
+                        <div class="score-value">
+                            {{ section_b_score|default:0 }}%
+                        </div>
+
+                        <div class="progress">
+
+                            <div
+                                class="progress-bar score-progress"
+                                role="progressbar"
+                                data-score="{{ section_b_score|default:0 }}"
+                                aria-label="Data Quality score"
+                            ></div>
+
+                        </div>
+
+                        <small class="text-muted">
+                            Weight: 30%
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- SECTION C -->
+            <div class="col-lg-4">
+
+                <div class="card score-card">
+
+                    <div class="card-body">
+
+                        <div class="score-label">
+                            Section C â€” Data Use
+                        </div>
+
+                        <div class="score-value">
+                            {{ section_c_score|default:0 }}%
+                        </div>
+
+                        <div class="progress">
+
+                            <div
+                                class="progress-bar score-progress"
+                                role="progressbar"
+                                data-score="{{ section_c_score|default:0 }}"
+                                aria-label="Data Use score"
+                            ></div>
+
+                        </div>
+
+                        <small class="text-muted">
+                            Weight: 40%
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             ASSESSMENT STATUS
+        ================================================== -->
+
+        <h4 class="section-title">
+            Assessment Status
+        </h4>
+
+        <div class="row g-4 mb-4">
+
+            <!-- DRAFT -->
+            <div class="col-xl col-lg-4 col-md-6">
+
+                <div class="card stat-card status-card">
+
+                    <div class="card-body">
+
+                        <div class="stat-title">
+                            Draft
+                        </div>
+
+                        <div class="stat-number">
+                            {{ draft_assessments|default:0 }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- SUBMITTED -->
+            <div class="col-xl col-lg-4 col-md-6">
+
+                <div class="card stat-card status-card">
+
+                    <div class="card-body">
+
+                        <div class="stat-title">
+                            Submitted
+                        </div>
+
+                        <div class="stat-number">
+                            {{ submitted_assessments|default:0 }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- REVIEWED -->
+            <div class="col-xl col-lg-4 col-md-6">
+
+                <div class="card stat-card status-card">
+
+                    <div class="card-body">
+
+                        <div class="stat-title">
+                            Reviewed
+                        </div>
+
+                        <div class="stat-number">
+                            {{ reviewed_assessments|default:0 }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- APPROVED -->
+            <div class="col-xl col-lg-4 col-md-6">
+
+                <div class="card stat-card status-card">
+
+                    <div class="card-body">
+
+                        <div class="stat-title">
+                            Approved
+                        </div>
+
+                        <div class="stat-number">
+                            {{ approved_assessments|default:0 }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- RETURNED -->
+            <div class="col-xl col-lg-4 col-md-6">
+
+                <div class="card stat-card status-card">
+
+                    <div class="card-body">
+
+                        <div class="stat-title">
+                            Returned
+                        </div>
+
+                        <div class="stat-number">
+                            {{ returned_assessments|default:0 }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             LQAS PERFORMANCE
+        ================================================== -->
+
+        <h4 class="section-title">
+            LQAS Performance
+        </h4>
+
+        <div class="row g-4 mb-4">
+
+            <!-- TOTAL LQAS -->
+            <div class="col-md-6">
+
+                <div class="card stat-card">
+
+                    <div class="card-body">
+
+                        <div class="stat-title">
+                            Total LQAS Assessments
+                        </div>
+
+                        <div class="stat-number">
+                            {{ total_lqas|default:0 }}
+                        </div>
+
+                        <div class="stat-description">
+                            LQAS assessments in your accessible area
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- AVERAGE LQAS -->
+            <div class="col-md-6">
+
+                <div class="card stat-card">
+
+                    <div class="card-body">
+
+                        <div class="stat-title">
+                            Average LQAS Accuracy
+                        </div>
+
+                        <div class="stat-number">
+                            {{ average_lqas|default:0 }}%
+                        </div>
+
+                        <div class="stat-description">
+                            Average LQAS performance
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             RECENT ASSESSMENTS
+        ================================================== -->
+
+        <div class="card summary-card">
+
+            <div class="card-body">
+
+                <h4 class="section-title">
+                    Recent Assessments
+                </h4>
+
+                {% if recent_assessments %}
+
+                    <div class="table-responsive">
+
+                        <table class="table table-hover align-middle">
+
+                            <thead>
+                                <tr>
+                                    <th>Facility</th>
+                                    <th>Year</th>
+                                    <th>Period</th>
+                                    <th>Status</th>
+                                    <th>Score</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                {% for assessment in recent_assessments %}
+
+                                    <tr>
+
+                                        <td>
+                                            <strong>
+                                                {{ assessment.facility }}
+                                            </strong>
+                                        </td>
+
+                                        <td>
+                                            {{ assessment.period.year }}
+                                        </td>
+
+                                        <td>
+                                            {{ assessment.period.period_number }}
+                                        </td>
+
+                                        <td>
+
+                                            {% if assessment.status == "DRAFT" %}
+
+                                                <span class="status-badge status-draft">
+                                                    Draft
+                                                </span>
+
+                                            {% elif assessment.status == "SUBMITTED" %}
+
+                                                <span class="status-badge status-submitted">
+                                                    Submitted
+                                                </span>
+
+                                            {% elif assessment.status == "REVIEWED" %}
+
+                                                <span class="status-badge status-reviewed">
+                                                    Reviewed
+                                                </span>
+
+                                            {% elif assessment.status == "APPROVED" %}
+
+                                                <span class="status-badge status-approved">
+                                                    Approved
+                                                </span>
+
+                                            {% elif assessment.status == "RETURNED" %}
+
+                                                <span class="status-badge status-returned">
+                                                    Returned
+                                                </span>
+
+                                            {% else %}
+
+                                                <span class="status-badge">
+                                                    {{ assessment.status }}
+                                                </span>
+
+                                            {% endif %}
+
+                                        </td>
+
+                                        <td>
+                                            <strong>
+                                                {{ assessment.total_score|default:0 }}%
+                                            </strong>
+                                        </td>
+
+                                    </tr>
+
+                                {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                {% else %}
+
+                    <div class="empty-state">
+
+                        <div class="empty-state-icon">
+                            <i class="bi bi-clipboard-x"></i>
+                        </div>
+
+                        <p class="mb-0">
+                            No assessments are currently available.
+                        </p>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             RECENT LQAS
+        ================================================== -->
+
+        <div class="card summary-card">
+
+            <div class="card-body">
+
+                <h4 class="section-title">
+                    Recent LQAS Assessments
+                </h4>
+
+                {% if recent_lqas %}
+
+                    <div class="table-responsive">
+
+                        <table class="table table-hover align-middle">
+
+                            <thead>
+                                <tr>
+                                    <th>Facility</th>
+                                    <th>Year</th>
+                                    <th>Percentage</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                {% for lqas in recent_lqas %}
+
+                                    <tr>
+
+                                        <td>
+                                            <strong>
+                                                {{ lqas.facility }}
+                                            </strong>
+                                        </td>
+
+                                        <td>
+                                            {{ lqas.year }}
+                                        </td>
+
+                                        <td>
+                                            <strong>
+                                                {{ lqas.percentage|default:0 }}%
+                                            </strong>
+                                        </td>
+
+                                    </tr>
+
+                                {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                {% else %}
+
+                    <div class="empty-state">
+
+                        <div class="empty-state-icon">
+                            <i class="bi bi-bar-chart"></i>
+                        </div>
+
+                        <p class="mb-0">
+                            No LQAS assessments are currently available.
+                        </p>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <!-- =====================================================
+         JAVASCRIPT
+    ====================================================== -->
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const progressBars = document.querySelectorAll(".score-progress");
+
+            progressBars.forEach(function (bar) {
+
+                let score = parseFloat(bar.dataset.score);
+
+                if (isNaN(score)) {
+                    score = 0;
+                }
+
+                if (score < 0) {
+                    score = 0;
+                }
+
+                if (score > 100) {
+                    score = 100;
+                }
+
+                bar.style.width = score + "%";
+                bar.setAttribute("aria-valuenow", score);
+                bar.setAttribute("aria-valuemin", "0");
+                bar.setAttribute("aria-valuemax", "100");
+
+            });
+
+        });
+    </script>
+
+</body>
+</html>

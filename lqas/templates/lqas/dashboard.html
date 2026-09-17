@@ -1,0 +1,492 @@
+{% extends "base.html" %}
+
+{% block title %}LQAS Data Quality Audits - EHIRS{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Summary Cards */
+    .summary-card {
+        border: 0;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        transition: transform 0.15s ease-in-out;
+    }
+    .summary-card:hover {
+        transform: translateY(-2px);
+    }
+    .summary-label {
+        color: #6c757d;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+    }
+    .summary-number {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-top: 4px;
+    }
+
+    /* Organization Tree */
+    .tree-card {
+        border: 0;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+    .tree-card .card-header {
+        background: #ffffff;
+        border-bottom: 1px solid #edf2f7;
+        padding: 16px 20px;
+    }
+    .tree-title {
+        font-weight: 700;
+        font-size: 1.05rem;
+    }
+    .tree-subtitle {
+        color: #6c757d;
+        font-size: 0.84rem;
+    }
+    .organization-tree {
+        padding: 12px 18px 20px 18px;
+    }
+    .tree-node {
+        margin: 3px 0;
+    }
+    .tree-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 44px;
+        padding: 6px 10px;
+        border-radius: 8px;
+        transition: background-color .15s ease;
+    }
+    .tree-row:hover {
+        background: #f8fafc;
+    }
+    .tree-toggle {
+        width: 28px;
+        height: 28px;
+        border: 0;
+        background: transparent;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 28px;
+        cursor: pointer;
+        color: #495057;
+    }
+    .tree-toggle:hover {
+        background: #e2e8f0;
+    }
+    .tree-toggle.empty {
+        cursor: default;
+    }
+    .tree-icon {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 30px;
+        font-size: .9rem;
+    }
+    .org-icon {
+        background: #e8f5ee;
+        color: #198754;
+    }
+    .facility-icon {
+        background: #eff6ff;
+        color: #2563eb;
+    }
+    .tree-name {
+        font-weight: 600;
+        color: #1e293b;
+        flex: 1;
+        min-width: 0;
+    }
+    .tree-name small {
+        font-size: .75rem;
+        font-weight: 400;
+    }
+    .tree-children, .tree-facilities {
+        margin-left: 28px;
+        border-left: 2px solid #e2e8f0;
+        padding-left: 10px;
+    }
+    .tree-badge {
+        font-size: .72rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    .facility-row .tree-name {
+        font-weight: 500;
+    }
+    .facility-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .status-badge {
+        font-size: .72rem;
+        font-weight: 600;
+        padding: 4px 8px;
+        border-radius: 6px;
+    }
+    .view-btn {
+        font-size: .76rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    .hover-shadow:hover {
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08) !important;
+    }
+    .hover-primary:hover {
+        color: #0d6efd !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold mb-1">
+                LQAS Data Quality Audits
+            </h2>
+
+            <p class="text-muted mb-0">
+                Lot Quality Assurance Sampling data verification across all organizational levels
+            </p>
+        </div>
+
+        {% if role == "FACILITY_USER" and facility %}
+            <a href="{% url 'lqas:create' %}"
+               class="btn btn-primary fw-bold">
+                <i class="bi bi-plus-lg me-1"></i> + New LQAS
+            </a>
+        {% endif %}
+    </div>
+
+    <!-- FILTER BAR (YEAR & MONTH / PERIOD) -->
+    <div class="card shadow-sm border-0 mb-4 bg-light">
+        <div class="card-body py-3">
+            <form method="get" class="row g-3 align-items-center">
+                <div class="col-auto">
+                    <span class="fw-bold text-dark me-2">
+                        <i class="bi bi-funnel-fill text-primary"></i> Filter By:
+                    </span>
+                </div>
+
+                <!-- Year Filter -->
+                <div class="col-auto">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-white fw-semibold">Year</span>
+                        <select name="year" class="form-select form-select-sm" onchange="this.form.submit()">
+                            <option value="">All Years</option>
+                            {% for y in available_years %}
+                                <option value="{{ y }}" {% if selected_year == y %}selected{% endif %}>
+                                    {{ y }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Month / Period Filter -->
+                <div class="col-auto">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-white fw-semibold">Month / Period</span>
+                        <select name="period" class="form-select form-select-sm" onchange="this.form.submit()">
+                            <option value="">All Months</option>
+                            {% for code, label in available_periods %}
+                                <option value="{{ code }}" {% if selected_period == code %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-sm btn-primary">
+                        <i class="bi bi-search"></i> Apply
+                    </button>
+                    {% if selected_year or selected_period %}
+                        <a href="{% url 'lqas:dashboard' %}" class="btn btn-sm btn-outline-secondary ms-1">
+                            <i class="bi bi-x-circle"></i> Clear Filter
+                        </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if role == "MINISTRY_ADMIN" %}
+
+        <!-- SUMMARY METRICS CARDS -->
+        <div class="row g-3 mb-4">
+            <div class="col-sm-6 col-lg-3">
+                <div class="card summary-card border-start border-4 border-primary">
+                    <div class="card-body">
+                        <div class="summary-label">Total Facilities</div>
+                        <div class="summary-number text-primary">{{ total_facilities|default:0 }}</div>
+                        <small class="text-muted">Health Centers & Hospitals</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-lg-3">
+                <div class="card summary-card border-start border-4 border-info">
+                    <div class="card-body">
+                        <div class="summary-label">Audited Facilities</div>
+                        <div class="summary-number text-info">{{ audited_facilities_count|default:0 }}</div>
+                        <small class="text-muted">With submitted audits</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-lg-3">
+                <div class="card summary-card border-start border-4 border-success">
+                    <div class="card-body">
+                        <div class="summary-label">Total Audits</div>
+                        <div class="summary-number text-success">{{ total_audits_count|default:0 }}</div>
+                        <small class="text-muted">LQAS reports in filter</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6 col-lg-3">
+                <div class="card summary-card border-start border-4 border-warning">
+                    <div class="card-body">
+                        <div class="summary-label">Overall Accuracy</div>
+                        <div class="summary-number text-dark">
+                            {% if overall_avg_percentage is not None %}
+                                {{ overall_avg_percentage }}%
+                            {% else %}
+                                -
+                            {% endif %}
+                        </div>
+                        <small class="text-muted">Average verified score</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HIERARCHICAL ORGANIZATION TREE (DHIS2 STYLE) -->
+        <div class="card tree-card mb-4 shadow-sm border">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="tree-title text-dark">
+                        <i class="bi bi-diagram-3 me-2 text-primary"></i>
+                        Organization Hierarchy & Health Facilities
+                    </div>
+                    <div class="tree-subtitle">
+                        Expand regions and sub-cities to view subordinate health centers and audit reports
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="expandAllBtn">
+                        <i class="bi bi-arrows-expand me-1"></i> Expand All
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="collapseAllBtn">
+                        <i class="bi bi-arrows-collapse me-1"></i> Collapse All
+                    </button>
+                </div>
+            </div>
+
+            <div class="organization-tree">
+                {% if organization_tree %}
+                    {% for node in organization_tree %}
+                        {% include "lqas/hierarchy.html" with node=node level=0 %}
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-diagram-3 fs-1 d-block mb-2"></i>
+                        <p class="mb-0 fw-semibold">No organization units or facilities found matching your criteria.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- REGION CARDS OVERVIEW -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold text-dark">
+                    <i class="bi bi-geo-alt me-2 text-primary"></i> Regions Overview
+                </h5>
+                {% if selected_year or selected_period %}
+                    <span class="badge bg-info text-dark">
+                        Filtered: {% if selected_year %}Year {{ selected_year }}{% endif %} {% if selected_period %}({{ selected_period }}){% endif %}
+                    </span>
+                {% endif %}
+            </div>
+
+            <div class="card-body">
+                {% if regions %}
+                    <div class="row g-3">
+                        {% for item in regions %}
+                            <div class="col-md-4 col-lg-3">
+                                <a href="{% url 'lqas:organization' item.unit.id %}{% if selected_year or selected_period %}?{% if selected_year %}year={{ selected_year }}&{% endif %}{% if selected_period %}period={{ selected_period }}{% endif %}{% endif %}"
+                                   class="text-decoration-none">
+                                    <div class="card h-100 border shadow-sm hover-shadow transition">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <span class="badge bg-primary">
+                                                    Region
+                                                </span>
+                                                {% if item.avg_percentage is not None %}
+                                                    <span class="badge {% if item.avg_percentage >= 80 %}bg-success{% elif item.avg_percentage >= 60 %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                                                        {{ item.avg_percentage }}% Avg
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+
+                                            <h5 class="text-dark fw-bold mb-1">
+                                                {{ item.unit.name }}
+                                            </h5>
+
+                                            {% if item.unit.code %}
+                                                <small class="text-muted d-block mb-2">
+                                                    {{ item.unit.code }}
+                                                </small>
+                                            {% endif %}
+
+                                            <div class="d-flex justify-content-between text-muted small mt-3 pt-2 border-top">
+                                                <span>{{ item.facility_count }} Facilities</span>
+                                                <span class="text-primary fw-semibold">{{ item.report_count }} Audit(s)</span>
+                                            </div>
+
+                                            <div class="mt-2 text-primary fw-bold small">
+                                                Open Region & Facilities →
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info mb-0">
+                        No regions with LQAS facilities were found matching the selected filter criteria.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+    {% else %}
+
+        {% if facility %}
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <span class="badge bg-success mb-2">
+                        Facility
+                    </span>
+
+                    <h4>
+                        {{ facility.name }}
+                    </h4>
+
+                    {% if facility.code %}
+                        <p class="text-muted mb-3">
+                            Code: {{ facility.code }}
+                        </p>
+                    {% endif %}
+
+                    <a href="{% url 'lqas:facility_reports' facility.id %}{% if selected_year or selected_period %}?{% if selected_year %}year={{ selected_year }}&{% endif %}{% if selected_period %}period={{ selected_period }}{% endif %}{% endif %}"
+                       class="btn btn-primary">
+                        View LQAS Reports
+                    </a>
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-warning">
+                Your account does not have a facility assigned.
+            </div>
+        {% endif %}
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Individual tree node toggle
+        document.querySelectorAll(".tree-toggle").forEach(function(btn) {
+            btn.addEventListener("click", function(e) {
+                e.stopPropagation();
+                var targetId = this.getAttribute("data-target");
+                if (!targetId) return;
+                var targetEl = document.getElementById(targetId);
+                if (targetEl) {
+                    var isHidden = targetEl.classList.contains("d-none");
+                    if (isHidden) {
+                        targetEl.classList.remove("d-none");
+                        this.setAttribute("aria-expanded", "true");
+                        var icon = this.querySelector("i");
+                        if (icon) {
+                            icon.classList.remove("bi-chevron-right");
+                            icon.classList.add("bi-chevron-down");
+                        }
+                    } else {
+                        targetEl.classList.add("d-none");
+                        this.setAttribute("aria-expanded", "false");
+                        var icon = this.querySelector("i");
+                        if (icon) {
+                            icon.classList.remove("bi-chevron-down");
+                            icon.classList.add("bi-chevron-right");
+                        }
+                    }
+                }
+            });
+        });
+
+        // Expand All button
+        var expandAllBtn = document.getElementById("expandAllBtn");
+        if (expandAllBtn) {
+            expandAllBtn.addEventListener("click", function() {
+                document.querySelectorAll(".tree-container").forEach(function(el) {
+                    el.classList.remove("d-none");
+                });
+                document.querySelectorAll(".tree-toggle").forEach(function(btn) {
+                    btn.setAttribute("aria-expanded", "true");
+                    var icon = btn.querySelector("i");
+                    if (icon) {
+                        icon.classList.remove("bi-chevron-right");
+                        icon.classList.add("bi-chevron-down");
+                    }
+                });
+            });
+        }
+
+        // Collapse All button
+        var collapseAllBtn = document.getElementById("collapseAllBtn");
+        if (collapseAllBtn) {
+            collapseAllBtn.addEventListener("click", function() {
+                document.querySelectorAll(".tree-container").forEach(function(el) {
+                    el.classList.add("d-none");
+                });
+                document.querySelectorAll(".tree-toggle").forEach(function(btn) {
+                    btn.setAttribute("aria-expanded", "false");
+                    var icon = btn.querySelector("i");
+                    if (icon) {
+                        icon.classList.remove("bi-chevron-down");
+                        icon.classList.add("bi-chevron-right");
+                    }
+                });
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,298 @@
+<div class="tree-node">
+
+    <div class="tree-row">
+
+        {% if node.children or node.facilities %}
+
+            <button
+                type="button"
+                class="tree-toggle"
+                data-target="tree-node-{{ node.organization.id }}"
+                aria-expanded="{% if node.open %}true{% else %}false{% endif %}"
+                title="Expand or collapse"
+            >
+
+                {% if node.open %}
+
+                    <i class="bi bi-chevron-down"></i>
+
+                {% else %}
+
+                    <i class="bi bi-chevron-right"></i>
+
+                {% endif %}
+
+            </button>
+
+        {% else %}
+
+            <span class="tree-toggle empty"></span>
+
+        {% endif %}
+
+
+        <!-- ORGANIZATION ICON -->
+
+        <span class="tree-icon org-icon">
+
+            {% if node.organization.unit_type == "REGION" %}
+
+                <i class="bi bi-geo-alt"></i>
+
+            {% elif node.organization.unit_type == "SUBCITY" %}
+
+                <i class="bi bi-building"></i>
+
+            {% elif node.organization.unit_type == "ZONE" %}
+
+                <i class="bi bi-diagram-3"></i>
+
+            {% elif node.organization.unit_type == "WOREDA" %}
+
+                <i class="bi bi-diagram-2"></i>
+
+            {% else %}
+
+                <i class="bi bi-building"></i>
+
+            {% endif %}
+
+        </span>
+
+
+        <!-- ORGANIZATION NAME -->
+
+        <div class="tree-name">
+
+            {{ node.organization.name }}
+
+            <small>
+
+                {{ node.organization.get_unit_type_display }}
+
+                {% if node.organization.code %}
+
+                    · {{ node.organization.code }}
+
+                {% endif %}
+
+            </small>
+
+        </div>
+
+
+        <!-- CHILD COUNT -->
+
+        {% if node.children %}
+
+            <span class="badge bg-light text-dark tree-badge">
+
+                {{ node.children|length }}
+                organization{{ node.children|length|pluralize }}
+
+            </span>
+
+        {% endif %}
+
+
+        {% if node.facilities %}
+
+            <span class="badge bg-light text-dark tree-badge">
+
+                {{ node.facilities|length }}
+                facilit{{ node.facilities|length|pluralize:"y,ies" }}
+
+            </span>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- CHILD ORGANIZATIONS + FACILITIES -->
+    <!-- ================================================= -->
+
+    {% if node.children or node.facilities %}
+
+        <div
+            id="tree-node-{{ node.organization.id }}"
+            class="
+                {% if not node.open %}
+                    d-none
+                {% endif %}
+            "
+        >
+
+            <!-- CHILD ORGANIZATIONS -->
+
+            {% if node.children %}
+
+                <div class="tree-children">
+
+                    {% for child in node.children %}
+
+                        {% include "assessments/_organization_node.html" with node=child level=level|add:"1" %}
+
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+
+            <!-- FACILITIES -->
+
+            {% if node.facilities %}
+
+                <div class="tree-facilities">
+
+                    {% for item in node.facilities %}
+
+                        <div class="tree-row facility-row">
+
+
+                            <!-- FACILITY HAS NO CHILDREN -->
+
+                            <span class="tree-toggle empty"></span>
+
+
+                            <!-- FACILITY ICON -->
+
+                            <span class="tree-icon facility-icon">
+
+                                {% if item.facility.facility_type == "SPECIAL_HOSPITAL" %}
+
+                                    <i class="bi bi-hospital"></i>
+
+                                {% else %}
+
+                                    <i class="bi bi-hospital"></i>
+
+                                {% endif %}
+
+                            </span>
+
+
+                            <!-- FACILITY NAME -->
+
+                            <div class="tree-name">
+
+                                {{ item.facility.name }}
+
+                                <small>
+
+                                    {{ item.facility.get_facility_type_display }}
+
+                                    · {{ item.facility.code }}
+
+                                </small>
+
+                            </div>
+
+
+                            <!-- ASSESSMENT STATUS -->
+
+                            {% if item.assessment %}
+
+                                <span
+                                    class="
+                                        status-badge
+                                        {% if item.assessment.status == 'DRAFT' %}
+                                            status-draft
+                                        {% elif item.assessment.status == 'SUBMITTED' %}
+                                            status-submitted
+                                        {% elif item.assessment.status == 'REVIEWED' %}
+                                            status-reviewed
+                                        {% elif item.assessment.status == 'APPROVED' %}
+                                            status-approved
+                                        {% elif item.assessment.status == 'RETURNED' %}
+                                            status-returned
+                                        {% else %}
+                                            status-not-started
+                                        {% endif %}
+                                    "
+                                >
+
+                                    {{ item.assessment.get_status_display }}
+
+                                </span>
+
+
+                                {% if item.assessment.total_score is not None %}
+
+                                    <span class="facility-score">
+
+                                        {{ item.assessment.total_score }}
+
+                                    </span>
+
+                                {% endif %}
+
+
+                                <div class="facility-actions">
+
+                                    <a
+                                        href="{% url 'assessments:detail' item.assessment.id %}"
+                                        class="btn btn-sm btn-outline-success view-btn"
+                                    >
+
+                                        View
+
+                                    </a>
+
+                                </div>
+
+
+                            {% else %}
+
+                                <span class="status-badge status-not-started">
+
+                                    Not Started
+
+                                </span>
+
+
+                                <div class="facility-actions">
+
+                                    {% if is_facility %}
+
+                                        <a
+                                            href="{% url 'assessments:start' %}"
+                                            class="btn btn-sm btn-success view-btn"
+                                        >
+
+                                            Start
+
+                                        </a>
+
+                                    {% else %}
+
+                                        <a
+                                            href="{% url 'assessments:facility' item.facility.id %}"
+                                            class="btn btn-sm btn-outline-success view-btn"
+                                        >
+
+                                            View
+
+                                        </a>
+
+                                    {% endif %}
+
+                                </div>
+
+                            {% endif %}
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    {% endif %}
+
+</div>

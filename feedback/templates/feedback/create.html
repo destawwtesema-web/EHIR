@@ -1,0 +1,378 @@
+
+{% extends "base.html" %}
+
+{% block title %}New Feedback{% endblock %}
+
+{% block content %}
+
+<style>
+    .feedback-create-page {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .feedback-create-header {
+        margin-bottom: 24px;
+    }
+
+    .feedback-create-header h2 {
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .feedback-create-header p {
+        color: #6b7280;
+        margin-bottom: 0;
+    }
+
+    .feedback-form-card {
+        border: 0;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    }
+
+    .feedback-form-card .card-body {
+        padding: 28px;
+    }
+
+    .feedback-label {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 7px;
+    }
+
+    .required {
+        color: #dc2626;
+    }
+
+    .feedback-help {
+        font-size: 12px;
+        color: #6b7280;
+        margin-top: 5px;
+    }
+
+    .feedback-form-card input,
+    .feedback-form-card select,
+    .feedback-form-card textarea {
+        width: 100%;
+        border-radius: 7px;
+        border: 1px solid #d1d5db;
+    }
+
+    .feedback-form-card input:focus,
+    .feedback-form-card select:focus,
+    .feedback-form-card textarea:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.10);
+    }
+
+    .feedback-form-card textarea {
+        min-height: 180px;
+        resize: vertical;
+    }
+
+    .send-button {
+        min-width: 150px;
+    }
+
+    .back-button {
+        min-width: 90px;
+    }
+
+    @media (max-width: 576px) {
+        .feedback-form-card .card-body {
+            padding: 20px;
+        }
+    }
+</style>
+
+<div class="container-fluid py-4">
+
+    <div class="feedback-create-page">
+
+        <!-- ==================================================
+             HEADER
+        ================================================== -->
+
+        <div class="feedback-create-header">
+
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+
+                <div>
+                    <h2>
+                        <i class="bi bi-chat-square-text me-2"></i>
+                        New Feedback
+                    </h2>
+
+                    <p>
+                        Send a message to an authorized receiver.
+                    </p>
+                </div>
+
+                <a href="{% url 'feedback:dashboard' %}"
+                   class="btn btn-outline-secondary back-button">
+
+                    <i class="bi bi-arrow-left me-1"></i>
+                    Back
+
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <!-- ==================================================
+             FEEDBACK FORM
+        ================================================== -->
+
+        <div class="card feedback-form-card">
+
+            <div class="card-body">
+
+                <form method="post"
+                      action="{% url 'feedback:create' %}">
+
+                    {% csrf_token %}
+
+
+                    <!-- ==================================================
+                         FORM ERRORS
+                    ================================================== -->
+
+                    {% if form.non_field_errors %}
+
+                        <div class="alert alert-danger">
+
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+
+                            {{ form.non_field_errors }}
+
+                        </div>
+
+                    {% endif %}
+
+
+                    <!-- ==================================================
+                         RECEIVER
+                         Sender is determined automatically by backend.
+                    ================================================== -->
+
+                    <div class="mb-4">
+
+                        <label for="{{ form.recipient.id_for_label }}"
+                               class="form-label feedback-label">
+
+                            Receiver
+                            <span class="required">*</span>
+
+                        </label>
+
+                        {{ form.recipient }}
+
+                        <div class="feedback-help">
+                            Select the organization or facility that should receive this feedback.
+                        </div>
+
+                        {% for error in form.recipient.errors %}
+
+                            <div class="text-danger small mt-1">
+                                <i class="bi bi-exclamation-circle me-1"></i>
+                                {{ error }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    <!-- ==================================================
+                         SUBJECT
+                    ================================================== -->
+
+                    <div class="mb-4">
+
+                        <label for="{{ form.subject.id_for_label }}"
+                               class="form-label feedback-label">
+
+                            Subject
+                            <span class="required">*</span>
+
+                        </label>
+
+                        {{ form.subject }}
+
+                        {% for error in form.subject.errors %}
+
+                            <div class="text-danger small mt-1">
+                                <i class="bi bi-exclamation-circle me-1"></i>
+                                {{ error }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    <!-- ==================================================
+                         CATEGORY + PRIORITY
+                    ================================================== -->
+
+                    <div class="row">
+
+                        <div class="col-md-6 mb-4">
+
+                            <label for="{{ form.category.id_for_label }}"
+                                   class="form-label feedback-label">
+
+                                Category
+                                <span class="required">*</span>
+
+                            </label>
+
+                            {{ form.category }}
+
+                            {% for error in form.category.errors %}
+
+                                <div class="text-danger small mt-1">
+                                    <i class="bi bi-exclamation-circle me-1"></i>
+                                    {{ error }}
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+
+                        <div class="col-md-6 mb-4">
+
+                            <label for="{{ form.priority.id_for_label }}"
+                                   class="form-label feedback-label">
+
+                                Priority
+                                <span class="required">*</span>
+
+                            </label>
+
+                            {{ form.priority }}
+
+                            {% for error in form.priority.errors %}
+
+                                <div class="text-danger small mt-1">
+                                    <i class="bi bi-exclamation-circle me-1"></i>
+                                    {{ error }}
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ==================================================
+                         MESSAGE
+                    ================================================== -->
+
+                    <div class="mb-4">
+
+                        <label for="{{ form.message.id_for_label }}"
+                               class="form-label feedback-label">
+
+                            Message
+                            <span class="required">*</span>
+
+                        </label>
+
+                        {{ form.message }}
+
+                        {% for error in form.message.errors %}
+
+                            <div class="text-danger small mt-1">
+                                <i class="bi bi-exclamation-circle me-1"></i>
+                                {{ error }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    <!-- ==================================================
+                         RATING
+                    ================================================== -->
+
+                    <div class="mb-4">
+
+                        <label for="{{ form.rating.id_for_label }}"
+                               class="form-label feedback-label">
+
+                            Rating
+                            <span class="text-muted fw-normal">
+                                (Optional)
+                            </span>
+
+                        </label>
+
+                        {{ form.rating }}
+
+                        <div class="feedback-help">
+                            Optional rating from 1 to 5.
+                        </div>
+
+                        {% for error in form.rating.errors %}
+
+                            <div class="text-danger small mt-1">
+                                <i class="bi bi-exclamation-circle me-1"></i>
+                                {{ error }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    <!-- ==================================================
+                         ACTION BUTTONS
+                    ================================================== -->
+
+                    <div class="d-flex justify-content-end gap-2 pt-2">
+
+                        <a href="{% url 'feedback:dashboard' %}"
+                           class="btn btn-light">
+
+                            Cancel
+
+                        </a>
+
+                        <button type="reset"
+                                class="btn btn-outline-secondary px-3">
+
+                            <i class="bi bi-x-circle me-1"></i>
+
+                            Clear Form
+
+                        </button>
+
+                        <button type="submit"
+                                class="btn btn-primary px-4 send-button">
+
+                            <i class="bi bi-send me-1"></i>
+
+                            Send Feedback
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

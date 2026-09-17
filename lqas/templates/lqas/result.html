@@ -1,0 +1,670 @@
+{% extends "base.html" %}
+
+{% block title %}LQAS Result{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+    <!-- ==========================================================
+         PAGE HEADER
+         ========================================================== -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="fw-bold mb-1">
+                LQAS Result
+            </h2>
+
+            <p class="text-muted mb-0">
+                {{ assessment.facility.name }}
+            </p>
+        </div>
+
+        <div class="d-flex gap-2 flex-wrap">
+
+            <!-- Excel -->
+
+            <a
+                href="{% url 'lqas:export_excel' assessment.id %}"
+                class="btn btn-success"
+            >
+                📊 Excel
+            </a>
+
+
+            <!-- PDF -->
+
+            <a
+                href="{% url 'lqas:export_pdf' assessment.id %}"
+                class="btn btn-danger"
+            >
+                📄 PDF
+            </a>
+
+
+            <!-- Print -->
+
+            <a
+                href="{% url 'lqas:print' assessment.id %}"
+                target="_blank"
+                class="btn btn-secondary"
+            >
+                🖨 Print
+            </a>
+
+
+            <!-- Back -->
+
+            <a
+                href="{% url 'lqas:dashboard' %}"
+                class="btn btn-outline-success"
+            >
+                Back to LQAS
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==========================================================
+         ORGANIZATION INFORMATION
+         ========================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header bg-success text-white">
+
+            <h5 class="mb-0">
+                Organization Information
+            </h5>
+
+        </div>
+
+
+        <div class="card-body">
+
+            <div class="row g-3">
+
+                <!-- Region -->
+
+                <div class="col-md-3">
+
+                    <div class="small text-muted">
+                        Region
+                    </div>
+
+                    <div class="fw-bold">
+
+                        {% if assessment.facility.organization %}
+
+                            {% if assessment.facility.organization.unit_type == "REGION" %}
+
+                                {{ assessment.facility.organization.name }}
+
+                            {% elif assessment.facility.organization.parent %}
+
+                                {{ assessment.facility.organization.parent.name }}
+
+                            {% else %}
+
+                                {{ assessment.facility.organization.name }}
+
+                            {% endif %}
+
+                        {% else %}
+
+                            <span class="text-muted">
+                                Not assigned
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+                <!-- Sub-city / Zone / Woreda -->
+
+                <div class="col-md-3">
+
+                    <div class="small text-muted">
+                        Sub-city / Zone / Woreda
+                    </div>
+
+                    <div class="fw-bold">
+
+                        {% if assessment.facility.organization %}
+
+                            {% if assessment.facility.organization.unit_type == "REGION" %}
+
+                                <span class="text-muted">
+                                    Direct to Region
+                                </span>
+
+                            {% else %}
+
+                                {{ assessment.facility.organization.name }}
+
+                            {% endif %}
+
+                        {% else %}
+
+                            <span class="text-muted">
+                                Not assigned
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+                <!-- Facility -->
+
+                <div class="col-md-3">
+
+                    <div class="small text-muted">
+                        Facility
+                    </div>
+
+                    <div class="fw-bold">
+                        {{ assessment.facility.name }}
+                    </div>
+
+                    {% if assessment.facility.code %}
+
+                        <small class="text-muted">
+                            {{ assessment.facility.code }}
+                        </small>
+
+                    {% endif %}
+
+                </div>
+
+
+                <!-- Submitted By -->
+
+                <div class="col-md-3">
+
+                    <div class="small text-muted">
+                        Submitted By
+                    </div>
+
+                    <div class="fw-bold">
+
+                        {% if assessment.created_by %}
+
+                            {% if assessment.created_by.get_full_name %}
+
+                                {{ assessment.created_by.get_full_name }}
+
+                            {% else %}
+
+                                {{ assessment.created_by.username }}
+
+                            {% endif %}
+
+                        {% else %}
+
+                            <span class="text-muted">
+                                Unknown
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==========================================================
+         ASSESSMENT INFORMATION
+         ========================================================== -->
+
+    <div class="row g-4 mb-4">
+
+        <!-- Facility -->
+
+        <div class="col-md-3">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body text-center">
+
+                    <div class="text-muted mb-2">
+                        Facility
+                    </div>
+
+                    <h5 class="fw-bold mb-0">
+                        {{ assessment.facility.name }}
+                    </h5>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Year -->
+
+        <div class="col-md-3">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body text-center">
+
+                    <div class="text-muted mb-2">
+                        Year
+                    </div>
+
+                    <h3 class="fw-bold mb-0">
+                        {{ assessment.year }}
+                    </h3>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Period -->
+
+        <div class="col-md-3">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body text-center">
+
+                    <div class="text-muted mb-2">
+                        Period
+                    </div>
+
+                    <h5 class="fw-bold mb-0">
+                        {{ assessment.period }}
+                    </h5>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Status -->
+
+        <div class="col-md-3">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body text-center">
+
+                    <div class="text-muted mb-2">
+                        Status
+                    </div>
+
+                    {% if assessment.status == "SUBMITTED" %}
+
+                        <span class="badge bg-success fs-6">
+                            Submitted
+                        </span>
+
+                    {% else %}
+
+                        <span class="badge bg-secondary fs-6">
+                            {{ assessment.status }}
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==========================================================
+         RESULT SUMMARY
+         ========================================================== -->
+
+    <div class="row g-4 mb-4">
+
+        <!-- Matched Elements -->
+
+        <div class="col-md-4">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body text-center">
+
+                    <div class="text-muted mb-2">
+                        Matched Elements
+                    </div>
+
+                    <h2 class="fw-bold text-success">
+
+                        {{ assessment.matched_count }}
+
+                        /
+
+                        {{ assessment.total_elements }}
+
+                    </h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Accuracy -->
+
+        <div class="col-md-4">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body text-center">
+
+                    <div class="text-muted mb-2">
+                        LQAS Accuracy
+                    </div>
+
+                    <h2 class="fw-bold">
+
+                        {{ assessment.percentage }}%
+
+                    </h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Submitted -->
+
+        <div class="col-md-4">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body text-center">
+
+                    <div class="text-muted mb-2">
+                        Submitted
+                    </div>
+
+                    <h6 class="fw-bold">
+
+                        {{ assessment.created_at|date:"d M Y H:i" }}
+
+                    </h6>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==========================================================
+         DATA ELEMENT RESULTS
+         ========================================================== -->
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header bg-success text-white">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <h5 class="mb-0">
+                    Data Element Results
+                </h5>
+
+                <span>
+                    {{ assessment.year }}
+                    —
+                    {{ assessment.period }}
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered table-hover mb-0">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th style="width: 60px;">
+                                #
+                            </th>
+
+                            <th>
+                                Data Element Name
+                            </th>
+
+                            <th>
+                                Tally Sheet
+                            </th>
+
+                            <th>
+                                Register
+                            </th>
+
+                            <th>
+                                Report
+                            </th>
+
+                            <th>
+                                Match
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for response in responses %}
+
+                            <tr>
+
+                                <td>
+                                    {{ forloop.counter }}
+                                </td>
+
+
+                                <td>
+
+                                    <strong>
+                                        {{ response.data_element_name }}
+                                    </strong>
+
+                                </td>
+
+
+                                <!-- ==================================================
+                                     IMPORTANT:
+                                     These names match LQASResponse model.
+                                     ================================================== -->
+
+                                <td>
+                                    {{ response.tally_sheet }}
+                                </td>
+
+
+                                <td>
+                                    {{ response.register }}
+                                </td>
+
+
+                                <td>
+                                    {{ response.report }}
+                                </td>
+
+
+                                <td>
+
+                                    {% if response.match %}
+
+                                        <span class="badge bg-success">
+                                            YES
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="badge bg-danger">
+                                            NO
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                            </tr>
+
+                        {% empty %}
+
+                            <tr>
+
+                                <td
+                                    colspan="6"
+                                    class="text-center text-muted py-4"
+                                >
+
+                                    No data elements were entered
+                                    for this LQAS assessment.
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==========================================================
+         OVERALL RESULT
+         ========================================================== -->
+
+    <div class="alert alert-success mt-4">
+
+        <strong>
+            LQAS Result:
+        </strong>
+
+        {{ assessment.matched_count }}
+
+        of
+
+        {{ assessment.total_elements }}
+
+        data elements matched.
+
+        Overall accuracy:
+
+        <strong>
+            {{ assessment.percentage }}%
+        </strong>
+
+    </div>
+
+
+    <!-- ==========================================================
+         INTERPRETATION
+         ========================================================== -->
+
+    <div class="card border-0 shadow-sm mt-4">
+
+        <div class="card-body">
+
+            <h6 class="fw-bold mb-3">
+                LQAS Interpretation
+            </h6>
+
+
+            {% if assessment.percentage >= 90 %}
+
+                <div class="alert alert-success mb-0">
+
+                    <strong>
+                        High data consistency.
+                    </strong>
+
+                    The assessment achieved 90% or higher agreement
+                    between the tally sheet, register, and report.
+
+                </div>
+
+
+            {% elif assessment.percentage >= 70 %}
+
+                <div class="alert alert-warning mb-0">
+
+                    <strong>
+                        Moderate data consistency.
+                    </strong>
+
+                    Some discrepancies were identified and may require
+                    review by the facility or supervisory level.
+
+                </div>
+
+
+            {% else %}
+
+                <div class="alert alert-danger mb-0">
+
+                    <strong>
+                        Low data consistency.
+                    </strong>
+
+                    Significant discrepancies were identified between
+                    the tally sheet, register, and report.
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

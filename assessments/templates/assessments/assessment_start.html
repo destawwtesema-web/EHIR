@@ -1,0 +1,545 @@
+{% extends "base.html" %}
+
+{% block title %}Start Assessment - EHIRS{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+```
+<!-- =========================================================
+     PAGE HEADER
+========================================================== -->
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+
+    <div>
+        <h2 class="fw-bold mb-1">
+            <i class="bi bi-clipboard2-check me-2"></i>
+            Start Assessment
+        </h2>
+
+        <p class="text-muted mb-0">
+            Select the assessment period and facility to begin.
+        </p>
+    </div>
+
+    <div>
+        <a href="{% url 'assessments:dashboard' %}"
+           class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>
+            Back to Assessment
+        </a>
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     INFORMATION CARD
+========================================================== -->
+
+{% if facility_user %}
+
+    <div class="alert alert-info border-0 shadow-sm mb-4">
+
+        <div class="d-flex align-items-start">
+
+            <i class="bi bi-info-circle-fill fs-4 me-3"></i>
+
+            <div>
+
+                <strong>Facility User</strong>
+
+                <div class="mt-1">
+                    Your assigned facility is automatically selected.
+                    You cannot create an assessment for another facility.
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+{% else %}
+
+    <div class="alert alert-info border-0 shadow-sm mb-4">
+
+        <div class="d-flex align-items-start">
+
+            <i class="bi bi-info-circle-fill fs-4 me-3"></i>
+
+            <div>
+
+                <strong>Assessment Period</strong>
+
+                <div class="mt-1">
+                    Select the facility and reporting period for the
+                    assessment you want to start or open.
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+{% endif %}
+
+
+<!-- =========================================================
+     MAIN FORM
+========================================================== -->
+
+<div class="row justify-content-center">
+
+    <div class="col-12 col-xl-8">
+
+        <div class="card border-0 shadow-sm">
+
+            <!-- CARD HEADER -->
+
+            <div class="card-header bg-white border-0 py-4">
+
+                <div class="d-flex align-items-center">
+
+                    <div class="rounded-circle bg-primary bg-opacity-10
+                                text-primary p-3 me-3">
+
+                        <i class="bi bi-calendar2-check fs-4"></i>
+
+                    </div>
+
+                    <div>
+
+                        <h5 class="fw-bold mb-1">
+                            Assessment Information
+                        </h5>
+
+                        <small class="text-muted">
+                            Complete the information below to continue.
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- FORM -->
+
+            <div class="card-body p-4">
+
+                <form method="post" novalidate>
+
+                    {% csrf_token %}
+
+
+                    <!-- =================================================
+                         FACILITY
+                    ================================================== -->
+
+                    <div class="mb-4">
+
+                        <label for="facility"
+                               class="form-label fw-semibold">
+
+                            <i class="bi bi-hospital me-1"></i>
+                            Facility
+
+                            {% if not facility_user %}
+                                <span class="text-danger">*</span>
+                            {% endif %}
+
+                        </label>
+
+
+                        {% if facility_user %}
+
+                            <!-- FACILITY USER -->
+
+                            <div class="input-group">
+
+                                <span class="input-group-text">
+                                    <i class="bi bi-building"></i>
+                                </span>
+
+                                <input type="text"
+                                       class="form-control"
+                                       value="{{ assigned_facility.name }}"
+                                       readonly>
+
+                            </div>
+
+
+                            {% if assigned_facility.code %}
+
+                                <div class="form-text">
+                                    Facility Code:
+                                    <strong>
+                                        {{ assigned_facility.code }}
+                                    </strong>
+                                </div>
+
+                            {% endif %}
+
+
+                            <!-- Hidden facility ID -->
+
+                            <input type="hidden"
+                                   name="facility"
+                                   value="{{ assigned_facility.id }}">
+
+                        {% else %}
+
+                            <!-- HIGHER LEVEL USER -->
+
+                            <select name="facility"
+                                    id="facility"
+                                    class="form-select"
+                                    required>
+
+                                <option value="">
+                                    -- Select Facility --
+                                </option>
+
+                                {% for facility in facilities %}
+
+                                    <option value="{{ facility.id }}">
+
+                                        {{ facility.name }}
+
+                                        {% if facility.code %}
+                                            — {{ facility.code }}
+                                        {% endif %}
+
+                                    </option>
+
+                                {% empty %}
+
+                                    <option value="" disabled>
+                                        No accessible facilities found.
+                                    </option>
+
+                                {% endfor %}
+
+                            </select>
+
+                            <div class="form-text">
+                                Only facilities within your authorized
+                                organizational scope are displayed.
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- =================================================
+                         YEAR
+                    ================================================== -->
+
+                    <div class="mb-4">
+
+                        <label for="year"
+                               class="form-label fw-semibold">
+
+                            <i class="bi bi-calendar3 me-1"></i>
+                            Assessment Year
+
+                            <span class="text-danger">*</span>
+
+                        </label>
+
+
+                        <select name="year"
+                                id="year"
+                                class="form-select"
+                                required>
+
+                            <option value="">
+                                -- Select Year --
+                            </option>
+
+                            {% for year in years %}
+
+                                <option value="{{ year }}">
+
+                                    {{ year }}
+
+                                </option>
+
+                            {% empty %}
+
+                                <option value="" disabled>
+                                    No assessment years available.
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                        <div class="form-text">
+                            Select the year for this assessment.
+                        </div>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         REPORTING PERIOD
+                    ================================================== -->
+
+                    <div class="mb-4">
+
+                        <label for="period"
+                               class="form-label fw-semibold">
+
+                            <i class="bi bi-calendar-month me-1"></i>
+                            Reporting Period
+
+                            <span class="text-danger">*</span>
+
+                        </label>
+
+
+                        <select name="period"
+                                id="period"
+                                class="form-select"
+                                required>
+
+                            <option value="">
+                                -- Select Reporting Period --
+                            </option>
+
+                            {% for period in periods %}
+
+                                <option value="{{ period.id }}"
+                                        data-year="{{ period.year }}">
+
+                                    {{ period.name }}
+
+                                    {% if period.start_month %}
+                                        — Month {{ period.start_month }}
+                                    {% endif %}
+
+                                    {% if period.end_month and period.end_month != period.start_month %}
+                                        to {{ period.end_month }}
+                                    {% endif %}
+
+                                </option>
+
+                            {% empty %}
+
+                                <option value="" disabled>
+                                    No active assessment periods available.
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                        <div class="form-text">
+                            Select the reporting month or period for
+                            this assessment.
+                        </div>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         PERIOD INFORMATION
+                    ================================================== -->
+
+                    <div id="periodInfo"
+                         class="alert alert-light border mb-4 d-none">
+
+                        <div class="d-flex align-items-start">
+
+                            <i class="bi bi-calendar-event
+                                      text-primary fs-5 me-2"></i>
+
+                            <div>
+
+                                <strong>Selected Period</strong>
+
+                                <div id="selectedPeriodText"
+                                     class="text-muted mt-1">
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         ACTION BUTTONS
+                    ================================================== -->
+
+                    <div class="d-flex flex-wrap gap-2
+                                justify-content-end pt-3 border-top">
+
+                        <a href="{% url 'assessments:dashboard' %}"
+                           class="btn btn-outline-secondary">
+
+                            <i class="bi bi-x-circle me-1"></i>
+                            Cancel
+
+                        </a>
+
+
+                        <button type="submit"
+                                class="btn btn-primary px-4">
+
+                            <i class="bi bi-arrow-right-circle me-1"></i>
+                            Continue to Assessment
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+```
+
+</div>
+
+<!-- =============================================================
+     JAVASCRIPT
+============================================================= -->
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const yearSelect = document.getElementById("year");
+    const periodSelect = document.getElementById("period");
+
+    const periodInfo = document.getElementById("periodInfo");
+    const selectedPeriodText =
+        document.getElementById("selectedPeriodText");
+
+
+    function filterPeriods() {
+
+        const selectedYear = yearSelect.value;
+
+        const options = periodSelect.querySelectorAll(
+            "option[data-year]"
+        );
+
+        options.forEach(function (option) {
+
+            if (!selectedYear) {
+
+                option.hidden = true;
+
+            } else {
+
+                option.hidden =
+                    option.dataset.year !== selectedYear;
+
+            }
+
+        });
+
+
+        /*
+         * If the currently selected period does not belong
+         * to the selected year, reset it.
+         */
+
+        const selectedOption =
+            periodSelect.options[periodSelect.selectedIndex];
+
+        if (
+            selectedOption &&
+            selectedOption.dataset.year &&
+            selectedOption.dataset.year !== selectedYear
+        ) {
+
+            periodSelect.value = "";
+
+            periodInfo.classList.add("d-none");
+
+        }
+
+    }
+
+
+    function showSelectedPeriod() {
+
+        const option =
+            periodSelect.options[periodSelect.selectedIndex];
+
+
+        if (
+            !option ||
+            !option.value ||
+            !option.dataset.year
+        ) {
+
+            periodInfo.classList.add("d-none");
+
+            selectedPeriodText.textContent = "";
+
+            return;
+
+        }
+
+
+        selectedPeriodText.textContent =
+            option.textContent.trim();
+
+
+        periodInfo.classList.remove("d-none");
+
+    }
+
+
+    yearSelect.addEventListener(
+        "change",
+        function () {
+
+            filterPeriods();
+
+            showSelectedPeriod();
+
+        }
+    );
+
+
+    periodSelect.addEventListener(
+        "change",
+        function () {
+
+            showSelectedPeriod();
+
+        }
+    );
+
+
+    /*
+     * Initial state
+     */
+
+    filterPeriods();
+
+    showSelectedPeriod();
+
+});
+
+</script>
+
+{% endblock %}

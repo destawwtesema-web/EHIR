@@ -1,0 +1,211 @@
+<div class="tree-node">
+
+    <div class="tree-row">
+
+        {% if node.children or node.facilities %}
+
+            <button
+                type="button"
+                class="tree-toggle"
+                data-target="lqas-tree-node-{{ node.organization.id }}"
+                aria-expanded="{% if node.open %}true{% else %}false{% endif %}"
+                title="Expand or collapse"
+            >
+
+                {% if node.open %}
+                    <i class="bi bi-chevron-down"></i>
+                {% else %}
+                    <i class="bi bi-chevron-right"></i>
+                {% endif %}
+
+            </button>
+
+        {% else %}
+
+            <span class="tree-toggle empty"></span>
+
+        {% endif %}
+
+
+        <!-- ORGANIZATION ICON -->
+
+        <span class="tree-icon org-icon">
+
+            {% if node.organization.unit_type == "REGION" %}
+                <i class="bi bi-geo-alt"></i>
+            {% elif node.organization.unit_type == "SUBCITY" %}
+                <i class="bi bi-building"></i>
+            {% elif node.organization.unit_type == "ZONE" %}
+                <i class="bi bi-diagram-3"></i>
+            {% elif node.organization.unit_type == "WOREDA" %}
+                <i class="bi bi-diagram-2"></i>
+            {% else %}
+                <i class="bi bi-building"></i>
+            {% endif %}
+
+        </span>
+
+
+        <!-- ORGANIZATION NAME & LINK -->
+
+        <div class="tree-name">
+
+            <a href="{% url 'lqas:organization' node.organization.id %}{% if selected_year or selected_period %}?{% if selected_year %}year={{ selected_year }}&{% endif %}{% if selected_period %}period={{ selected_period }}{% endif %}{% endif %}"
+               class="text-decoration-none text-dark fw-bold hover-primary">
+                {{ node.organization.name }}
+            </a>
+
+            <small class="text-muted d-block">
+                {{ node.organization.get_unit_type_display|default:node.organization.unit_type }}
+                {% if node.organization.code %}
+                    · {{ node.organization.code }}
+                {% endif %}
+            </small>
+
+        </div>
+
+
+        <!-- METRICS / BADGES -->
+
+        <div class="tree-badges d-flex align-items-center gap-2">
+
+            {% if node.children %}
+                <span class="badge bg-light text-dark border tree-badge">
+                    {{ node.children|length }} organization{{ node.children|length|pluralize }}
+                </span>
+            {% endif %}
+
+            {% if node.total_facilities %}
+                <span class="badge bg-light text-dark border tree-badge">
+                    {{ node.total_facilities }} facilit{{ node.total_facilities|pluralize:"y,ies" }}
+                </span>
+            {% endif %}
+
+            {% if node.avg_percentage is not None %}
+                <span class="badge {% if node.avg_percentage >= 80 %}bg-success{% elif node.avg_percentage >= 60 %}bg-warning text-dark{% else %}bg-danger{% endif %} tree-badge">
+                    {{ node.avg_percentage }}% Avg
+                </span>
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- CHILD ORGANIZATIONS + FACILITIES -->
+    <!-- ================================================= -->
+
+    {% if node.children or node.facilities %}
+
+        <div
+            id="lqas-tree-node-{{ node.organization.id }}"
+            class="tree-container {% if not node.open %}d-none{% endif %}"
+        >
+
+            <!-- CHILD ORGANIZATIONS -->
+
+            {% if node.children %}
+
+                <div class="tree-children">
+
+                    {% for child in node.children %}
+
+                        {% include "lqas/hierarchy.html" with node=child level=level|add:"1" %}
+
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+
+            <!-- FACILITIES -->
+
+            {% if node.facilities %}
+
+                <div class="tree-facilities">
+
+                    {% for item in node.facilities %}
+
+                        <div class="tree-row facility-row">
+
+                            <!-- FACILITY HAS NO CHILDREN -->
+                            <span class="tree-toggle empty"></span>
+
+                            <!-- FACILITY ICON -->
+                            <span class="tree-icon facility-icon">
+                                {% if item.facility.facility_type == "SPECIAL_HOSPITAL" %}
+                                    <i class="bi bi-hospital-fill text-primary"></i>
+                                {% else %}
+                                    <i class="bi bi-hospital text-success"></i>
+                                {% endif %}
+                            </span>
+
+                            <!-- FACILITY NAME & TYPE -->
+                            <div class="tree-name">
+                                <span class="fw-semibold text-dark">
+                                    {{ item.facility.name }}
+                                </span>
+
+                                <small class="text-muted d-block">
+                                    <span class="badge bg-light text-dark border me-1" style="font-size: 0.7rem;">
+                                        {{ item.facility.get_facility_type_display|default:item.facility.facility_type }}
+                                    </span>
+                                    {% if item.facility.code %}
+                                        · {{ item.facility.code }}
+                                    {% endif %}
+                                </small>
+                            </div>
+
+                            <!-- ASSESSMENT STATUS & ACCURACY -->
+                            <div class="facility-actions d-flex align-items-center gap-2">
+
+                                {% if item.status == "SUBMITTED" %}
+
+                                    <span class="badge bg-success status-badge">
+                                        Submitted ({{ item.report_count }} Audit{{ item.report_count|pluralize }})
+                                    </span>
+
+                                    {% if item.percentage is not None %}
+                                        <span class="badge {% if item.percentage >= 80 %}bg-success{% elif item.percentage >= 60 %}bg-warning text-dark{% else %}bg-danger{% endif %} fw-bold">
+                                            {{ item.percentage }}%
+                                        </span>
+                                    {% endif %}
+
+                                {% elif item.status == "DRAFT" %}
+
+                                    <span class="badge bg-warning text-dark status-badge">
+                                        Draft
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge bg-secondary status-badge">
+                                        No Audits
+                                    </span>
+
+                                {% endif %}
+
+                                <a
+                                    href="{% url 'lqas:facility_reports' item.facility.id %}{% if selected_year or selected_period %}?{% if selected_year %}year={{ selected_year }}&{% endif %}{% if selected_period %}period={{ selected_period }}{% endif %}{% endif %}"
+                                    class="btn btn-sm btn-outline-primary view-btn"
+                                >
+                                    <i class="bi bi-journal-check me-1"></i> View Audits
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    {% endif %}
+
+</div>

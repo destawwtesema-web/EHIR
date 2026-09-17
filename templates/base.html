@@ -1,0 +1,891 @@
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        {% block title %}
+            EHIRS
+        {% endblock %}
+    </title>
+
+
+    <!-- =====================================================
+         BOOTSTRAP
+    ====================================================== -->
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+
+    <!-- =====================================================
+         BOOTSTRAP ICONS
+    ====================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    >
+
+
+    <!-- =====================================================
+         GLOBAL CSS
+    ====================================================== -->
+
+    <style>
+
+        /* =====================================================
+           GLOBAL
+        ===================================================== */
+
+        body {
+            margin: 0;
+            background: #f5f7fa;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+
+        /* =====================================================
+           SIDEBAR
+        ===================================================== */
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 260px;
+            background: #087f5b;
+            color: white;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 3px 0 12px rgba(0, 0, 0, 0.08);
+        }
+
+
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 10px;
+        }
+
+
+        /* =====================================================
+           BRAND
+        ===================================================== */
+
+        .sidebar-header {
+            padding: 22px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+
+        .brand-icon {
+            font-size: 30px;
+            margin-bottom: 8px;
+        }
+
+
+        .sidebar-header h4 {
+            margin: 0;
+            font-weight: 700;
+        }
+
+
+        .sidebar-header small {
+            display: block;
+            margin-top: 5px;
+            line-height: 1.4;
+            opacity: 0.85;
+        }
+
+
+        /* =====================================================
+           USER INFORMATION
+        ===================================================== */
+
+        .sidebar-user {
+            margin: 15px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.10);
+            border-radius: 8px;
+        }
+
+
+        .sidebar-user-name {
+            font-weight: 600;
+            font-size: 14px;
+            word-break: break-word;
+        }
+
+
+        .sidebar-user-role {
+            font-size: 11px;
+            opacity: 0.75;
+            margin-top: 4px;
+        }
+
+
+        /* =====================================================
+           ADMIN BADGE
+        ===================================================== */
+
+        .admin-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 10px;
+            padding: 3px 7px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            margin-top: 5px;
+        }
+
+
+        /* =====================================================
+           SIDEBAR SECTION
+        ===================================================== */
+
+        .sidebar-section {
+            padding: 18px 20px 7px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.65;
+        }
+
+
+        /* =====================================================
+           SIDEBAR LINKS
+        ===================================================== */
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            padding: 11px 20px;
+
+            color: rgba(255, 255, 255, 0.92);
+
+            text-decoration: none;
+
+            transition:
+                background 0.2s,
+                padding-left 0.2s;
+
+            border: 0;
+            background: transparent;
+
+            font-size: inherit;
+            font-family: inherit;
+
+            cursor: pointer;
+
+            box-sizing: border-box;
+        }
+
+
+        .sidebar-link i {
+            width: 20px;
+            min-width: 20px;
+            text-align: center;
+            font-size: 17px;
+        }
+
+
+        .sidebar-link:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: white;
+            padding-left: 24px;
+        }
+
+
+        .sidebar-link.active {
+            background: rgba(255, 255, 255, 0.18);
+            color: white;
+            font-weight: 600;
+            border-left: 4px solid white;
+            padding-left: 16px;
+        }
+
+
+        /* =====================================================
+           USER MANAGEMENT
+        ===================================================== */
+
+        .user-management-link {
+            font-weight: 600;
+        }
+
+
+        /* =====================================================
+           MAIN CONTENT
+        ===================================================== */
+
+        .main-content {
+            margin-left: 260px;
+            min-height: 100vh;
+        }
+
+
+        /* =====================================================
+           TOPBAR
+        ===================================================== */
+
+        .topbar {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+
+            padding: 15px 25px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            min-height: 65px;
+        }
+
+
+        .topbar-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+
+        /* =====================================================
+           CONTENT
+        ===================================================== */
+
+        .content {
+            padding: 25px;
+        }
+
+
+        /* =====================================================
+           MOBILE
+        ===================================================== */
+
+        @media (max-width: 900px) {
+
+            .sidebar {
+                width: 220px;
+            }
+
+            .main-content {
+                margin-left: 220px;
+            }
+
+        }
+
+
+        @media (max-width: 700px) {
+
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                max-height: none;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .topbar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .content {
+                padding: 15px;
+            }
+
+        }
+
+    </style>
+
+
+    {% block extra_css %}
+    {% endblock %}
+
+</head>
+
+
+<body>
+
+
+<!-- =========================================================
+     SIDEBAR
+========================================================= -->
+
+<div class="sidebar">
+
+
+    <!-- =====================================================
+         BRAND
+    ====================================================== -->
+
+    <div class="sidebar-header">
+
+        <div class="brand-icon">
+
+            <i class="bi bi-heart-pulse-fill"></i>
+
+        </div>
+
+
+        <h4>
+            EHIRS
+        </h4>
+
+
+        <small>
+            Ethiopian Health Information Revolution System
+        </small>
+
+    </div>
+
+
+    {% if user.is_authenticated %}
+
+
+        <!-- =================================================
+             USER INFORMATION
+        ================================================== -->
+
+        <div class="sidebar-user">
+
+
+            <div class="sidebar-user-name">
+
+                <i class="bi bi-person-circle me-1"></i>
+
+                {{ user.get_full_name|default:user.username }}
+
+            </div>
+
+
+            {% if user.profile %}
+
+                <div class="sidebar-user-role">
+
+                    {{ user.profile.get_role_display }}
+
+                </div>
+
+
+                {% if user.profile.is_ministry_admin or user.profile.is_region_admin or user.profile.is_subcity_admin %}
+
+                    <div class="admin-badge">
+
+                        <i class="bi bi-shield-check"></i>
+
+                        Administrator
+
+                    </div>
+
+                {% endif %}
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- =================================================
+             MAIN
+        ================================================== -->
+
+        <div class="sidebar-section">
+            Main
+        </div>
+
+
+        <!-- =================================================
+             DASHBOARD
+        ================================================== -->
+
+        <a
+            href="{% url 'dashboard:home' %}"
+            class="sidebar-link"
+        >
+
+            <i class="bi bi-speedometer2"></i>
+
+            <span>
+                Dashboard
+            </span>
+
+        </a>
+
+
+        <!-- =================================================
+             ASSESSMENTS
+        ================================================== -->
+
+        <a
+            href="{% url 'assessments:dashboard' %}"
+            class="sidebar-link"
+        >
+
+            <i class="bi bi-clipboard-check"></i>
+
+            <span>
+                Assessments
+            </span>
+
+        </a>
+
+
+        <!-- =================================================
+             LQAS
+        ================================================== -->
+
+        <a
+            href="{% url 'lqas:dashboard' %}"
+            class="sidebar-link"
+        >
+
+            <i class="bi bi-bar-chart-line"></i>
+
+            <span>
+                LQAS
+            </span>
+
+        </a>
+
+
+        <!-- =================================================
+             ANALYTICS
+        ================================================== -->
+
+        <a
+            href="{% url 'core:analytics' %}"
+            class="sidebar-link"
+        >
+
+            <i class="bi bi-graph-up"></i>
+
+            <span>
+                Analytics
+            </span>
+
+        </a>
+
+
+        <!-- =================================================
+             USER MANAGEMENT
+             
+             VISIBLE TO:
+             - MINISTRY ADMIN
+             - REGION ADMIN
+             - SUB-CITY ADMIN
+             - STAFF / SUPERUSER
+        ================================================== -->
+
+        {% if user.is_staff %}
+
+            <a
+                href="{% url 'accounts:user_management' %}"
+                class="sidebar-link user-management-link"
+            >
+
+                <i class="bi bi-people-fill"></i>
+
+                <span>
+                    User Management
+                </span>
+
+            </a>
+
+        {% elif user.profile %}
+
+            {% if user.profile.role == "MINISTRY_ADMIN" %}
+
+                <a
+                    href="{% url 'accounts:user_management' %}"
+                    class="sidebar-link user-management-link"
+                >
+
+                    <i class="bi bi-people-fill"></i>
+
+                    <span>
+                        User Management
+                    </span>
+
+                </a>
+
+
+            {% elif user.profile.role == "REGION_ADMIN" %}
+
+                <a
+                    href="{% url 'accounts:user_management' %}"
+                    class="sidebar-link user-management-link"
+                >
+
+                    <i class="bi bi-people-fill"></i>
+
+                    <span>
+                        User Management
+                    </span>
+
+                </a>
+
+
+            {% elif user.profile.role == "SUBCITY_ADMIN" %}
+
+                <a
+                    href="{% url 'accounts:user_management' %}"
+                    class="sidebar-link user-management-link"
+                >
+
+                    <i class="bi bi-people-fill"></i>
+
+                    <span>
+                        User Management
+                    </span>
+
+                </a>
+
+            {% endif %}
+
+        {% endif %}
+
+
+        <!-- =================================================
+             MONITORING & ANALYSIS
+        ================================================== -->
+
+        <div class="sidebar-section">
+            Monitoring & Analysis
+        </div>
+
+
+        <!-- =================================================
+             FEEDBACK
+        ================================================== -->
+
+        <a
+            href="{% url 'feedback:dashboard' %}"
+            class="sidebar-link"
+        >
+
+            <i class="bi bi-chat-left-text"></i>
+
+            <span>
+                Feedback
+            </span>
+
+        </a>
+
+
+        <!-- =================================================
+             NOTIFICATIONS
+        ================================================== -->
+
+        <a
+            href="{% url 'core:notifications' %}"
+            class="sidebar-link"
+        >
+
+            <i class="bi bi-bell"></i>
+
+            <span>
+                Notifications
+            </span>
+
+        </a>
+
+
+        <!-- =================================================
+             MY WORKSPACE
+        ================================================== -->
+
+        <div class="sidebar-section">
+            My Workspace
+        </div>
+
+
+        {% if user.profile %}
+
+
+            <!-- =================================================
+                 FACILITY USER
+            ================================================== -->
+
+            {% if user.profile.role == "FACILITY_USER" %}
+
+                <a
+                    href="{% url 'dashboard:facility' %}"
+                    class="sidebar-link"
+                >
+
+                    <i class="bi bi-hospital"></i>
+
+                    <span>
+                        My Facility
+                    </span>
+
+                </a>
+
+
+            <!-- =================================================
+                 SUB-CITY ADMIN
+            ================================================== -->
+
+            {% elif user.profile.role == "SUBCITY_ADMIN" %}
+
+                <a
+                    href="{% url 'dashboard:subcity' %}"
+                    class="sidebar-link"
+                >
+
+                    <i class="bi bi-buildings"></i>
+
+                    <span>
+                        My Sub-city
+                    </span>
+
+                </a>
+
+
+            <!-- =================================================
+                 REGIONAL ADMIN
+            ================================================== -->
+
+            {% elif user.profile.role == "REGION_ADMIN" %}
+
+                <a
+                    href="{% url 'dashboard:regional' %}"
+                    class="sidebar-link"
+                >
+
+                    <i class="bi bi-map"></i>
+
+                    <span>
+                        My Region
+                    </span>
+
+                </a>
+
+
+            <!-- =================================================
+                 MINISTRY ADMIN
+            ================================================== -->
+
+            {% elif user.profile.role == "MINISTRY_ADMIN" %}
+
+                <a
+                    href="{% url 'dashboard:ministry' %}"
+                    class="sidebar-link"
+                >
+
+                    <i class="bi bi-globe2"></i>
+
+                    <span>
+                        National Overview
+                    </span>
+
+                </a>
+
+            {% endif %}
+
+        {% endif %}
+
+
+        <!-- =================================================
+             SYSTEM ADMINISTRATION
+        ================================================== -->
+
+        {% if user.is_staff %}
+
+            <div class="sidebar-section">
+                System
+            </div>
+
+
+            <a
+                href="/admin/"
+                class="sidebar-link"
+            >
+
+                <i class="bi bi-shield-lock"></i>
+
+                <span>
+                    System Administration
+                </span>
+
+            </a>
+
+        {% endif %}
+
+
+        <!-- =================================================
+             ACCOUNT
+        ================================================== -->
+
+        <div class="sidebar-section">
+            Account
+        </div>
+
+
+        <form
+            method="post"
+            action="{% url 'accounts:logout' %}"
+            class="m-0"
+        >
+
+            {% csrf_token %}
+
+
+            <button
+                type="submit"
+                class="sidebar-link text-start"
+            >
+
+                <i class="bi bi-box-arrow-right"></i>
+
+                <span>
+                    Logout
+                </span>
+
+            </button>
+
+        </form>
+
+
+    {% endif %}
+
+</div>
+
+
+<!-- =========================================================
+     MAIN CONTENT
+========================================================= -->
+
+<div class="main-content">
+
+
+    <!-- =====================================================
+         TOPBAR
+    ====================================================== -->
+
+    <div class="topbar">
+
+
+        <div class="topbar-title">
+
+            {% block page_heading %}
+
+                EHIRS
+
+            {% endblock %}
+
+        </div>
+
+
+        {% if user.is_authenticated %}
+
+            <div>
+
+                <span class="text-muted me-2">
+
+                    {{ user.get_full_name|default:user.username }}
+
+                </span>
+
+
+                {% if user.profile and user.profile.active %}
+
+                    <span class="badge bg-success">
+                        Active
+                    </span>
+
+                {% else %}
+
+                    <span class="badge bg-secondary">
+                        Inactive
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- =====================================================
+         PAGE CONTENT
+    ====================================================== -->
+
+    <main class="content">
+
+
+        {% if messages %}
+
+            {% for message in messages %}
+
+                <div
+                    class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show"
+                    role="alert"
+                >
+
+                    {{ message }}
+
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert"
+                    ></button>
+
+                </div>
+
+            {% endfor %}
+
+        {% endif %}
+
+
+        {% block content %}
+        {% endblock %}
+
+
+    </main>
+
+</div>
+
+
+<!-- =====================================================
+     BOOTSTRAP JAVASCRIPT
+====================================================== -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+></script>
+
+
+{% block extra_js %}
+{% endblock %}
+
+
+</body>
+</html>

@@ -1,0 +1,521 @@
+
+{% extends "base.html" %}
+
+{% block title %}Feedback Dashboard - EHIRS{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="bi bi-chat-left-text me-2"></i>
+                Feedback Dashboard
+            </h2>
+
+            <p class="text-muted mb-0">
+                Send and receive messages between organizations.
+            </p>
+        </div>
+
+        <a
+            href="{% url 'feedback:create' %}"
+            class="btn btn-primary"
+        >
+            <i class="bi bi-plus-circle me-1"></i>
+            Send Message
+        </a>
+
+    </div>
+
+
+    <!-- =====================================================
+         THREE SUMMARY CARDS ONLY
+    ====================================================== -->
+
+    <div class="row g-4 mb-4">
+
+        <!-- SENT -->
+        <div class="col-md-4">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <div class="text-muted small">
+                                Sent Messages
+                            </div>
+
+                            <h2 class="fw-bold mb-0">
+                                {{ sent_count|default:0 }}
+                            </h2>
+                        </div>
+
+                        <i class="bi bi-send fs-1 text-primary"></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- RECEIVED -->
+        <div class="col-md-4">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <div class="text-muted small">
+                                Received Messages
+                            </div>
+
+                            <h2 class="fw-bold mb-0">
+                                {{ received_count|default:0 }}
+                            </h2>
+                        </div>
+
+                        <i class="bi bi-inbox fs-1 text-success"></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- UNSEEN -->
+        <div class="col-md-4">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <div class="text-muted small">
+                                Unseen Messages
+                            </div>
+
+                            <h2 class="fw-bold mb-0">
+                                {{ unread_count|default:0 }}
+                            </h2>
+                        </div>
+
+                        <i class="bi bi-envelope fs-1 text-danger"></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         ONLY THREE FILTERS
+         ORGANIZATION / YEAR / MONTH
+    ====================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-body p-4">
+
+            <h5 class="fw-bold mb-3">
+                <i class="bi bi-funnel me-2"></i>
+                Filter Messages
+            </h5>
+
+            <form method="get">
+
+                <div class="row g-3 align-items-end">
+
+                    <!-- ORGANIZATION -->
+                    <div class="col-md-5">
+
+                        <label class="form-label fw-semibold">
+                            Organization Unit
+                        </label>
+
+                        <select
+                            name="organization"
+                            class="form-select"
+                        >
+
+                            <option value="">
+                                All Organization Units
+                            </option>
+
+                            {% for organization in organization_options %}
+
+                                <option
+                                    value="{{ organization.pk }}"
+                                    {% if organization_filter == organization.pk|stringformat:"s" %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ organization.name }}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- YEAR -->
+                    <div class="col-md-3">
+
+                        <label class="form-label fw-semibold">
+                            Year
+                        </label>
+
+                        <select
+                            name="year"
+                            class="form-select"
+                        >
+
+                            <option value="">
+                                All Years
+                            </option>
+
+                            {% for year in year_choices %}
+
+                                <option
+                                    value="{{ year }}"
+                                    {% if selected_year == year|stringformat:"s" %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ year }}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- MONTH -->
+                    <div class="col-md-3">
+
+                        <label class="form-label fw-semibold">
+                            Month
+                        </label>
+
+                        <select
+                            name="month"
+                            class="form-select"
+                        >
+
+                            <option value="">
+                                All Months
+                            </option>
+
+                            {% for month_value, month_name in month_choices %}
+
+                                <option
+                                    value="{{ month_value }}"
+                                    {% if selected_month == month_value|stringformat:"s" %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ month_name }}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- APPLY -->
+                    <div class="col-md-1">
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary w-100"
+                            title="Apply filters"
+                        >
+                            <i class="bi bi-search"></i>
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         MESSAGE LIST
+    ====================================================== -->
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header bg-white py-3">
+
+            <h5 class="fw-bold mb-0">
+                <i class="bi bi-chat-square-text me-2"></i>
+                Messages
+            </h5>
+
+        </div>
+
+
+        <div class="card-body p-0">
+
+            {% if feedback_list %}
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle mb-0">
+
+                        <thead class="table-light">
+
+                            <tr>
+
+                                <th class="px-4">
+                                    Message
+                                </th>
+
+                                <th>
+                                    Organization Unit
+                                </th>
+
+                                <th>
+                                    Date & Time
+                                </th>
+
+                                <th>
+                                    Type
+                                </th>
+
+                                <th class="text-center">
+                                    Action
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            {% for feedback in feedback_list %}
+
+                                <tr
+                                    {% if feedback.is_received and not feedback.read_at %}
+                                        class="table-warning"
+                                    {% endif %}
+                                >
+
+                                    <!-- MESSAGE -->
+                                    <td class="px-4">
+
+                                        <div class="fw-semibold">
+
+                                            {% if feedback.subject %}
+                                                {{ feedback.subject }}
+                                            {% else %}
+                                                Feedback Message
+                                            {% endif %}
+
+                                        </div>
+
+                                        <div
+                                            class="text-muted small mt-1"
+                                            style="max-width: 500px;"
+                                        >
+
+                                            {{ feedback.message|truncatechars:120 }}
+
+                                        </div>
+
+                                    </td>
+
+
+                                    <!-- ORGANIZATION -->
+                                    <td>
+
+                                        {% if feedback.is_received %}
+
+                                            <div class="small text-muted">
+                                                From
+                                            </div>
+
+                                            <div class="fw-semibold">
+
+                                                {% if feedback.sender_organization %}
+
+                                                    {{ feedback.sender_organization.name }}
+
+                                                {% elif feedback.sender_facility %}
+
+                                                    {{ feedback.sender_facility.name }}
+
+                                                {% else %}
+
+                                                    {{ feedback.sender.username }}
+
+                                                {% endif %}
+
+                                            </div>
+
+                                        {% else %}
+
+                                            <div class="small text-muted">
+                                                To
+                                            </div>
+
+                                            <div class="fw-semibold">
+
+                                                {% if feedback.recipient_organization %}
+
+                                                    {{ feedback.recipient_organization.name }}
+
+                                                {% elif feedback.recipient_facility %}
+
+                                                    {{ feedback.recipient_facility.name }}
+
+                                                {% else %}
+
+                                                    Recipient
+
+                                                {% endif %}
+
+                                            </div>
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <!-- DATE/TIME -->
+                                    <td>
+
+                                        <div class="fw-semibold">
+                                            {{ feedback.created_at|date:"Y-m-d" }}
+                                        </div>
+
+                                        <div class="text-muted small">
+                                            {{ feedback.created_at|date:"H:i" }}
+                                        </div>
+
+                                    </td>
+
+
+                                    <!-- TYPE -->
+                                    <td>
+
+                                        {% if feedback.is_received %}
+
+                                            {% if not feedback.read_at %}
+
+                                                <span class="badge bg-danger">
+                                                    Unseen
+                                                </span>
+
+                                            {% else %}
+
+                                                <span class="badge bg-secondary">
+                                                    Seen
+                                                </span>
+
+                                            {% endif %}
+
+                                        {% else %}
+
+                                            <span class="badge bg-primary">
+                                                Sent
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <!-- VIEW -->
+                                    <td class="text-center">
+
+                                        <a
+                                            href="{% url 'feedback:detail' feedback.pk %}"
+                                            class="btn btn-sm btn-outline-primary"
+                                        >
+                                            <i class="bi bi-eye me-1"></i>
+                                            View
+                                        </a>
+
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            {% else %}
+
+                <div class="text-center py-5">
+
+                    <i class="bi bi-chat-square-text display-5 text-muted"></i>
+
+                    <h5 class="fw-semibold mt-3">
+                        No Messages Found
+                    </h5>
+
+                    <p class="text-muted">
+                        There are no feedback messages for the selected filters.
+                    </p>
+
+                    <a
+                        href="{% url 'feedback:create' %}"
+                        class="btn btn-primary"
+                    >
+                        <i class="bi bi-plus-circle me-1"></i>
+                        Send Message
+                    </a>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

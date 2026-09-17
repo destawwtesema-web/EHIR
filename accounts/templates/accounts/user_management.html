@@ -1,0 +1,767 @@
+{% extends "base.html" %}
+
+{% block title %}User Management - EHIRS{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+```
+<!-- =====================================================
+     HEADER
+====================================================== -->
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+
+    <div>
+        <h2 class="fw-bold mb-1">
+            <i class="bi bi-people-fill text-primary me-2"></i>
+            User Management
+        </h2>
+
+        <p class="text-muted mb-0">
+            Manage EHIRS user accounts, roles and access.
+        </p>
+    </div>
+
+    <div>
+        <a
+            href="{% url 'accounts:user_create' %}"
+            class="btn btn-primary"
+        >
+            <i class="bi bi-person-plus-fill me-1"></i>
+            Create User
+        </a>
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     MESSAGES
+====================================================== -->
+
+{% if messages %}
+
+    {% for message in messages %}
+
+        <div
+            class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show"
+            role="alert"
+        >
+
+            {{ message }}
+
+            <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close"
+            ></button>
+
+        </div>
+
+    {% endfor %}
+
+{% endif %}
+
+
+<!-- =====================================================
+     SEARCH / FILTER
+====================================================== -->
+
+<div class="card shadow-sm border-0 mb-4">
+
+    <div class="card-body">
+
+        <form method="get">
+
+            <div class="row g-3 align-items-end">
+
+                <!-- SEARCH -->
+
+                <div class="col-lg-5">
+
+                    <label
+                        class="form-label fw-semibold small text-uppercase text-muted"
+                        for="id_search"
+                    >
+                        Search
+                    </label>
+
+                    <div class="input-group">
+
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="bi bi-search text-muted"></i>
+                        </span>
+
+                        <input
+                            type="text"
+                            id="id_search"
+                            name="search"
+                            value="{{ search }}"
+                            class="form-control border-start-0"
+                            placeholder="Username, name, email, organization or facility..."
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <!-- ROLE -->
+
+                <div class="col-lg-3">
+
+                    <label
+                        class="form-label fw-semibold small text-uppercase text-muted"
+                        for="id_role"
+                    >
+                        Role
+                    </label>
+
+                    <select
+                        id="id_role"
+                        name="role"
+                        class="form-select"
+                    >
+
+                        <option value="">
+                            All roles
+                        </option>
+
+                        {% for value, label in role_choices %}
+
+                            <option
+                                value="{{ value }}"
+                                {% if selected_role == value %}selected{% endif %}
+                            >
+                                {{ label }}
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <!-- STATUS -->
+
+                <div class="col-lg-2">
+
+                    <label
+                        class="form-label fw-semibold small text-uppercase text-muted"
+                        for="id_status"
+                    >
+                        Status
+                    </label>
+
+                    <select
+                        id="id_status"
+                        name="status"
+                        class="form-select"
+                    >
+
+                        <option value="">
+                            All
+                        </option>
+
+                        <option
+                            value="active"
+                            {% if selected_status == "active" %}selected{% endif %}
+                        >
+                            Active
+                        </option>
+
+                        <option
+                            value="inactive"
+                            {% if selected_status == "inactive" %}selected{% endif %}
+                        >
+                            Inactive
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- BUTTONS -->
+
+                <div class="col-lg-2 d-flex gap-2">
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary flex-fill"
+                    >
+                        <i class="bi bi-filter me-1"></i>
+                        Filter
+                    </button>
+
+                    <a
+                        href="{% url 'accounts:user_management' %}"
+                        class="btn btn-outline-secondary"
+                        title="Clear filters"
+                        aria-label="Clear filters"
+                    >
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     ACTIVE FILTERS
+====================================================== -->
+
+{% if search or selected_role or selected_status %}
+
+    <div class="alert alert-info py-2 px-3 small mb-4">
+
+        <i class="bi bi-funnel me-1"></i>
+
+        <strong>Active filters:</strong>
+
+        {% if search %}
+
+            <span class="ms-1">
+                Search: "{{ search }}"
+            </span>
+
+        {% endif %}
+
+
+        {% if selected_role %}
+
+            <span class="ms-1">
+                | Role: {{ selected_role }}
+            </span>
+
+        {% endif %}
+
+
+        {% if selected_status %}
+
+            <span class="ms-1">
+                | Status: {{ selected_status }}
+            </span>
+
+        {% endif %}
+
+        <span class="ms-1">|</span>
+
+        <a
+            href="{% url 'accounts:user_management' %}"
+            class="ms-1"
+        >
+            Clear all
+        </a>
+
+    </div>
+
+{% endif %}
+
+
+<!-- =====================================================
+     USERS TABLE
+====================================================== -->
+
+<div class="card shadow-sm border-0">
+
+    <!-- TABLE HEADER -->
+
+    <div class="card-header bg-white py-3 border-bottom">
+
+        <div class="d-flex justify-content-between align-items-center">
+
+            <strong>
+                <i class="bi bi-people me-1 text-primary"></i>
+                EHIRS Users
+            </strong>
+
+            <span class="badge bg-primary rounded-pill">
+
+                {{ users|length }}
+
+                user{{ users|length|pluralize }}
+
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- TABLE -->
+
+    <div class="table-responsive">
+
+        <table class="table table-hover align-middle mb-0">
+
+            <thead class="table-light">
+
+                <tr>
+
+                    <th class="ps-4">
+                        #
+                    </th>
+
+                    <th>
+                        User
+                    </th>
+
+                    <th>
+                        Role
+                    </th>
+
+                    <th>
+                        Organization
+                    </th>
+
+                    <th>
+                        Facility
+                    </th>
+
+                    <th>
+                        Status
+                    </th>
+
+                    <th class="text-end pe-4">
+                        Actions
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for up in users %}
+
+                    <tr
+                        {% if not up.active or not up.user.is_active %}
+                            class="table-secondary"
+                        {% endif %}
+                    >
+
+                        <!-- =================================================
+                             NUMBER
+                        ================================================== -->
+
+                        <td class="ps-4 text-muted">
+
+                            {{ forloop.counter }}
+
+                        </td>
+
+
+                        <!-- =================================================
+                             USER
+                        ================================================== -->
+
+                        <td>
+
+                            <div class="d-flex align-items-center gap-2">
+
+                                <!-- AVATAR -->
+
+                                {% if up.active and up.user.is_active %}
+
+                                    <div class="user-avatar user-avatar-active">
+
+                                {% else %}
+
+                                    <div class="user-avatar user-avatar-inactive">
+
+                                {% endif %}
+
+                                    {% if up.user.first_name %}
+
+                                        {{ up.user.first_name|slice:":1"|upper }}{{ up.user.last_name|slice:":1"|upper }}
+
+                                    {% else %}
+
+                                        {{ up.user.username|slice:":2"|upper }}
+
+                                    {% endif %}
+
+                                </div>
+
+
+                                <!-- USER INFORMATION -->
+
+                                <div>
+
+                                    <div class="fw-semibold lh-sm">
+
+                                        {% if up.user.first_name or up.user.last_name %}
+
+                                            {{ up.user.get_full_name }}
+
+                                        {% else %}
+
+                                            {{ up.user.username }}
+
+                                        {% endif %}
+
+                                    </div>
+
+
+                                    <div class="small text-muted">
+
+                                        @{{ up.user.username }}
+
+                                    </div>
+
+
+                                    {% if up.user.email %}
+
+                                        <div class="small text-muted">
+
+                                            {{ up.user.email }}
+
+                                        </div>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- =================================================
+                             ROLE
+                        ================================================== -->
+
+                        <td>
+
+                            {% if up.role == "MINISTRY_ADMIN" %}
+
+                                <span class="badge bg-danger">
+
+                                    <i class="bi bi-shield-fill-check me-1"></i>
+
+                                    Ministry Admin
+
+                                </span>
+
+                            {% elif up.role == "REGION_ADMIN" %}
+
+                                <span class="badge bg-primary">
+
+                                    <i class="bi bi-building me-1"></i>
+
+                                    Regional Admin
+
+                                </span>
+
+                            {% elif up.role == "SUBCITY_ADMIN" %}
+
+                                <span class="badge bg-info text-dark">
+
+                                    <i class="bi bi-diagram-3 me-1"></i>
+
+                                    Sub-city Admin
+
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge bg-secondary">
+
+                                    <i class="bi bi-hospital me-1"></i>
+
+                                    Facility User
+
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- =================================================
+                             ORGANIZATION
+                        ================================================== -->
+
+                        <td>
+
+                            {% if up.organization %}
+
+                                <div class="fw-semibold">
+
+                                    {{ up.organization.name }}
+
+                                </div>
+
+                                <div class="small text-muted">
+
+                                    {{ up.organization.get_unit_type_display }}
+
+                                </div>
+
+                            {% else %}
+
+                                <span class="text-muted">
+                                    —
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- =================================================
+                             FACILITY
+                        ================================================== -->
+
+                        <td>
+
+                            {% if up.facility %}
+
+                                <div class="fw-semibold">
+
+                                    {{ up.facility.name }}
+
+                                </div>
+
+
+                                {% if up.facility.code %}
+
+                                    <div class="small text-muted">
+
+                                        {{ up.facility.code }}
+
+                                    </div>
+
+                                {% endif %}
+
+                            {% else %}
+
+                                <span class="text-muted">
+                                    —
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- =================================================
+                             STATUS
+                        ================================================== -->
+
+                        <td>
+
+                            {% if up.active and up.user.is_active %}
+
+                                <span class="badge bg-success">
+
+                                    <i class="bi bi-check-circle me-1"></i>
+
+                                    Active
+
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge bg-secondary">
+
+                                    <i class="bi bi-x-circle me-1"></i>
+
+                                    Inactive
+
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- =================================================
+                             ACTIONS
+                        ================================================== -->
+
+                        <td class="text-end pe-4">
+
+                            {% if up.user_id != request.user.id %}
+
+                                <div
+                                    class="btn-group"
+                                    role="group"
+                                    aria-label="User actions"
+                                >
+
+                                    <!-- EDIT -->
+
+                                    <a
+                                        href="{% url 'accounts:user_edit' up.id %}"
+                                        class="btn btn-sm btn-outline-primary"
+                                        title="Edit user"
+                                        aria-label="Edit user"
+                                    >
+                                        <i class="bi bi-pencil-fill"></i>
+                                    </a>
+
+
+                                    <!-- RESET PASSWORD -->
+
+                                    <a
+                                        href="{% url 'accounts:user_edit' up.id %}"
+                                        class="btn btn-sm btn-outline-warning"
+                                        title="Edit user / reset password"
+                                        aria-label="Edit user / reset password"
+                                    >
+                                        <i class="bi bi-key-fill"></i>
+                                    </a>
+
+
+                                    <!-- ACTIVATE / DEACTIVATE -->
+
+                                    <form
+                                        method="post"
+                                        action="{% url 'accounts:user_toggle_active' up.id %}"
+                                        class="d-inline"
+                                        onsubmit="return confirm('{% if up.active and up.user.is_active %}Deactivate{% else %}Activate{% endif %} {{ up.user.username }}?');"
+                                    >
+
+                                        {% csrf_token %}
+
+                                        {% if up.active and up.user.is_active %}
+
+                                            <button
+                                                type="submit"
+                                                class="btn btn-sm btn-outline-danger"
+                                                title="Deactivate user"
+                                                aria-label="Deactivate user"
+                                            >
+                                                <i class="bi bi-person-x-fill"></i>
+                                            </button>
+
+                                        {% else %}
+
+                                            <button
+                                                type="submit"
+                                                class="btn btn-sm btn-outline-success"
+                                                title="Activate user"
+                                                aria-label="Activate user"
+                                            >
+                                                <i class="bi bi-person-check-fill"></i>
+                                            </button>
+
+                                        {% endif %}
+
+                                    </form>
+
+                                </div>
+
+                            {% else %}
+
+                                <span class="badge bg-light text-dark border">
+
+                                    <i class="bi bi-person-circle me-1"></i>
+
+                                    You
+
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                {% empty %}
+
+                    <tr>
+
+                        <td
+                            colspan="7"
+                            class="text-center py-5"
+                        >
+
+                            <div class="text-muted">
+
+                                <i
+                                    class="bi bi-people display-5 d-block mb-3"
+                                ></i>
+
+                                <h5 class="mb-1">
+                                    No users found
+                                </h5>
+
+                                <p class="mb-0">
+                                    Try changing your search or filter.
+                                </p>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+```
+
+</div>
+
+<!-- ============================================================
+     PAGE-SPECIFIC STYLE
+============================================================= -->
+
+<style>
+
+    .user-avatar {
+        width: 42px;
+        height: 42px;
+        min-width: 42px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 14px;
+        text-transform: uppercase;
+    }
+
+    .user-avatar-active {
+        background: #d1fae5;
+        color: #047857;
+    }
+
+    .user-avatar-inactive {
+        background: #e2e8f0;
+        color: #64748b;
+    }
+
+    .table > :not(caption) > * > * {
+        padding-top: 0.85rem;
+        padding-bottom: 0.85rem;
+    }
+
+    .btn-group form {
+        display: inline-block;
+    }
+
+</style>
+
+{% endblock %}

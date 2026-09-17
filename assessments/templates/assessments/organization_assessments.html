@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ organization.name }} | Assessment
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+<div>
+
+    <h2 class="mb-1">
+        {{ organization.name }}
+    </h2>
+
+    <p class="text-muted mb-0">
+        Assessment Organization Hierarchy
+    </p>
+
+</div>
+
+<a
+    href="{% url 'assessments:dashboard' %}"
+    class="btn btn-outline-secondary"
+>
+    ← Back to Assessment
+</a>
+```
+
+</div>
+
+<!-- ORGANIZATION HIERARCHY -->
+
+<div class="card shadow-sm border-0">
+
+```
+<div class="card-header bg-white">
+
+    <strong>
+        Organization Hierarchy
+    </strong>
+
+</div>
+
+
+<div class="card-body">
+
+
+    <!-- ROOT ORGANIZATION -->
+
+    <div class="border rounded mb-3">
+
+        <button
+            type="button"
+            class="btn btn-light w-100 text-start p-3 organization-toggle"
+            data-target="root-{{ organization.pk }}"
+        >
+
+            <span
+                id="icon-root-{{ organization.pk }}"
+                class="tree-icon me-2"
+            >
+                ▼
+            </span>
+
+            <strong>
+                {{ organization.name }}
+            </strong>
+
+            <small class="text-muted ms-2">
+
+                {{ organization.get_unit_type_display }}
+
+            </small>
+
+        </button>
+
+
+        <!-- ROOT CHILDREN -->
+
+        <div
+            id="root-{{ organization.pk }}"
+            class="tree-children p-3"
+        >
+
+
+            <!-- CHILD ORGANIZATIONS -->
+
+            {% for child in child_organizations %}
+
+                <div class="mb-2 ms-3">
+
+                    <a
+                        href="{% url 'assessments:organization' child.pk %}"
+                        class="
+                            btn
+                            btn-outline-primary
+                            w-100
+                            text-start
+                            p-3
+                        "
+                    >
+
+                        <span class="me-2">
+                            ▶
+                        </span>
+
+                        <strong>
+                            {{ child.name }}
+                        </strong>
+
+                        <small class="text-muted ms-2">
+
+                            {{ child.get_unit_type_display }}
+
+                        </small>
+
+                        <span class="float-end text-muted">
+
+                            Expand →
+
+                        </span>
+
+                    </a>
+
+                </div>
+
+            {% endfor %}
+
+
+            <!-- FACILITIES -->
+
+            {% for facility in facilities %}
+
+                <div class="mb-2 ms-3">
+
+                    <a
+                        href="{% url 'assessments:facility' facility.pk %}"
+                        class="
+                            btn
+                            btn-outline-succes

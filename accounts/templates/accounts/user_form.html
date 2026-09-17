@@ -1,0 +1,494 @@
+
+{% extends "base.html" %}
+
+{% block title %}
+{{ page_title }} - EHIRS
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+    <div class="row justify-content-center">
+
+        <div class="col-xl-9 col-lg-10">
+
+            <!-- ========================================== -->
+            <!-- HEADER -->
+            <!-- ========================================== -->
+
+            <div class="d-flex align-items-center mb-4">
+
+                <a
+                    href="{% url 'accounts:user_management' %}"
+                    class="btn btn-outline-secondary me-3"
+                >
+                    <i class="bi bi-arrow-left"></i>
+                </a>
+
+                <div>
+
+                    <h2 class="fw-bold mb-1">
+                        {{ page_title }}
+                    </h2>
+
+                    <p class="text-muted mb-0">
+                        Manage EHIRS account information and access.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- ========================================== -->
+            <!-- FORM -->
+            <!-- ========================================== -->
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-body p-4">
+
+                    <form
+                        method="post"
+                        id="userForm"
+                    >
+
+                        {% csrf_token %}
+
+
+                        <!-- ================================= -->
+                        <!-- ACCOUNT INFORMATION -->
+                        <!-- ================================= -->
+
+                        <h5 class="fw-bold mb-3">
+                            <i class="bi bi-person-circle"></i>
+                            Account Information
+                        </h5>
+
+                        <div class="row g-3 mb-4">
+
+                            <div class="col-md-6">
+
+                                <label class="form-label fw-semibold">
+                                    Username *
+                                </label>
+
+                                {{ form.username }}
+
+                                {% if form.username.errors %}
+
+                                    <div class="text-danger small mt-1">
+                                        {{ form.username.errors }}
+                                    </div>
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <div class="col-md-6">
+
+                                <label class="form-label fw-semibold">
+                                    Email
+                                </label>
+
+                                {{ form.email }}
+
+                                {% if form.email.errors %}
+
+                                    <div class="text-danger small mt-1">
+                                        {{ form.email.errors }}
+                                    </div>
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <div class="col-md-6">
+
+                                <label class="form-label fw-semibold">
+                                    First name
+                                </label>
+
+                                {{ form.first_name }}
+
+                                {% if form.first_name.errors %}
+
+                                    <div class="text-danger small mt-1">
+                                        {{ form.first_name.errors }}
+                                    </div>
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <div class="col-md-6">
+
+                                <label class="form-label fw-semibold">
+                                    Last name
+                                </label>
+
+                                {{ form.last_name }}
+
+                                {% if form.last_name.errors %}
+
+                                    <div class="text-danger small mt-1">
+                                        {{ form.last_name.errors }}
+                                    </div>
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- ================================= -->
+                        <!-- ACCESS -->
+                        <!-- ================================= -->
+
+                        <hr>
+
+                        <h5 class="fw-bold mb-3 mt-4">
+                            <i class="bi bi-shield-lock"></i>
+                            Access and Organization
+                        </h5>
+
+
+                        <div class="alert alert-info">
+
+                            <i class="bi bi-info-circle"></i>
+
+                            The user's role determines what part of EHIRS
+                            the user can access.
+
+                        </div>
+
+
+                        <div class="row g-3 mb-4">
+
+                            <div class="col-md-4">
+
+                                <label class="form-label fw-semibold">
+                                    Role *
+                                </label>
+
+                                {{ form.role }}
+
+                                {% if form.role.errors %}
+
+                                    <div class="text-danger small mt-1">
+                                        {{ form.role.errors }}
+                                    </div>
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label fw-semibold">
+                                    Organization
+                                </label>
+
+                                {{ form.organization }}
+
+                                <div class="form-text">
+                                    Required for Regional and Sub-city
+                                    administrators.
+                                </div>
+
+                                {% if form.organization.errors %}
+
+                                    <div class="text-danger small mt-1">
+                                        {{ form.organization.errors }}
+                                    </div>
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <div class="col-md-4">
+
+                                <label class="form-label fw-semibold">
+                                    Facility
+                                </label>
+
+                                {{ form.facility }}
+
+                                <div class="form-text">
+                                    Required for Facility Users.
+                                </div>
+
+                                {% if form.facility.errors %}
+
+                                    <div class="text-danger small mt-1">
+                                        {{ form.facility.errors }}
+                                    </div>
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- ================================= -->
+                        <!-- PASSWORD -->
+                        <!-- ================================= -->
+
+                        <hr>
+
+                        <h5 class="fw-bold mb-3 mt-4">
+
+                            <i class="bi bi-key"></i>
+
+                            Password
+
+                        </h5>
+
+
+                        {% if is_edit %}
+
+                            <div class="alert alert-secondary">
+
+                                Leave the password fields blank if you
+                                do not want to change the existing password.
+
+                            </div>
+
+                        {% else %}
+
+                            <div class="alert alert-warning">
+
+                                The user will use this password for their
+                                first login. Give the password to the user
+                                securely.
+
+                            </div>
+
+                        {% endif %}
+
+
+                        <div class="row g-3 mb-4">
+
+                            <div class="col-md-6">
+
+                                <label class="form-label fw-semibold">
+                                    Password
+                                    {% if not is_edit %}
+                                        *
+                                    {% endif %}
+                                </label>
+
+                                {{ form.password }}
+
+                                {% if form.password.errors %}
+
+                                    <div class="text-danger small mt-1">
+                                        {{ form.password.errors }}
+                                    </div>
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <div class="col-md-6">
+
+                                <label class="form-label fw-semibold">
+                                    Confirm password
+                                    {% if not is_edit %}
+                                        *
+                                    {% endif %}
+                                </label>
+
+                                {{ form.password_confirm }}
+
+                                {% if form.password_confirm.errors %}
+
+                                    <div class="text-danger small mt-1">
+                                        {{ form.password_confirm.errors }}
+                                    </div>
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- ================================= -->
+                        <!-- STATUS -->
+                        <!-- ================================= -->
+
+                        <hr>
+
+                        <div class="form-check form-switch mb-4">
+
+                            {{ form.active }}
+
+                            <label
+                                class="form-check-label fw-semibold"
+                                for="{{ form.active.id_for_label }}"
+                            >
+                                Active user
+                            </label>
+
+                        </div>
+
+
+                        <!-- ================================= -->
+                        <!-- FORM ERRORS -->
+                        <!-- ================================= -->
+
+                        {% if form.non_field_errors %}
+
+                            <div class="alert alert-danger">
+
+                                {% for error in form.non_field_errors %}
+
+                                    <div>
+                                        {{ error }}
+                                    </div>
+
+                                {% endfor %}
+
+                            </div>
+
+                        {% endif %}
+
+
+                        <!-- ================================= -->
+                        <!-- ACTIONS -->
+                        <!-- ================================= -->
+
+                        <div class="d-flex justify-content-end gap-2">
+
+                            <a
+                                href="{% url 'accounts:user_management' %}"
+                                class="btn btn-outline-secondary"
+                            >
+                                Cancel
+                            </a>
+
+                            <button
+                                type="submit"
+                                class="btn btn-primary px-4"
+                            >
+
+                                {% if is_edit %}
+
+                                    <i class="bi bi-check-circle"></i>
+                                    Save Changes
+
+                                {% else %}
+
+                                    <i class="bi bi-person-plus"></i>
+                                    Create User
+
+                                {% endif %}
+
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ===================================================== -->
+<!-- ROLE / ORGANIZATION UI -->
+<!-- ===================================================== -->
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const role = document.getElementById("id_role");
+    const organization = document.getElementById("id_organization");
+    const facility = document.getElementById("id_facility");
+
+    function updateFields() {
+
+        if (!role) {
+            return;
+        }
+
+        const selectedRole = role.value;
+
+        // Ministry Admin
+        if (selectedRole === "MINISTRY_ADMIN") {
+
+            organization.value = "";
+            facility.value = "";
+
+            organization.disabled = true;
+            facility.disabled = true;
+
+        }
+
+        // Regional Admin
+        else if (selectedRole === "REGION_ADMIN") {
+
+            organization.disabled = false;
+            facility.value = "";
+            facility.disabled = true;
+
+        }
+
+        // Sub-city Admin
+        else if (selectedRole === "SUBCITY_ADMIN") {
+
+            organization.disabled = false;
+            facility.value = "";
+            facility.disabled = true;
+
+        }
+
+        // Facility User
+        else if (selectedRole === "FACILITY_USER") {
+
+            organization.disabled = false;
+            facility.disabled = false;
+
+        }
+
+        else {
+
+            organization.disabled = false;
+            facility.disabled = false;
+
+        }
+    }
+
+    if (role) {
+
+        role.addEventListener(
+            "change",
+            updateFields
+        );
+
+        updateFields();
+
+    }
+
+});
+
+</script>
+
+{% endblock %}

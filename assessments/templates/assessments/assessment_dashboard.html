@@ -1,0 +1,1323 @@
+{% extends "base.html" %}
+
+{% block title %}Assessment Dashboard - EHIRS{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+```
+<!-- =========================================================
+     HEADER
+========================================================== -->
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+
+    <div>
+        <h2 class="fw-bold mb-1">
+            <i class="bi bi-clipboard2-check me-2"></i>
+            Assessment
+        </h2>
+
+        <p class="text-muted mb-0">
+            Monitor, create, and view health facility assessments.
+        </p>
+    </div>
+
+    {% if is_facility or is_subcity or is_region or is_ministry %}
+
+        <a href="{% url 'assessments:start' %}"
+           class="btn btn-primary">
+
+            <i class="bi bi-plus-circle me-1"></i>
+            Start Assessment
+
+        </a>
+
+    {% endif %}
+
+</div>
+
+
+<!-- =========================================================
+     SUMMARY CARDS
+========================================================== -->
+
+<div class="row g-3 mb-4">
+
+    <!-- TOTAL FACILITIES -->
+
+    <div class="col-12 col-sm-6 col-xl-3">
+
+        <div class="card border-0 shadow-sm h-100">
+
+            <div class="card-body">
+
+                <div class="d-flex justify-content-between
+                            align-items-start">
+
+                    <div>
+
+                        <small class="text-muted">
+                            Facilities
+                        </small>
+
+                        <h3 class="fw-bold mb-0 mt-1">
+                            {{ total_facilities }}
+                        </h3>
+
+                    </div>
+
+                    <div class="rounded-circle
+                                bg-primary bg-opacity-10
+                                text-primary p-3">
+
+                        <i class="bi bi-hospital fs-4"></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- SUBMITTED -->
+
+    <div class="col-12 col-sm-6 col-xl-3">
+
+        <div class="card border-0 shadow-sm h-100">
+
+            <div class="card-body">
+
+                <div class="d-flex justify-content-between
+                            align-items-start">
+
+                    <div>
+
+                        <small class="text-muted">
+                            Submitted
+                        </small>
+
+                        <h3 class="fw-bold mb-0 mt-1">
+                            {{ submitted_count }}
+                        </h3>
+
+                    </div>
+
+                    <div class="rounded-circle
+                                bg-success bg-opacity-10
+                                text-success p-3">
+
+                        <i class="bi bi-send-check fs-4"></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- REVIEWED -->
+
+    <div class="col-12 col-sm-6 col-xl-3">
+
+        <div class="card border-0 shadow-sm h-100">
+
+            <div class="card-body">
+
+                <div class="d-flex justify-content-between
+                            align-items-start">
+
+                    <div>
+
+                        <small class="text-muted">
+                            Reviewed
+                        </small>
+
+                        <h3 class="fw-bold mb-0 mt-1">
+                            {{ reviewed_count }}
+                        </h3>
+
+                    </div>
+
+                    <div class="rounded-circle
+                                bg-info bg-opacity-10
+                                text-info p-3">
+
+                        <i class="bi bi-check2-circle fs-4"></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- APPROVED -->
+
+    <div class="col-12 col-sm-6 col-xl-3">
+
+        <div class="card border-0 shadow-sm h-100">
+
+            <div class="card-body">
+
+                <div class="d-flex justify-content-between
+                            align-items-start">
+
+                    <div>
+
+                        <small class="text-muted">
+                            Approved
+                        </small>
+
+                        <h3 class="fw-bold mb-0 mt-1">
+                            {{ approved_count }}
+                        </h3>
+
+                    </div>
+
+                    <div class="rounded-circle
+                                bg-success bg-opacity-10
+                                text-success p-3">
+
+                        <i class="bi bi-shield-check fs-4"></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     FILTER CARD
+========================================================== -->
+
+<div class="card border-0 shadow-sm mb-4">
+
+    <div class="card-body">
+
+        <form method="get"
+              class="row g-3 align-items-end">
+
+
+            <!-- =================================================
+                 REGION
+            ================================================== -->
+
+            {% if is_ministry %}
+
+                <div class="col-12 col-md-3">
+
+                    <label for="region"
+                           class="form-label fw-semibold">
+
+                        <i class="bi bi-geo-alt me-1"></i>
+                        Region
+
+                    </label>
+
+                    <select name="region"
+                            id="region"
+                            class="form-select">
+
+                        <option value="">
+                            All Regions
+                        </option>
+
+                        {% for region in regions %}
+
+                            <option value="{{ region.id }}"
+                                {% if selected_region and selected_region.id == region.id %}
+                                    selected
+                                {% endif %}>
+
+                                {{ region.name }}
+
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+            {% elif is_region %}
+
+                <div class="col-12 col-md-3">
+
+                    <label class="form-label fw-semibold">
+                        <i class="bi bi-geo-alt me-1"></i>
+                        Region
+                    </label>
+
+                    <input type="text"
+                           class="form-control"
+                           value="{{ selected_region.name }}"
+                           readonly>
+
+                </div>
+
+            {% endif %}
+
+
+            <!-- =================================================
+                 SUB-CITY
+            ================================================== -->
+
+            {% if is_ministry or is_region or is_subcity %}
+
+                <div class="col-12 col-md-3">
+
+                    <label for="subcity"
+                           class="form-label fw-semibold">
+
+                        <i class="bi bi-diagram-3 me-1"></i>
+                        Sub-city
+
+                    </label>
+
+                    <select name="subcity"
+                            id="subcity"
+                            class="form-select">
+
+                        <option value="">
+                            All Sub-cities
+                        </option>
+
+                        {% for subcity in subcities %}
+
+                            <option value="{{ subcity.id }}"
+                                {% if selected_subcity and selected_subcity.id == subcity.id %}
+                                    selected
+                                {% endif %}>
+
+                                {{ subcity.name }}
+
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+            {% endif %}
+
+
+            <!-- =================================================
+                 YEAR
+            ================================================== -->
+
+            <div class="col-12 col-md-2">
+
+                <label for="year"
+                       class="form-label fw-semibold">
+
+                    <i class="bi bi-calendar3 me-1"></i>
+                    Year
+
+                </label>
+
+                <select name="year"
+                        id="year"
+                        class="form-select">
+
+                    <option value="">
+                        All Years
+                    </option>
+
+                    {% for year in years %}
+
+                        <option value="{{ year }}"
+                            {% if selected_year == year %}
+                                selected
+                            {% endif %}>
+
+                            {{ year }}
+
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- =================================================
+                 PERIOD
+            ================================================== -->
+
+            <div class="col-12 col-md-2">
+
+                <label for="period"
+                       class="form-label fw-semibold">
+
+                    <i class="bi bi-calendar-month me-1"></i>
+                    Period
+
+                </label>
+
+                <select name="period"
+                        id="period"
+                        class="form-select">
+
+                    <option value="">
+                        All Periods
+                    </option>
+
+                    {% for period in periods %}
+
+                        <option value="{{ period.id }}"
+                            data-year="{{ period.year }}"
+                            {% if selected_period and selected_period.id == period.id %}
+                                selected
+                            {% endif %}>
+
+                            {{ period.name }}
+
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- =================================================
+                 FILTER BUTTON
+            ================================================== -->
+
+            <div class="col-12 col-md-2">
+
+                <button type="submit"
+                        class="btn btn-primary w-100">
+
+                    <i class="bi bi-funnel me-1"></i>
+                    Apply
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     SELECTED PERIOD
+========================================================== -->
+
+{% if selected_period %}
+
+    <div class="alert alert-light border shadow-sm mb-4">
+
+        <div class="d-flex flex-wrap
+                    justify-content-between
+                    align-items-center">
+
+            <div>
+
+                <strong>
+                    <i class="bi bi-calendar-check me-1"></i>
+                    Reporting Period:
+                </strong>
+
+                {{ selected_period.name }}
+
+                <span class="text-muted ms-2">
+                    {{ selected_period.year }}
+                </span>
+
+            </div>
+
+            <div>
+
+                {% if selected_subcity %}
+
+                    <span class="badge bg-primary">
+                        {{ selected_subcity.name }}
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+{% endif %}
+
+
+<!-- =========================================================
+     FACILITY USER
+========================================================== -->
+
+{% if is_facility %}
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header bg-white py-3">
+
+            <h5 class="fw-bold mb-0">
+
+                <i class="bi bi-hospital me-2"></i>
+                My Facility
+
+            </h5>
+
+        </div>
+
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover
+                              align-middle mb-0">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th class="ps-4">
+                                Facility
+                            </th>
+
+                            <th>
+                                Code
+                            </th>
+
+                            <th>
+                                Period
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                            <th>
+                                Score
+                            </th>
+
+                            <th class="text-end pe-4">
+                                Action
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for row in facility_rows %}
+
+                            <tr>
+
+                                <td class="ps-4">
+
+                                    <div class="fw-semibold">
+                                        {{ row.facility.name }}
+                                    </div>
+
+                                    {% if row.region %}
+                                        <small class="text-muted">
+                                            {{ row.region.name }}
+                                        </small>
+                                    {% endif %}
+
+                                </td>
+
+
+                                <td>
+
+                                    {% if row.facility.code %}
+                                        {{ row.facility.code }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+
+                                </td>
+
+
+                                <td>
+
+                                    {% if selected_period %}
+
+                                        {{ selected_period.name }}
+
+                                    {% else %}
+
+                                        —
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <td>
+
+                                    {% if row.status == "SUBMITTED" %}
+
+                                        <span class="badge bg-primary">
+                                            Submitted
+                                        </span>
+
+                                    {% elif row.status == "REVIEWED" %}
+
+                                        <span class="badge bg-info">
+                                            Reviewed
+                                        </span>
+
+                                    {% elif row.status == "APPROVED" %}
+
+                                        <span class="badge bg-success">
+                                            Approved
+                                        </span>
+
+                                    {% elif row.status == "RETURNED" %}
+
+                                        <span class="badge bg-warning text-dark">
+                                            Returned
+                                        </span>
+
+                                    {% elif row.status == "DRAFT" %}
+
+                                        <span class="badge bg-secondary">
+                                            Draft
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="badge bg-light text-dark border">
+                                            Not Started
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <td>
+
+                                    {% if row.score is not None %}
+
+                                        <strong>
+                                            {{ row.score|floatformat:2 }}%
+                                        </strong>
+
+                                    {% else %}
+
+                                        <span class="text-muted">
+                                            —
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <td class="text-end pe-4">
+
+                                    {% if row.assessment %}
+
+                                        <a href="{% url 'assessments:assessment_detail' row.assessment.id %}"
+                                           class="btn btn-sm btn-outline-primary">
+
+                                            <i class="bi bi-eye me-1"></i>
+                                            {% if row.status == "DRAFT" or row.status == "RETURNED" %}
+                                                Open
+                                            {% else %}
+                                                View
+                                            {% endif %}
+
+                                        </a>
+
+                                    {% else %}
+
+                                        <a href="{% url 'assessments:start' %}"
+                                           class="btn btn-sm btn-primary">
+
+                                            <i class="bi bi-plus-circle me-1"></i>
+                                            Start
+
+                                        </a>
+
+                                    {% endif %}
+
+                                </td>
+
+                            </tr>
+
+                        {% empty %}
+
+                            <tr>
+
+                                <td colspan="6"
+                                    class="text-center py-5">
+
+                                    <i class="bi bi-clipboard-x
+                                              fs-1 text-muted"></i>
+
+                                    <p class="text-muted mt-3 mb-0">
+                                        No assessment information
+                                        is available for the selected
+                                        period.
+                                    </p>
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+<!-- =========================================================
+     SUB-CITY USER
+========================================================== -->
+
+{% elif is_subcity %}
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header bg-white py-3">
+
+            <div class="d-flex flex-wrap
+                        justify-content-between
+                        align-items-center">
+
+                <div>
+
+                    <h5 class="fw-bold mb-1">
+
+                        <i class="bi bi-hospital me-2"></i>
+                        Health Centers
+
+                    </h5>
+
+                    <small class="text-muted">
+
+                        Facilities within
+                        {{ selected_subcity.name }}
+
+                    </small>
+
+                </div>
+
+                <span class="badge bg-primary">
+
+                    {{ total_facilities }} Facilities
+
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover
+                              align-middle mb-0">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th class="ps-4">
+                                Health Facility
+                            </th>
+
+                            <th>
+                                Code
+                            </th>
+
+                            <th>
+                                Period
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                            <th>
+                                Score
+                            </th>
+
+                            <th class="text-end pe-4">
+                                Action
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for row in facility_rows %}
+
+                            <tr>
+
+                                <td class="ps-4">
+
+                                    <div class="fw-semibold">
+                                        {{ row.facility.name }}
+                                    </div>
+
+                                </td>
+
+
+                                <td>
+                                    {{ row.facility.code|default:"—" }}
+                                </td>
+
+
+                                <td>
+
+                                    {% if selected_period %}
+                                        {{ selected_period.name }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+
+                                </td>
+
+
+                                <td>
+
+                                    {% if row.status == "SUBMITTED" %}
+
+                                        <span class="badge bg-primary">
+                                            Submitted
+                                        </span>
+
+                                    {% elif row.status == "REVIEWED" %}
+
+                                        <span class="badge bg-info">
+                                            Reviewed
+                                        </span>
+
+                                    {% elif row.status == "APPROVED" %}
+
+                                        <span class="badge bg-success">
+                                            Approved
+                                        </span>
+
+                                    {% elif row.status == "RETURNED" %}
+
+                                        <span class="badge bg-warning text-dark">
+                                            Returned
+                                        </span>
+
+                                    {% elif row.status == "DRAFT" %}
+
+                                        <span class="badge bg-secondary">
+                                            Draft
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="badge bg-light text-dark border">
+                                            Not Started
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <td>
+
+                                    {% if row.score is not None %}
+
+                                        <strong>
+                                            {{ row.score|floatformat:2 }}%
+                                        </strong>
+
+                                    {% else %}
+                                        —
+                                    {% endif %}
+
+                                </td>
+
+
+                                <td class="text-end pe-4">
+
+                                    {% if row.assessment %}
+
+                                        <a href="{% url 'assessments:assessment_detail' row.assessment.id %}"
+                                           class="btn btn-sm btn-outline-primary">
+
+                                            <i class="bi bi-eye me-1"></i>
+                                            View Assessment
+
+                                        </a>
+
+                                    {% else %}
+
+                                        <span class="text-muted small">
+                                            Not submitted
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                            </tr>
+
+                        {% empty %}
+
+                            <tr>
+
+                                <td colspan="6"
+                                    class="text-center py-5">
+
+                                    <i class="bi bi-hospital
+                                              fs-1 text-muted"></i>
+
+                                    <p class="text-muted mt-3">
+                                        No health centers were found
+                                        in this sub-city.
+                                    </p>
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+<!-- =========================================================
+     REGION / MINISTRY USER
+========================================================== -->
+
+{% elif is_region or is_ministry %}
+
+    <div class="row g-4">
+
+        {% for group in subcity_groups %}
+
+            <div class="col-12">
+
+                <div class="card border-0 shadow-sm">
+
+                    <!-- SUB-CITY HEADER -->
+
+                    <div class="card-header bg-white py-3">
+
+                        <div class="d-flex flex-wrap
+                                    justify-content-between
+                                    align-items-center">
+
+                            <div>
+
+                                <h5 class="fw-bold mb-1">
+
+                                    <i class="bi bi-diagram-3 me-2"></i>
+                                    {{ group.subcity.name }}
+
+                                </h5>
+
+                                <small class="text-muted">
+
+                                    Health centers and assessment
+                                    status
+
+                                </small>
+
+                            </div>
+
+
+                            <span class="badge bg-primary">
+
+                                {{ group.facilities|length }}
+                                Facilities
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- FACILITIES -->
+
+                    <div class="card-body p-0">
+
+                        <div class="table-responsive">
+
+                            <table class="table table-hover
+                                          align-middle mb-0">
+
+                                <thead class="table-light">
+
+                                    <tr>
+
+                                        <th class="ps-4">
+                                            Health Center
+                                        </th>
+
+                                        <th>
+                                            Code
+                                        </th>
+
+                                        <th>
+                                            Period
+                                        </th>
+
+                                        <th>
+                                            Status
+                                        </th>
+
+                                        <th>
+                                            Score
+                                        </th>
+
+                                        <th class="text-end pe-4">
+                                            Action
+                                        </th>
+
+                                    </tr>
+
+                                </thead>
+
+
+                                <tbody>
+
+                                    {% for row in group.facilities %}
+
+                                        <tr>
+
+                                            <td class="ps-4">
+
+                                                <div class="fw-semibold">
+
+                                                    {{ row.facility.name }}
+
+                                                </div>
+
+                                            </td>
+
+
+                                            <td>
+
+                                                {{ row.facility.code|default:"—" }}
+
+                                            </td>
+
+
+                                            <td>
+
+                                                {% if selected_period %}
+
+                                                    {{ selected_period.name }}
+
+                                                {% else %}
+
+                                                    —
+
+                                                {% endif %}
+
+                                            </td>
+
+
+                                            <td>
+
+                                                {% if row.status == "SUBMITTED" %}
+
+                                                    <span class="badge bg-primary">
+                                                        Submitted
+                                                    </span>
+
+                                                {% elif row.status == "REVIEWED" %}
+
+                                                    <span class="badge bg-info">
+                                                        Reviewed
+                                                    </span>
+
+                                                {% elif row.status == "APPROVED" %}
+
+                                                    <span class="badge bg-success">
+                                                        Approved
+                                                    </span>
+
+                                                {% elif row.status == "RETURNED" %}
+
+                                                    <span class="badge bg-warning text-dark">
+                                                        Returned
+                                                    </span>
+
+                                                {% elif row.status == "DRAFT" %}
+
+                                                    <span class="badge bg-secondary">
+                                                        Draft
+                                                    </span>
+
+                                                {% else %}
+
+                                                    <span class="badge bg-light text-dark border">
+                                                        Not Started
+                                                    </span>
+
+                                                {% endif %}
+
+                                            </td>
+
+
+                                            <td>
+
+                                                {% if row.score is not None %}
+
+                                                    <strong>
+                                                        {{ row.score|floatformat:2 }}%
+                                                    </strong>
+
+                                                {% else %}
+
+                                                    —
+
+                                                {% endif %}
+
+                                            </td>
+
+
+                                            <td class="text-end pe-4">
+
+                                                {% if row.assessment %}
+
+                                                    <a href="{% url 'assessments:assessment_detail' row.assessment.id %}"
+                                                       class="btn btn-sm btn-outline-primary">
+
+                                                        <i class="bi bi-eye me-1"></i>
+                                                        View
+
+                                                    </a>
+
+                                                {% else %}
+
+                                                    <span class="text-muted small">
+                                                        Not submitted
+                                                    </span>
+
+                                                {% endif %}
+
+                                            </td>
+
+                                        </tr>
+
+
+                                    {% empty %}
+
+                                        <tr>
+
+                                            <td colspan="6"
+                                                class="text-center py-4">
+
+                                                <span class="text-muted">
+
+                                                    No health centers
+                                                    found in this
+                                                    sub-city.
+
+                                                </span>
+
+                                            </td>
+
+                                        </tr>
+
+                                    {% endfor %}
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        {% empty %}
+
+            <div class="col-12">
+
+                <div class="card border-0 shadow-sm">
+
+                    <div class="card-body text-center py-5">
+
+                        <i class="bi bi-diagram-3
+                                  fs-1 text-muted"></i>
+
+                        <h5 class="fw-bold mt-3">
+                            No Organizational Units Found
+                        </h5>
+
+                        <p class="text-muted mb-0">
+
+                            There are currently no sub-cities
+                            available within your authorized scope.
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+
+<!-- =========================================================
+     FALLBACK
+========================================================== -->
+
+{% else %}
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-body text-center py-5">
+
+            <i class="bi bi-shield-lock
+                      fs-1 text-muted"></i>
+
+            <h5 class="fw-bold mt-3">
+                Assessment Access
+            </h5>
+
+            <p class="text-muted mb-0">
+                Your account does not currently have access
+                to the Assessment module.
+            </p>
+
+        </div>
+
+    </div>
+
+{% endif %}
+```
+
+</div>
+
+<!-- =============================================================
+     PERIOD FILTER JAVASCRIPT
+============================================================= -->
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const yearSelect = document.getElementById("year");
+    const periodSelect = document.getElementById("period");
+
+    if (!yearSelect || !periodSelect) {
+        return;
+    }
+
+
+    function filterPeriods() {
+
+        const selectedYear = yearSelect.value;
+
+        const options = periodSelect.querySelectorAll(
+            "option[data-year]"
+        );
+
+
+        options.forEach(function (option) {
+
+            if (!selectedYear) {
+
+                option.hidden = false;
+
+            } else {
+
+                option.hidden =
+                    option.dataset.year !== selectedYear;
+
+            }
+
+        });
+
+
+        const selectedOption =
+            periodSelect.options[periodSelect.selectedIndex];
+
+
+        if (
+            selectedOption &&
+            selectedOption.dataset.year &&
+            selectedOption.dataset.year !== selectedYear
+        ) {
+
+            periodSelect.value = "";
+
+        }
+
+    }
+
+
+    yearSelect.addEventListener(
+        "change",
+        filterPeriods
+    );
+
+
+    filterPeriods();
+
+});
+
+</script>
+
+{% endblock %}

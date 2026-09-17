@@ -1,0 +1,3251 @@
+{% extends "base.html" %}
+
+{% block title %}
+Assessment - {{ assessment.facility.name }}
+{% endblock %}
+
+{% block content %}
+
+<style>
+:root {
+    --eh-primary: #0f766e;
+    --eh-primary-dark: #115e59;
+    --eh-success: #15803d;
+    --eh-success-dark: #166534;
+    --eh-info: #0369a1;
+    --eh-warning: #b45309;
+    --eh-danger: #dc2626;
+    --eh-text: #1e293b;
+    --eh-muted: #64748b;
+    --eh-border: #d9e2e7;
+    --eh-border-light: #e8eef1;
+    --eh-yellow: #fffbeb;
+    --eh-green-light: #f0fdf4;
+    --eh-blue-light: #eff6ff;
+    --eh-page: #ffffff;
+}
+
+/* =========================================================
+   PAGE
+========================================================= */
+
+.assessment-page {
+    width: 100%;
+    max-width: 1650px;
+    margin: 0 auto;
+    background: #ffffff;
+}
+
+/* =========================================================
+   TOP INFORMATION HEADER
+========================================================= */
+
+.assessment-header {
+    position: relative;
+    background: #ffffff;
+    border: 1px solid var(--eh-border);
+    border-radius: 14px;
+    margin-bottom: 18px;
+    overflow: hidden;
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.05);
+}
+
+.assessment-header::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    background: linear-gradient(
+        180deg,
+        var(--eh-primary),
+        var(--eh-success)
+    );
+}
+
+.assessment-header-inner {
+    padding: 23px 26px 22px 30px;
+}
+
+.assessment-kicker {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.assessment-kicker-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 9px;
+    border-radius: 6px;
+    background: #f0fdfa;
+    color: var(--eh-primary-dark);
+    border: 1px solid #99f6e4;
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+}
+
+.assessment-header h1 {
+    margin: 0;
+    color: var(--eh-text);
+    font-size: 1.65rem;
+    font-weight: 800;
+    line-height: 1.3;
+}
+
+.assessment-subtitle {
+    margin-top: 5px;
+    color: var(--eh-muted);
+    font-size: 0.92rem;
+}
+
+.header-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 17px;
+}
+
+.header-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 11px;
+    border: 1px solid var(--eh-border);
+    border-radius: 7px;
+    background: #fafcfd;
+    color: #475569;
+    font-size: 0.82rem;
+    font-weight: 650;
+}
+
+.header-pill i {
+    color: var(--eh-primary);
+}
+
+.header-actions {
+    min-width: 185px;
+}
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 11px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 800;
+}
+
+.status-draft {
+    background: #e0f2fe;
+    color: #0369a1;
+}
+
+.status-submitted {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-reviewed {
+    background: #ede9fe;
+    color: #6d28d9;
+}
+
+.status-approved {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status-returned {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* =========================================================
+   READ ONLY NOTICE
+========================================================= */
+
+.readonly-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 13px 16px;
+    margin-bottom: 18px;
+    border-left: 5px solid #2563eb;
+    border-top: 1px solid #bfdbfe;
+    border-right: 1px solid #bfdbfe;
+    border-bottom: 1px solid #bfdbfe;
+    border-radius: 8px;
+    background: #eff6ff;
+    color: #1e40af;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* =========================================================
+   SCORE OVERVIEW
+========================================================= */
+
+.score-overview {
+    display: grid;
+    grid-template-columns: minmax(280px, 1.4fr) repeat(3, minmax(190px, 1fr));
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.score-panel {
+    min-height: 132px;
+    padding: 17px 18px;
+    border: 1px solid var(--eh-border);
+    border-radius: 11px;
+    background: #ffffff;
+    box-shadow: 0 3px 13px rgba(15, 23, 42, 0.04);
+}
+
+.score-panel-main {
+    border-left: 5px solid var(--eh-primary);
+}
+
+.score-panel-label {
+    margin-bottom: 8px;
+    color: var(--eh-muted);
+    font-size: 0.72rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.overall-score {
+    color: var(--eh-primary-dark);
+    font-size: 2.4rem;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.score-max {
+    color: var(--eh-muted);
+    font-size: 0.88rem;
+    font-weight: 700;
+}
+
+.score-percent {
+    margin-top: 6px;
+    color: var(--eh-primary);
+    font-weight: 850;
+}
+
+.section-score-number {
+    color: var(--eh-text);
+    font-size: 1.35rem;
+    font-weight: 900;
+}
+
+.section-weight {
+    color: var(--eh-muted);
+    font-size: 0.73rem;
+    font-weight: 700;
+}
+
+.score-panel-name {
+    margin-top: 8px;
+    color: #475569;
+    font-size: 0.78rem;
+    line-height: 1.4;
+}
+
+.progress {
+    height: 8px;
+    background: #e8eef1;
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    border-radius: 99px;
+    transition: width 0.25s ease;
+}
+
+.main-progress {
+    height: 10px;
+}
+
+/* =========================================================
+   COMPLETION BAR
+========================================================= */
+
+.completion-panel {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 20px;
+    padding: 15px 18px;
+    margin-bottom: 18px;
+    border: 1px solid var(--eh-border);
+    border-radius: 10px;
+    background: #ffffff;
+}
+
+.completion-title {
+    color: var(--eh-text);
+    font-weight: 800;
+}
+
+.completion-subtitle {
+    margin-top: 2px;
+    color: var(--eh-muted);
+    font-size: 0.78rem;
+}
+
+.completion-number {
+    color: var(--eh-success);
+    font-size: 1.05rem;
+    font-weight: 900;
+}
+
+/* =========================================================
+   SECTION NAVIGATION
+========================================================= */
+
+.sticky-tools {
+    position: sticky;
+    top: 10px;
+    z-index: 25;
+    padding: 10px 12px;
+    margin-bottom: 18px;
+    border: 1px solid var(--eh-border);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.97);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+}
+
+.navigation-heading {
+    color: var(--eh-text);
+    font-size: 0.82rem;
+    font-weight: 850;
+}
+
+.section-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.section-nav a {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 9px;
+    border: 1px solid var(--eh-border);
+    border-radius: 6px;
+    background: #ffffff;
+    color: #475569;
+    text-decoration: none;
+    font-size: 0.75rem;
+    font-weight: 750;
+    transition: all 0.18s ease;
+}
+
+.section-nav a:hover {
+    color: var(--eh-primary-dark);
+    border-color: #5eead4;
+    background: #f0fdfa;
+}
+
+/* =========================================================
+   ASSESSMENT SECTION
+========================================================= */
+
+.assessment-section {
+    margin-bottom: 22px;
+    border: 1px solid var(--eh-border);
+    border-radius: 13px;
+    background: #ffffff;
+    overflow: hidden;
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.045);
+    scroll-margin-top: 85px;
+}
+
+/* =========================================================
+   SECTION HEADER
+========================================================= */
+
+.section-heading {
+    padding: 20px 22px 16px;
+    background: linear-gradient(
+        180deg,
+        #ffffff 0%,
+        #f8fbfc 100%
+    );
+    border-bottom: 1px solid var(--eh-border);
+}
+
+.section-heading-main {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.section-code {
+    flex-shrink: 0;
+    width: 45px;
+    height: 45px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9px;
+    background: var(--eh-primary);
+    color: #ffffff;
+    font-weight: 900;
+    box-shadow: 0 3px 9px rgba(15, 118, 110, 0.18);
+}
+
+.section-title {
+    color: var(--eh-text);
+    font-size: 1.18rem;
+    font-weight: 850;
+    line-height: 1.35;
+}
+
+.section-subtitle {
+    margin-top: 3px;
+    color: var(--eh-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.section-average-box {
+    min-width: 145px;
+    padding: 9px 14px;
+    border: 1px solid #86efac;
+    border-radius: 9px;
+    background: var(--eh-green-light);
+    text-align: center;
+}
+
+.section-average-label {
+    color: #166534;
+    font-size: 0.68rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.section-average-score {
+    margin-top: 2px;
+    color: var(--eh-success);
+    font-size: 1.32rem;
+    font-weight: 900;
+    line-height: 1.2;
+}
+
+.section-weight-text {
+    margin-top: 2px;
+    color: #64748b;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.section-progress-line {
+    margin-top: 17px;
+}
+
+.section-heading .progress {
+    height: 7px;
+}
+
+.section-heading .progress-bar {
+    background: linear-gradient(
+        90deg,
+        var(--eh-primary),
+        var(--eh-success)
+    ) !important;
+}
+
+.section-performance {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 7px;
+    color: var(--eh-muted);
+    font-size: 0.7rem;
+    font-weight: 650;
+}
+
+/* =========================================================
+   THEMATIC AREA
+========================================================= */
+
+.thematic-area {
+    margin: 15px;
+    border: 1px solid #d7e2e6;
+    border-radius: 10px;
+    background: #ffffff;
+    overflow: hidden;
+}
+
+.thematic-header {
+    padding: 14px 16px;
+    background: #f8fafb;
+    border-bottom: 1px solid #dce5e8;
+}
+
+.thematic-left {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.thematic-number {
+    flex-shrink: 0;
+    min-width: 32px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    background: #e0f2fe;
+    color: #075985;
+    font-size: 0.72rem;
+    font-weight: 900;
+}
+
+.thematic-title {
+    color: var(--eh-text);
+    font-size: 1rem;
+    font-weight: 850;
+    line-height: 1.4;
+}
+
+.thematic-subtitle {
+    margin-top: 2px;
+    color: var(--eh-muted);
+    font-size: 0.72rem;
+}
+
+.thematic-score {
+    text-align: right;
+}
+
+.thematic-max {
+    color: var(--eh-muted);
+    font-size: 0.68rem;
+    font-weight: 750;
+    text-transform: uppercase;
+}
+
+.thematic-score-value {
+    margin-top: 2px;
+    color: var(--eh-primary-dark);
+    font-size: 0.86rem;
+    font-weight: 900;
+}
+
+.thematic-progress {
+    height: 5px;
+    margin-top: 10px;
+}
+
+/* =========================================================
+   INDICATOR ROW
+========================================================= */
+
+.indicator-card {
+    position: relative;
+    margin: 0;
+    padding: 17px 18px 19px;
+    border-bottom: 1px solid #e3eaed;
+    background: #ffffff;
+    transition: background 0.18s ease;
+}
+
+.indicator-card:last-child {
+    border-bottom: 0;
+}
+
+.indicator-card:hover {
+    background: #fcfefe;
+}
+
+.indicator-top {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 18px;
+    align-items: start;
+}
+
+.indicator-main {
+    min-width: 0;
+}
+
+.indicator-line {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+}
+
+.indicator-code {
+    flex-shrink: 0;
+    min-width: 62px;
+    padding: 5px 8px;
+    border-radius: 5px;
+    background: #eef6f7;
+    border: 1px solid #c9dfe1;
+    color: var(--eh-primary-dark);
+    text-align: center;
+    font-size: 0.7rem;
+    font-weight: 900;
+}
+
+.indicator-question {
+    color: var(--eh-text);
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1.55;
+}
+
+.indicator-help {
+    margin: 7px 0 0 71px;
+    color: var(--eh-muted);
+    font-size: 0.78rem;
+    line-height: 1.45;
+}
+
+.indicator-score-box {
+    min-width: 105px;
+    padding-left: 12px;
+    border-left: 1px solid #e2e8f0;
+    text-align: right;
+}
+
+.indicator-score {
+    color: var(--eh-primary-dark);
+    font-size: 1.25rem;
+    font-weight: 900;
+    line-height: 1.2;
+}
+
+.indicator-score-max {
+    display: block;
+    margin-top: 2px;
+    color: var(--eh-muted);
+    font-size: 0.68rem;
+    font-weight: 700;
+}
+
+/* =========================================================
+   RESPONSE / INPUT AREA
+========================================================= */
+
+.answer-area {
+    margin: 15px 0 0 71px;
+    padding: 14px;
+    border: 2px solid var(--eh-success);
+    border-radius: 9px;
+    background: var(--eh-yellow);
+}
+
+.answer-area .form-control,
+.answer-area input[type="number"],
+.answer-area textarea,
+.answer-area select {
+    min-height: 43px;
+    border: 2px solid var(--eh-success) !important;
+    border-radius: 7px !important;
+    background: #fffdf3 !important;
+    color: var(--eh-text) !important;
+    box-shadow: none !important;
+    transition: all 0.18s ease;
+}
+
+.answer-area .form-control:hover,
+.answer-area input[type="number"]:hover,
+.answer-area textarea:hover,
+.answer-area select:hover {
+    border-color: var(--eh-success-dark) !important;
+}
+
+.answer-area .form-control:focus,
+.answer-area input[type="number"]:focus,
+.answer-area textarea:focus,
+.answer-area select:focus {
+    outline: none !important;
+    border-color: var(--eh-primary-dark) !important;
+    background: #ffffff !important;
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12) !important;
+}
+
+.answer-area textarea.form-control {
+    min-height: 76px;
+    resize: vertical;
+}
+
+.field-label {
+    display: block;
+    margin-bottom: 6px;
+    color: #475569;
+    font-size: 0.72rem;
+    font-weight: 850;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.numeric-input {
+    max-width: 320px;
+}
+
+.calc-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(150px, 1fr));
+    gap: 11px;
+}
+
+.calc-grid > div {
+    min-width: 0;
+}
+
+/* =========================================================
+   OPTIONS
+========================================================= */
+
+.option-grid {
+    display: grid;
+    grid-template-columns: repeat(
+        auto-fit,
+        minmax(190px, 1fr)
+    );
+    gap: 9px;
+}
+
+.option-label {
+    position: relative;
+    display: block;
+    cursor: pointer;
+}
+
+.option-label input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.option-content {
+    min-height: 46px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 2px solid var(--eh-success);
+    border-radius: 7px;
+    background: #fffdf3;
+    color: var(--eh-text);
+    transition: all 0.18s ease;
+}
+
+.option-content:hover {
+    border-color: var(--eh-success-dark);
+    background: #fffbea;
+}
+
+.option-label input:checked + .option-content {
+    border-color: var(--eh-primary-dark);
+    background: #f0fdf4;
+    color: var(--eh-primary-dark);
+    box-shadow: 0 0 0 2px rgba(21, 128, 61, 0.08);
+    font-weight: 800;
+}
+
+.option-score {
+    color: var(--eh-success);
+    font-size: 0.7rem;
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+/* =========================================================
+   RATIO
+========================================================= */
+
+.numeric-field,
+.ratio-field {
+    font-size: 0.92rem;
+    font-weight: 600;
+}
+
+.numeric-field::placeholder,
+.ratio-field::placeholder {
+    color: #94a3b8;
+    opacity: 1;
+}
+
+.ratio-result {
+    margin-top: 11px;
+    padding: 10px 12px;
+    border: 1px dashed var(--eh-success);
+    border-radius: 7px;
+    background: #fffdf3;
+    color: #475569;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+/* =========================================================
+   CONDUCTED
+========================================================= */
+
+.conducted-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+}
+
+.conducted-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 13px;
+    border: 2px solid var(--eh-success);
+    border-radius: 7px;
+    background: #fffdf3;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.conducted-option:hover {
+    border-color: var(--eh-success-dark);
+    background: #fffbea;
+}
+
+.conducted-option input {
+    width: 17px;
+    height: 17px;
+    accent-color: var(--eh-primary);
+}
+
+/* =========================================================
+   READ ONLY
+========================================================= */
+
+.readonly-answer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    color: #475569;
+    font-size: 0.85rem;
+}
+
+.readonly-answer strong {
+    color: var(--eh-text);
+}
+
+.readonly-value {
+    padding: 7px 11px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background: #f8fafc;
+    color: var(--eh-text);
+    font-weight: 700;
+}
+
+.no-response {
+    color: #94a3b8;
+    font-size: 0.8rem;
+    font-style: italic;
+}
+
+/* =========================================================
+   ACTION BAR
+========================================================= */
+
+.action-bar {
+    position: sticky;
+    bottom: 10px;
+    z-index: 30;
+    margin-top: 20px;
+    padding: 13px 15px;
+    border: 1px solid var(--eh-border);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.97);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 8px 28px rgba(15, 23, 42, 0.11);
+}
+
+.action-title {
+    color: var(--eh-text);
+    font-weight: 800;
+}
+
+.action-subtitle {
+    margin-top: 2px;
+    color: var(--eh-muted);
+    font-size: 0.75rem;
+}
+
+.btn-primary-custom {
+    background: var(--eh-primary);
+    border-color: var(--eh-primary);
+    color: #ffffff;
+    font-weight: 800;
+}
+
+.btn-primary-custom:hover {
+    background: var(--eh-primary-dark);
+    border-color: var(--eh-primary-dark);
+    color: #ffffff;
+}
+
+.btn-submit {
+    background: var(--eh-success);
+    border-color: var(--eh-success);
+    color: #ffffff;
+    font-weight: 800;
+}
+
+.btn-submit:hover {
+    background: var(--eh-success-dark);
+    border-color: var(--eh-success-dark);
+    color: #ffffff;
+}
+
+/* =========================================================
+   PRINT
+========================================================= */
+
+@media print {
+
+    @page {
+        size: A4;
+        margin: 12mm;
+    }
+
+    .no-print,
+    nav,
+    aside,
+    .sidebar,
+    .navbar,
+    .sticky-tools,
+    .action-bar,
+    button,
+    .btn {
+        display: none !important;
+    }
+
+    body {
+        background: #ffffff !important;
+    }
+
+    .assessment-page {
+        width: 100%;
+        max-width: none;
+        background: #ffffff !important;
+    }
+
+    .assessment-header {
+        border: 1px solid #333 !important;
+        box-shadow: none !important;
+    }
+
+    .assessment-header::before {
+        background: #333 !important;
+    }
+
+    .score-panel,
+    .completion-panel,
+    .assessment-section,
+    .thematic-area {
+        box-shadow: none !important;
+    }
+
+    .assessment-section {
+        break-inside: avoid;
+    }
+
+    .section-heading {
+        background: #ffffff !important;
+    }
+
+    .section-average-box {
+        background: #ffffff !important;
+        border: 1px solid #333 !important;
+    }
+
+    .indicator-card {
+        break-inside: avoid;
+    }
+
+    .answer-area {
+        background: #ffffff !important;
+        border: 1px solid #333 !important;
+    }
+
+    .answer-area .form-control,
+    .answer-area input[type="number"],
+    .answer-area textarea,
+    .answer-area select {
+        background: #ffffff !important;
+        border: 1px solid #333 !important;
+    }
+
+    .option-content,
+    .conducted-option {
+        background: #ffffff !important;
+        border: 1px solid #333 !important;
+    }
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1150px) {
+
+    .score-overview {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+@media (max-width: 800px) {
+
+    .assessment-header-inner {
+        padding: 19px;
+    }
+
+    .assessment-header h1 {
+        font-size: 1.4rem;
+    }
+
+    .header-actions {
+        width: 100%;
+    }
+
+    .score-overview {
+        grid-template-columns: 1fr;
+    }
+
+    .completion-panel {
+        grid-template-columns: 1fr;
+    }
+
+    .section-heading-main {
+        align-items: flex-start;
+    }
+
+    .section-average-box {
+        width: 100%;
+    }
+
+    .indicator-top {
+        grid-template-columns: 1fr;
+    }
+
+    .indicator-score-box {
+        padding-left: 0;
+        padding-top: 8px;
+        border-left: 0;
+        border-top: 1px solid #e2e8f0;
+        text-align: left;
+    }
+
+    .answer-area {
+        margin-left: 0;
+    }
+
+    .indicator-help {
+        margin-left: 0;
+    }
+
+    .calc-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+@media (max-width: 550px) {
+
+    .section-heading {
+        padding: 16px;
+    }
+
+    .thematic-area {
+        margin: 9px;
+    }
+
+    .indicator-card {
+        padding: 14px;
+    }
+
+    .indicator-line {
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .option-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .answer-area {
+        padding: 12px;
+    }
+
+}
+</style>
+
+<div class="assessment-page">
+
+```
+<!-- =====================================================
+     ASSESSMENT HEADER
+====================================================== -->
+
+<div class="assessment-header">
+
+    <div class="assessment-header-inner">
+
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-4">
+
+            <div class="flex-grow-1">
+
+                <div class="assessment-kicker">
+
+                    <span class="assessment-kicker-label">
+                        <i class="bi bi-clipboard2-pulse"></i>
+                        EHIRS ASSESSMENT
+                    </span>
+
+                    {% if assessment.status == "DRAFT" %}
+
+                        <span class="status-badge status-draft">
+                            <i class="bi bi-pencil"></i>
+                            Draft
+                        </span>
+
+                    {% elif assessment.status == "SUBMITTED" %}
+
+                        <span class="status-badge status-submitted">
+                            <i class="bi bi-send"></i>
+                            Submitted
+                        </span>
+
+                    {% elif assessment.status == "REVIEWED" %}
+
+                        <span class="status-badge status-reviewed">
+                            <i class="bi bi-check2-circle"></i>
+                            Reviewed
+                        </span>
+
+                    {% elif assessment.status == "APPROVED" %}
+
+                        <span class="status-badge status-approved">
+                            <i class="bi bi-shield-check"></i>
+                            Approved
+                        </span>
+
+                    {% elif assessment.status == "RETURNED" %}
+
+                        <span class="status-badge status-returned">
+                            <i class="bi bi-arrow-return-left"></i>
+                            Returned
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+
+                <h1>
+                    {{ assessment.facility.name }}
+                </h1>
+
+                <div class="assessment-subtitle">
+                    Health Facility Assessment Checklist
+                </div>
+
+
+                <div class="header-info">
+
+                    {% if assessment.facility.organization %}
+
+                        <span class="header-pill">
+                            <i class="bi bi-diagram-3"></i>
+                            {{ assessment.facility.organization.name }}
+                        </span>
+
+                    {% endif %}
+
+
+                    <span class="header-pill">
+                        <i class="bi bi-calendar3"></i>
+                        {{ assessment.period.year }}
+                    </span>
+
+
+                    <span class="header-pill">
+                        <i class="bi bi-clock"></i>
+                        {{ assessment.period.name }}
+                    </span>
+
+
+                    <span class="header-pill">
+                        <i class="bi bi-hash"></i>
+                        Assessment #{{ assessment.id }}
+                    </span>
+
+                </div>
+
+            </div>
+
+```html
+<div class="header-actions text-end no-print">
+
+    <!-- BACK TO ASSESSMENT DASHBOARD -->
+    <a href="{% url 'assessments:dashboard' %}"
+       class="btn btn-outline-secondary btn-sm fw-bold mb-2">
+
+        <i class="bi bi-arrow-left"></i>
+        Assessment Dashboard
+
+    </a>
+
+    <br>
+
+    <!-- PDF EXPORT -->
+    <a href="{% url 'assessments:export_pdf' assessment.id %}"
+       class="btn btn-outline-danger btn-sm fw-bold me-1">
+
+        <i class="bi bi-file-earmark-pdf"></i>
+        PDF
+
+    </a>
+
+    <!-- EXCEL EXPORT -->
+    <a href="{% url 'assessments:export_excel' assessment.id %}"
+       class="btn btn-outline-success btn-sm fw-bold me-1">
+
+        <i class="bi bi-file-earmark-excel"></i>
+        Excel
+
+    </a>
+
+    <!-- PRINT -->
+    <button type="button"
+            onclick="window.print()"
+            class="btn btn-outline-primary btn-sm fw-bold">
+
+        <i class="bi bi-printer"></i>
+        Print
+
+    </button>
+
+</div>
+
+<!-- =====================================================
+     READ ONLY NOTICE
+====================================================== -->
+
+{% if not can_edit %}
+
+    <div class="readonly-notice no-print">
+
+        <i class="bi bi-lock-fill"></i>
+
+        <div>
+
+            <strong>View-only assessment.</strong>
+
+            This assessment is currently
+            <strong>{{ assessment.get_status_display }}</strong>
+            and cannot be edited by your account.
+
+        </div>
+
+    </div>
+
+{% endif %}
+
+
+<!-- =====================================================
+     SCORE OVERVIEW
+====================================================== -->
+
+<div class="score-overview">
+
+    <div class="score-panel score-panel-main">
+
+        <div class="score-panel-label">
+            Overall Assessment Score
+        </div>
+
+        <div>
+
+            <span id="overallScore"
+                  class="overall-score">
+
+                {{ assessment.total_score|default:"0.00" }}
+
+            </span>
+
+            <span class="score-max">
+                / 100
+            </span>
+
+        </div>
+
+        <div class="score-percent">
+
+            <span id="overallPercent">
+                {{ assessment.total_score|default:"0.00" }}%
+            </span>
+
+        </div>
+
+        <div class="progress main-progress mt-3">
+
+            <div id="overallProgress"
+                 class="progress-bar bg-success"
+                 role="progressbar"
+                 style="width: {{ assessment.total_score|default:0 }}%;">
+            </div>
+
+        </div>
+
+    </div>
+
+
+    {% for section in sections %}
+
+        {% if forloop.counter <= 3 %}
+
+            <div class="score-panel">
+
+                <div class="score-panel-label">
+                    Section {{ forloop.counter }}
+                </div>
+
+                <div class="section-score-number"
+                     id="summarySectionScore{{ section.id }}">
+
+                    0.00%
+
+                </div>
+
+                <div class="section-weight">
+                    Weight: {{ section.weight }}%
+                </div>
+
+                <div class="progress mt-3">
+
+                    <div class="progress-bar bg-primary"
+                         id="summarySectionProgress{{ section.id }}"
+                         style="width: 0%;">
+
+                    </div>
+
+                </div>
+
+                <div class="score-panel-name">
+                    {{ section.name }}
+                </div>
+
+            </div>
+
+        {% endif %}
+
+    {% endfor %}
+
+</div>
+
+
+<!-- =====================================================
+     COMPLETION
+====================================================== -->
+
+<div class="completion-panel">
+
+    <div>
+
+        <div class="completion-title">
+
+            <i class="bi bi-check2-square text-success me-1"></i>
+
+            Assessment Completion
+
+        </div>
+
+        <div class="completion-subtitle">
+
+            Complete all indicators before submitting the assessment.
+
+        </div>
+
+        <div class="progress mt-2">
+
+            <div id="completionProgress"
+                 class="progress-bar bg-success"
+                 style="width: 0%;">
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="text-end">
+
+        <div class="completion-number">
+
+            <span id="answeredCount">0</span>
+            /
+            <span id="totalIndicators">0</span>
+
+        </div>
+
+        <div class="small text-muted">
+
+            <span id="completionPercent">0</span>%
+            completed
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     SECTION NAVIGATION
+====================================================== -->
+
+<div class="sticky-tools no-print">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+
+        <div class="navigation-heading">
+
+            <i class="bi bi-list-ul me-1"></i>
+            Assessment Sections
+
+        </div>
+
+        <small class="text-muted">
+            Select a section to navigate
+        </small>
+
+    </div>
+
+
+    <div class="section-nav">
+
+        {% for section in sections %}
+
+            <a href="#section-{{ section.id }}">
+
+                <strong>{{ section.code }}</strong>
+
+                <span>{{ section.name }}</span>
+
+            </a>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     ASSESSMENT FORM
+====================================================== -->
+
+<form method="post"
+      id="assessmentForm"
+      novalidate>
+
+    {% csrf_token %}
+
+
+    {% for section in sections %}
+
+        <section class="assessment-section"
+                 id="section-{{ section.id }}"
+                 data-section-id="{{ section.id }}"
+                 data-section-weight="{{ section.weight }}">
+
+
+            <!-- =================================================
+                 SECTION HEADER
+            ================================================== -->
+
+            <div class="section-heading">
+
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+
+
+                    <div class="section-heading-main">
+
+                        <span class="section-code">
+                            {{ section.code }}
+                        </span>
+
+                        <div>
+
+                            <div class="section-title">
+                                {{ section.name }}
+                            </div>
+
+                            <div class="section-subtitle">
+                                Assessment Section
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="section-average-box">
+
+                        <div class="section-average-label">
+                            Average Score
+                        </div>
+
+                        <div class="section-average-score"
+                             id="sectionAverage{{ section.id }}">
+
+                            0.00%
+
+                        </div>
+
+                        <div class="section-weight-text">
+                            Weight: {{ section.weight }}%
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="section-progress-line">
+
+                    <div class="progress">
+
+                        <div class="progress-bar"
+                             id="sectionProgress{{ section.id }}"
+                             role="progressbar"
+                             style="width: 0%;">
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="section-performance">
+
+                        <span>
+                            Section performance
+                        </span>
+
+                        <span>
+
+                            Weighted score:
+
+                            <strong id="sectionScore{{ section.id }}">
+                                0.00 / {{ section.weight }}
+                            </strong>
+
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 THEMATIC AREAS
+            ================================================== -->
+
+            {% for thematic_area in section.thematic_areas.all %}
+
+                {% if thematic_area.active %}
+
+                    <div class="thematic-area"
+                         data-thematic-id="{{ thematic_area.id }}">
+
+
+                        <!-- THEMATIC HEADER -->
+
+                        <div class="thematic-header">
+
+                            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+
+
+                                <div class="thematic-left">
+
+                                    <div class="thematic-number">
+
+                                        {{ thematic_area.code }}
+
+                                    </div>
+
+
+                                    <div>
+
+                                        <div class="thematic-title">
+
+                                            {{ thematic_area.name }}
+
+                                        </div>
+
+                                        <div class="thematic-subtitle">
+
+                                            Thematic Area
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="thematic-score">
+
+                                    <div class="thematic-max">
+                                        Maximum Score
+                                    </div>
+
+                                    <div class="thematic-score-value">
+
+                                        <span id="thematicScore{{ thematic_area.id }}">
+                                            0.00
+                                        </span>
+
+                                        /
+
+                                        {{ thematic_area.maximum_score|default:"0.00" }}
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="progress thematic-progress">
+
+                                <div class="progress-bar bg-info"
+                                     id="thematicProgress{{ thematic_area.id }}"
+                                     style="width: 0%;">
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- =================================================
+                             INDICATORS
+                        ================================================== -->
+
+                        {% for item in response_forms %}
+
+                            {% if item.section.id == section.id and item.thematic_area.id == thematic_area.id %}
+
+                                {% with indicator=item.indicator response=item.response %}
+
+
+                                    <div class="indicator-card"
+
+                                         data-indicator-id="{{ indicator.id }}"
+
+                                         data-section-id="{{ section.id }}"
+
+                                         data-thematic-id="{{ thematic_area.id }}"
+
+                                         data-max-score="{{ indicator.maximum_score|default:0 }}"
+
+                                         data-response-type="{{ indicator.response_type }}"
+
+                                         data-calculation-type="{{ indicator.calculation_type }}">
+
+
+                                        <!-- INDICATOR HEADER -->
+
+                                        <div class="indicator-top">
+
+
+                                            <div class="indicator-main">
+
+                                                <div class="indicator-line">
+
+                                                    <span class="indicator-code">
+                                                        {{ indicator.code }}
+                                                    </span>
+
+                                                    <span class="indicator-question">
+                                                        {{ indicator.question }}
+                                                    </span>
+
+                                                </div>
+
+
+                                                {% if indicator.help_text %}
+
+                                                    <div class="indicator-help">
+
+                                                        <i class="bi bi-info-circle me-1"></i>
+
+                                                        {{ indicator.help_text }}
+
+                                                    </div>
+
+                                                {% endif %}
+
+                                            </div>
+
+
+                                            <!-- INDICATOR SCORE -->
+
+                                            <div class="indicator-score-box">
+
+                                                <div class="indicator-score"
+                                                     id="indicatorScore{{ indicator.id }}">
+
+                                                    {% if response %}
+
+                                                        {{ response.calculated_score|default:"0.00" }}
+
+                                                    {% else %}
+
+                                                        0.00
+
+                                                    {% endif %}
+
+                                                </div>
+
+                                                <span class="indicator-score-max">
+
+                                                    Maximum:
+                                                    {{ indicator.maximum_score|default:"0.00" }}
+
+                                                </span>
+
+                                            </div>
+
+                                        </div>
+
+
+                                        <!-- =================================================
+                                             EDITABLE ANSWER
+                                        ================================================== -->
+
+                                        {% if can_edit %}
+
+                                            <div class="answer-area">
+
+
+                                                {% if indicator.response_type == "YES_NO" %}
+
+                                                    <div class="option-grid">
+
+                                                        {% for option in indicator.options.all %}
+
+                                                            {% if option.active %}
+
+                                                                <label class="option-label">
+
+                                                                    <input type="radio"
+
+                                                                           name="indicator_{{ indicator.id }}_option"
+
+                                                                           value="{{ option.id }}"
+
+                                                                           class="indicator-option"
+
+                                                                           data-indicator="{{ indicator.id }}"
+
+                                                                           data-score="{{ option.score }}"
+
+                                                                           {% if response and response.selected_option_id == option.id %}checked{% endif %}>
+
+
+                                                                    <span class="option-content">
+
+                                                                        <span>
+                                                                            {{ option.label }}
+                                                                        </span>
+
+                                                                        <span class="option-score">
+                                                                            {{ option.score }} pts
+                                                                        </span>
+
+                                                                    </span>
+
+                                                                </label>
+
+                                                            {% endif %}
+
+                                                        {% endfor %}
+
+                                                    </div>
+
+
+                                                {% elif indicator.response_type == "CHOICE" %}
+
+                                                    <div class="option-grid">
+
+                                                        {% for option in indicator.options.all %}
+
+                                                            {% if option.active %}
+
+                                                                <label class="option-label">
+
+                                                                    <input type="radio"
+
+                                                                           name="indicator_{{ indicator.id }}_option"
+
+                                                                           value="{{ option.id }}"
+
+                                                                           class="indicator-option"
+
+                                                                           data-indicator="{{ indicator.id }}"
+
+                                                                           data-score="{{ option.score }}"
+
+                                                                           {% if response and response.selected_option_id == option.id %}checked{% endif %}>
+
+
+                                                                    <span class="option-content">
+
+                                                                        <span>
+                                                                            {{ option.label }}
+                                                                        </span>
+
+                                                                        <span class="option-score">
+                                                                            {{ option.score }} pts
+                                                                        </span>
+
+                                                                    </span>
+
+                                                                </label>
+
+                                                            {% endif %}
+
+                                                        {% endfor %}
+
+                                                    </div>
+
+
+                                                {% elif indicator.response_type == "NUMERIC" %}
+
+                                                    <div class="numeric-input">
+
+                                                        <label class="field-label">
+                                                            Numeric Value
+                                                        </label>
+
+                                                        <input type="number"
+
+                                                               step="0.01"
+
+                                                               min="0"
+
+                                                               name="indicator_{{ indicator.id }}_numeric"
+
+                                                               class="form-control numeric-field"
+
+                                                               data-indicator="{{ indicator.id }}"
+
+                                                               value="{% if response and response.numeric_value != None %}{{ response.numeric_value }}{% endif %}"
+
+                                                               placeholder="Enter numeric value">
+
+                                                    </div>
+
+
+                                                {% elif indicator.response_type == "CALCULATION" %}
+
+                                                    <div class="calc-grid">
+
+
+                                                        <div>
+
+                                                            <label class="field-label">
+                                                                Numeric Value
+                                                            </label>
+
+                                                            <input type="number"
+
+                                                                   step="0.01"
+
+                                                                   min="0"
+
+                                                                   name="indicator_{{ indicator.id }}_numeric"
+
+                                                                   class="form-control numeric-field"
+
+                                                                   data-indicator="{{ indicator.id }}"
+
+                                                                   value="{% if response and response.numeric_value != None %}{{ response.numeric_value }}{% endif %}"
+
+                                                                   placeholder="Enter value">
+
+                                                        </div>
+
+
+                                                        {% if indicator.calculation_type == "RATIO" %}
+
+                                                            <div>
+
+                                                                <label class="field-label">
+                                                                    Numerator
+                                                                </label>
+
+                                                                <input type="number"
+
+                                                                       step="0.01"
+
+                                                                       min="0"
+
+                                                                       name="indicator_{{ indicator.id }}_numerator"
+
+                                                                       class="form-control ratio-field"
+
+                                                                       data-indicator="{{ indicator.id }}"
+
+                                                                       data-ratio="numerator"
+
+                                                                       value="{% if response and response.numerator != None %}{{ response.numerator }}{% endif %}"
+
+                                                                       placeholder="Numerator">
+
+                                                            </div>
+
+
+                                                            <div>
+
+                                                                <label class="field-label">
+                                                                    Denominator
+                                                                </label>
+
+                                                                <input type="number"
+
+                                                                       step="0.01"
+
+                                                                       min="0"
+
+                                                                       name="indicator_{{ indicator.id }}_denominator"
+
+                                                                       class="form-control ratio-field"
+
+                                                                       data-indicator="{{ indicator.id }}"
+
+                                                                       data-ratio="denominator"
+
+                                                                       value="{% if response and response.denominator != None %}{{ response.denominator }}{% endif %}"
+
+                                                                       placeholder="Denominator">
+
+                                                            </div>
+
+                                                        {% endif %}
+
+                                                    </div>
+
+
+                                                    {% if indicator.calculation_type == "RATIO" %}
+
+                                                        <div class="ratio-result"
+                                                             id="ratioResult{{ indicator.id }}">
+
+                                                            Ratio:
+                                                            <strong>0.00%</strong>
+
+                                                            &nbsp; | &nbsp;
+
+                                                            Calculated score:
+                                                            <strong>0.00</strong>
+
+                                                        </div>
+
+                                                    {% else %}
+
+                                                        <div class="small text-muted mt-2">
+
+                                                            Calculation:
+                                                            {{ indicator.get_calculation_type_display }}
+
+                                                        </div>
+
+                                                    {% endif %}
+
+
+                                                {% elif indicator.response_type == "CONDUCTED_CHECK" %}
+
+                                                    <div class="conducted-options">
+
+
+                                                        <label class="conducted-option">
+
+                                                            <input type="radio"
+
+                                                                   name="indicator_{{ indicator.id }}_conducted"
+
+                                                                   value="yes"
+
+                                                                   class="conducted-field"
+
+                                                                   data-indicator="{{ indicator.id }}"
+
+                                                                   {% if response and response.conducted == True %}checked{% endif %}>
+
+
+                                                            <span class="fw-bold text-success">
+
+                                                                <i class="bi bi-check-circle me-1"></i>
+                                                                Conducted
+
+                                                            </span>
+
+                                                        </label>
+
+
+                                                        <label class="conducted-option">
+
+                                                            <input type="radio"
+
+                                                                   name="indicator_{{ indicator.id }}_conducted"
+
+                                                                   value="no"
+
+                                                                   class="conducted-field"
+
+                                                                   data-indicator="{{ indicator.id }}"
+
+                                                                   {% if response and response.conducted == False %}checked{% endif %}>
+
+
+                                                            <span class="fw-bold text-danger">
+
+                                                                <i class="bi bi-x-circle me-1"></i>
+                                                                Not Conducted
+
+                                                            </span>
+
+                                                        </label>
+
+                                                    </div>
+
+
+                                                {% else %}
+
+                                                    <div class="text-muted small">
+
+                                                        Unsupported response type.
+
+                                                    </div>
+
+                                                {% endif %}
+
+
+                                            </div>
+
+
+                                        <!-- =================================================
+                                             READ ONLY ANSWER
+                                        ================================================== -->
+
+                                        {% else %}
+
+                                            <div class="answer-area">
+
+
+                                                {% if response %}
+
+                                                    <div class="readonly-answer">
+
+
+                                                        {% if response.selected_option %}
+
+                                                            <strong>
+                                                                Answer:
+                                                            </strong>
+
+                                                            <span class="readonly-value">
+
+                                                                {{ response.selected_option.label }}
+
+                                                            </span>
+
+                                                            <span class="badge bg-success">
+
+                                                                {{ response.calculated_score|default:"0.00" }}
+                                                                points
+
+                                                            </span>
+
+                                                        {% endif %}
+
+
+                                                        {% if response.numeric_value != None %}
+
+                                                            <strong>
+                                                                Numeric Value:
+                                                            </strong>
+
+                                                            <span class="readonly-value">
+
+                                                                {{ response.numeric_value }}
+
+                                                            </span>
+
+                                                        {% endif %}
+
+
+                                                        {% if response.numerator != None or response.denominator != None %}
+
+                                                            <strong>
+                                                                Numerator:
+                                                            </strong>
+
+                                                            <span class="readonly-value">
+
+                                                                {{ response.numerator|default:"—" }}
+
+                                                            </span>
+
+                                                            <strong>
+                                                                /
+                                                            </strong>
+
+                                                            <strong>
+                                                                Denominator:
+                                                            </strong>
+
+                                                            <span class="readonly-value">
+
+                                                                {{ response.denominator|default:"—" }}
+
+                                                            </span>
+
+                                                        {% endif %}
+
+
+                                                        {% if response.conducted != None %}
+
+                                                            <strong>
+                                                                Status:
+                                                            </strong>
+
+                                                            {% if response.conducted %}
+
+                                                                <span class="text-success fw-bold">
+
+                                                                    <i class="bi bi-check-circle me-1"></i>
+                                                                    Conducted
+
+                                                                </span>
+
+                                                            {% else %}
+
+                                                                <span class="text-danger fw-bold">
+
+                                                                    <i class="bi bi-x-circle me-1"></i>
+                                                                    Not Conducted
+
+                                                                </span>
+
+                                                            {% endif %}
+
+                                                        {% endif %}
+
+                                                    </div>
+
+
+                                                {% else %}
+
+                                                    <span class="no-response">
+                                                        No response entered.
+                                                    </span>
+
+                                                {% endif %}
+
+                                            </div>
+
+                                        {% endif %}
+
+                                    </div>
+
+
+                                {% endwith %}
+
+                            {% endif %}
+
+                        {% endfor %}
+
+                    </div>
+
+                {% endif %}
+
+            {% endfor %}
+
+        </section>
+
+    {% endfor %}
+
+
+    <!-- =====================================================
+         ACTION BAR
+    ====================================================== -->
+
+    {% if can_edit %}
+
+        <div class="action-bar no-print">
+
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+
+                <div>
+
+                    <div class="action-title">
+
+                        <i class="bi bi-clipboard-check me-1"></i>
+                        Assessment Actions
+
+                    </div>
+
+                    <div class="action-subtitle">
+
+                        Save your progress as a draft before final submission.
+
+                    </div>
+
+                </div>
+
+
+                <div class="d-flex flex-wrap gap-2">
+
+                    <button type="submit"
+
+                            name="action"
+
+                            value="save"
+
+                            class="btn btn-primary-custom px-4">
+
+                        <i class="bi bi-save me-1"></i>
+                        Save Draft
+
+                    </button>
+
+
+                    <button type="submit"
+
+                            name="action"
+
+                            value="submit"
+
+                            id="submitAssessmentBtn"
+
+                            class="btn btn-submit px-4">
+
+                        <i class="bi bi-send-check me-1"></i>
+                        Submit Assessment
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    {% else %}
+
+        <div class="action-bar no-print">
+
+            <div class="d-flex justify-content-between align-items-center gap-3">
+
+                <div class="text-muted small">
+
+                    <i class="bi bi-lock-fill me-1"></i>
+
+                    This assessment is read-only.
+
+                </div>
+
+
+                <a href="{% url 'assessments:dashboard' %}"
+                   class="btn btn-primary-custom">
+
+                    <i class="bi bi-arrow-left me-1"></i>
+                    Back to Dashboard
+
+                </a>
+
+            </div>
+
+        </div>
+
+    {% endif %}
+
+</form>
+```
+
+</div>
+
+<!-- =========================================================
+     EXISTING SCORING JAVASCRIPT
+     KEPT UNCHANGED
+========================================================== -->
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    "use strict";
+
+    function number(value) {
+
+        const parsed = parseFloat(value);
+
+        return Number.isFinite(parsed)
+            ? parsed
+            : 0;
+    }
+
+
+    function clamp(value, minimum, maximum) {
+
+        return Math.min(
+            Math.max(value, minimum),
+            maximum
+        );
+
+    }
+
+
+    function scoreText(value) {
+
+        return number(value).toFixed(2);
+
+    }
+
+
+    document.querySelectorAll(".indicator-card").forEach(function (card) {
+
+        const indicatorId =
+            card.dataset.indicatorId;
+
+        const scoreElement =
+            document.getElementById(
+                "indicatorScore" + indicatorId
+            );
+
+        let savedScore = 0;
+
+        if (scoreElement) {
+
+            savedScore =
+                number(scoreElement.textContent);
+
+        }
+
+        card.dataset.liveScore =
+            savedScore.toString();
+
+    });
+
+
+    function updateIndicatorScore(card) {
+
+        const indicatorId =
+            card.dataset.indicatorId;
+
+        const maximum =
+            number(card.dataset.maxScore);
+
+        let score =
+            number(card.dataset.liveScore);
+
+        const selected =
+            card.querySelector(
+                "input.indicator-option:checked"
+            );
+
+        if (selected) {
+
+            score =
+                number(
+                    selected.dataset.score
+                );
+
+        }
+
+        const conducted =
+            card.querySelector(
+                "input.conducted-field:checked"
+            );
+
+        if (conducted) {
+
+            if (conducted.value === "no") {
+
+                score = 0;
+
+            }
+
+        }
+
+        const numeric =
+            card.querySelector(
+                ".numeric-field"
+            );
+
+        if (
+            numeric &&
+            numeric.value !== ""
+        ) {
+
+            const numericValue =
+                number(numeric.value);
+
+            if (
+                card.dataset.responseType ===
+                "NUMERIC"
+            ) {
+
+                score =
+                    clamp(
+                        numericValue,
+                        0,
+                        maximum
+                    );
+
+            }
+
+        }
+
+        score =
+            clamp(
+                score,
+                0,
+                maximum
+            );
+
+        card.dataset.liveScore =
+            score.toString();
+
+        const scoreElement =
+            document.getElementById(
+                "indicatorScore" + indicatorId
+            );
+
+        if (scoreElement) {
+
+            scoreElement.textContent =
+                scoreText(score);
+
+        }
+
+    }
+
+
+    function updateRatio(card) {
+
+        const indicatorId =
+            card.dataset.indicatorId;
+
+        const numerator =
+            card.querySelector(
+                'input[data-ratio="numerator"]'
+            );
+
+        const denominator =
+            card.querySelector(
+                'input[data-ratio="denominator"]'
+            );
+
+        const result =
+            document.getElementById(
+                "ratioResult" + indicatorId
+            );
+
+        if (
+            !numerator ||
+            !denominator ||
+            !result
+        ) {
+
+            return;
+
+        }
+
+        const numeratorValue =
+            number(numerator.value);
+
+        const denominatorValue =
+            number(denominator.value);
+
+        const maximum =
+            number(card.dataset.maxScore);
+
+        let percentage = 0;
+
+        let score = 0;
+
+        if (denominatorValue > 0) {
+
+            percentage =
+                (
+                    numeratorValue /
+                    denominatorValue
+                ) * 100;
+
+            percentage =
+                clamp(
+                    percentage,
+                    0,
+                    100
+                );
+
+            score =
+                (
+                    percentage /
+                    100
+                ) * maximum;
+
+            score =
+                clamp(
+                    score,
+                    0,
+                    maximum
+                );
+
+        }
+
+        card.dataset.liveScore =
+            score.toString();
+
+        result.innerHTML =
+            "Ratio: <strong>" +
+            scoreText(percentage) +
+            "%</strong>" +
+            " &nbsp; | &nbsp; " +
+            "Calculated score: <strong>" +
+            scoreText(score) +
+            "</strong>";
+
+        const scoreElement =
+            document.getElementById(
+                "indicatorScore" + indicatorId
+            );
+
+        if (scoreElement) {
+
+            scoreElement.textContent =
+                scoreText(score);
+
+        }
+
+    }
+
+
+    function calculateScores() {
+
+        const sections =
+            document.querySelectorAll(
+                ".assessment-section"
+            );
+
+        let overall = 0;
+
+        let totalIndicators = 0;
+
+        let answeredIndicators = 0;
+
+
+        sections.forEach(function (section) {
+
+            const sectionId =
+                section.dataset.sectionId;
+
+            const weight =
+                number(
+                    section.dataset.sectionWeight
+                );
+
+            let maximum = 0;
+
+            let achieved = 0;
+
+
+            const indicators =
+                section.querySelectorAll(
+                    ".indicator-card"
+                );
+
+            totalIndicators +=
+                indicators.length;
+
+
+            indicators.forEach(function (card) {
+
+                const max =
+                    number(
+                        card.dataset.maxScore
+                    );
+
+                const score =
+                    clamp(
+                        number(
+                            card.dataset.liveScore
+                        ),
+                        0,
+                        max
+                    );
+
+                maximum += max;
+
+                achieved += score;
+
+
+                const option =
+                    card.querySelector(
+                        "input.indicator-option:checked"
+                    );
+
+                const numeric =
+                    card.querySelector(
+                        ".numeric-field"
+                    );
+
+                const conducted =
+                    card.querySelector(
+                        "input.conducted-field:checked"
+                    );
+
+                const numerator =
+                    card.querySelector(
+                        'input[data-ratio="numerator"]'
+                    );
+
+                const denominator =
+                    card.querySelector(
+                        'input[data-ratio="denominator"]'
+                    );
+
+
+                if (option) {
+
+                    answeredIndicators++;
+
+                }
+
+                else if (conducted) {
+
+                    answeredIndicators++;
+
+                }
+
+                else if (
+                    numerator &&
+                    denominator &&
+                    numerator.value !== "" &&
+                    denominator.value !== ""
+                ) {
+
+                    answeredIndicators++;
+
+                }
+
+                else if (
+                    numeric &&
+                    numeric.value !== ""
+                ) {
+
+                    answeredIndicators++;
+
+                }
+
+            });
+
+
+            let sectionPercent = 0;
+
+            if (maximum > 0) {
+
+                sectionPercent =
+                    (
+                        achieved /
+                        maximum
+                    ) * 100;
+
+            }
+
+            sectionPercent =
+                clamp(
+                    sectionPercent,
+                    0,
+                    100
+                );
+
+
+            const weightedScore =
+                sectionPercent *
+                (weight / 100);
+
+            overall +=
+                weightedScore;
+
+
+            const sectionScore =
+                document.getElementById(
+                    "sectionScore" + sectionId
+                );
+
+            if (sectionScore) {
+
+                sectionScore.textContent =
+                    scoreText(
+                        weightedScore
+                    ) +
+                    " / " +
+                    scoreText(weight);
+
+            }
+
+
+            const sectionProgress =
+                document.getElementById(
+                    "sectionProgress" +
+                    sectionId
+                );
+
+            if (sectionProgress) {
+
+                sectionProgress.style.width =
+                    sectionPercent + "%";
+
+            }
+
+
+            const sectionAverage =
+                document.getElementById(
+                    "sectionAverage" +
+                    sectionId
+                );
+
+            if (sectionAverage) {
+
+                sectionAverage.textContent =
+                    scoreText(sectionPercent) +
+                    "%";
+
+            }
+
+
+            const summaryScore =
+                document.getElementById(
+                    "summarySectionScore" +
+                    sectionId
+                );
+
+            if (summaryScore) {
+
+                summaryScore.textContent =
+                    scoreText(
+                        sectionPercent
+                    ) +
+                    "%";
+
+            }
+
+
+            const summaryProgress =
+                document.getElementById(
+                    "summarySectionProgress" +
+                    sectionId
+                );
+
+            if (summaryProgress) {
+
+                summaryProgress.style.width =
+                    sectionPercent + "%";
+
+            }
+
+
+            section
+                .querySelectorAll(
+                    ".thematic-area"
+                )
+                .forEach(function (thematic) {
+
+                    let thematicMaximum = 0;
+
+                    let thematicAchieved = 0;
+
+
+                    thematic
+                        .querySelectorAll(
+                            ".indicator-card"
+                        )
+                        .forEach(function (card) {
+
+                            const max =
+                                number(
+                                    card.dataset.maxScore
+                                );
+
+                            const score =
+                                clamp(
+                                    number(
+                                        card.dataset.liveScore
+                                    ),
+                                    0,
+                                    max
+                                );
+
+                            thematicMaximum +=
+                                max;
+
+                            thematicAchieved +=
+                                score;
+
+                        });
+
+
+                    let thematicPercent = 0;
+
+                    if (thematicMaximum > 0) {
+
+                        thematicPercent =
+                            (
+                                thematicAchieved /
+                                thematicMaximum
+                            ) * 100;
+
+                    }
+
+
+                    const thematicId =
+                        thematic.dataset.thematicId;
+
+
+                    const thematicScore =
+                        document.getElementById(
+                            "thematicScore" +
+                            thematicId
+                        );
+
+                    if (thematicScore) {
+
+                        thematicScore.textContent =
+                            scoreText(
+                                thematicAchieved
+                            ) +
+                            " / " +
+                            scoreText(
+                                thematicMaximum
+                            );
+
+                    }
+
+
+                    const thematicProgress =
+                        document.getElementById(
+                            "thematicProgress" +
+                            thematicId
+                        );
+
+                    if (thematicProgress) {
+
+                        thematicProgress.style.width =
+                            clamp(
+                                thematicPercent,
+                                0,
+                                100
+                            ) + "%";
+
+                    }
+
+                });
+
+        });
+
+
+        overall =
+            clamp(
+                overall,
+                0,
+                100
+            );
+
+
+        const overallScore =
+            document.getElementById(
+                "overallScore"
+            );
+
+        const overallPercent =
+            document.getElementById(
+                "overallPercent"
+            );
+
+        const overallProgress =
+            document.getElementById(
+                "overallProgress"
+            );
+
+
+        if (window.ehirsChanged) {
+
+            if (overallScore) {
+
+                overallScore.textContent =
+                    scoreText(overall);
+
+            }
+
+            if (overallPercent) {
+
+                overallPercent.textContent =
+                    scoreText(overall) +
+                    "%";
+
+            }
+
+            if (overallProgress) {
+
+                overallProgress.style.width =
+                    overall + "%";
+
+            }
+
+        }
+
+
+        let completion = 0;
+
+        if (totalIndicators > 0) {
+
+            completion =
+                (
+                    answeredIndicators /
+                    totalIndicators
+                ) * 100;
+
+        }
+
+        completion =
+            clamp(
+                completion,
+                0,
+                100
+            );
+
+
+        const answered =
+            document.getElementById(
+                "answeredCount"
+            );
+
+        const total =
+            document.getElementById(
+                "totalIndicators"
+            );
+
+        const completionText =
+            document.getElementById(
+                "completionPercent"
+            );
+
+        const completionProgress =
+            document.getElementById(
+                "completionProgress"
+            );
+
+
+        if (answered) {
+
+            answered.textContent =
+                answeredIndicators;
+
+        }
+
+
+        if (total) {
+
+            total.textContent =
+                totalIndicators;
+
+        }
+
+
+        if (completionText) {
+
+            completionText.textContent =
+                Math.round(completion);
+
+        }
+
+
+        if (completionProgress) {
+
+            completionProgress.style.width =
+                completion + "%";
+
+        }
+
+    }
+
+
+    document.querySelectorAll(
+        ".indicator-option"
+    ).forEach(function (input) {
+
+        input.addEventListener(
+            "change",
+            function () {
+
+                window.ehirsChanged =
+                    true;
+
+                const card =
+                    input.closest(
+                        ".indicator-card"
+                    );
+
+                if (!card) {
+
+                    return;
+
+                }
+
+                updateIndicatorScore(card);
+
+                calculateScores();
+
+            }
+        );
+
+    });
+
+
+    document.querySelectorAll(
+        ".conducted-field"
+    ).forEach(function (input) {
+
+        input.addEventListener(
+            "change",
+            function () {
+
+                window.ehirsChanged =
+                    true;
+
+                const card =
+                    input.closest(
+                        ".indicator-card"
+                    );
+
+                if (!card) {
+
+                    return;
+
+                }
+
+                updateIndicatorScore(card);
+
+                calculateScores();
+
+            }
+        );
+
+    });
+
+
+    document.querySelectorAll(
+        ".ratio-field"
+    ).forEach(function (input) {
+
+        input.addEventListener(
+            "input",
+            function () {
+
+                window.ehirsChanged =
+                    true;
+
+                const card =
+                    input.closest(
+                        ".indicator-card"
+                    );
+
+                if (!card) {
+
+                    return;
+
+                }
+
+                updateRatio(card);
+
+                calculateScores();
+
+            }
+        );
+
+    });
+
+
+    document.querySelectorAll(
+        ".numeric-field"
+    ).forEach(function (input) {
+
+        input.addEventListener(
+            "input",
+            function () {
+
+                window.ehirsChanged =
+                    true;
+
+                const card =
+                    input.closest(
+                        ".indicator-card"
+                    );
+
+                if (card) {
+
+                    updateIndicatorScore(card);
+
+                }
+
+                calculateScores();
+
+            }
+        );
+
+    });
+
+
+    window.ehirsChanged = false;
+
+
+    document.querySelectorAll(
+        ".indicator-card"
+    ).forEach(function (card) {
+
+        const selected =
+            card.querySelector(
+                "input.indicator-option:checked"
+            );
+
+
+        if (selected) {
+
+            card.dataset.liveScore =
+                number(
+                    selected.dataset.score
+                ).toString();
+
+        }
+
+
+        if (
+            card.querySelector(
+                'input[data-ratio="numerator"]'
+            )
+        ) {
+
+            updateRatio(card);
+
+        }
+
+    });
+
+
+    calculateScores();
+
+
+    const form =
+        document.getElementById(
+            "assessmentForm"
+        );
+
+
+    const submitButton =
+        document.getElementById(
+            "submitAssessmentBtn"
+        );
+
+
+    if (form && submitButton) {
+
+        form.addEventListener(
+            "submit",
+            function (event) {
+
+                const clickedButton =
+                    event.submitter;
+
+
+                const action =
+                    clickedButton
+                    ? clickedButton.value
+                    : "save";
+
+
+                if (
+                    action !== "submit"
+                ) {
+
+                    return;
+
+                }
+
+
+                const confirmed =
+                    window.confirm(
+                        "Are you sure you want to submit this assessment?\n\n" +
+                        "After submission, the facility user will not be able " +
+                        "to edit it unless it is returned for correction."
+                    );
+
+
+                if (!confirmed) {
+
+                    event.preventDefault();
+
+                    return;
+
+                }
+
+
+                submitButton.disabled =
+                    true;
+
+
+                submitButton.innerHTML =
+                    '<span class="spinner-border spinner-border-sm me-1"></span>' +
+                    'Submitting...';
+
+            }
+        );
+
+    }
+
+});
+</script>
+
+{% endblock %}

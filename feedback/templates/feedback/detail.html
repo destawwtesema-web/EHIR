@@ -1,0 +1,262 @@
+
+{% extends "base.html" %}
+
+{% block title %}Feedback Message - EHIRS{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+    <!-- =========================================================
+         PAGE HEADER
+    ========================================================== -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="bi bi-chat-left-text me-2"></i>
+                Feedback Message
+            </h2>
+
+            <p class="text-muted mb-0">
+                View the complete feedback message
+            </p>
+        </div>
+
+        <a href="{% url 'feedback:dashboard' %}"
+           class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>
+            Back to Feedback
+        </a>
+
+    </div>
+
+
+    <!-- =========================================================
+         MESSAGE CARD
+    ========================================================== -->
+    <div class="card border-0 shadow-sm">
+
+        <!-- Card Header -->
+        <div class="card-header bg-white border-bottom py-3">
+
+            <h5 class="fw-bold mb-0">
+                <i class="bi bi-envelope-open me-2"></i>
+
+                {% if feedback.subject %}
+                    {{ feedback.subject }}
+                {% else %}
+                    Feedback Message
+                {% endif %}
+
+            </h5>
+
+        </div>
+
+
+        <!-- Card Body -->
+        <div class="card-body p-4">
+
+            <!-- =================================================
+                 FROM
+            ================================================== -->
+            <div class="row mb-4">
+
+                <div class="col-md-3">
+                    <div class="fw-bold text-muted">
+                        <i class="bi bi-person-fill me-2"></i>
+                        From
+                    </div>
+                </div>
+
+                <div class="col-md-9">
+
+                    {% if feedback.sender_facility %}
+
+                        <div class="fw-semibold">
+                            {{ feedback.sender_facility.name }}
+                        </div>
+
+                        {% if feedback.sender_organization %}
+                            <div class="small text-muted">
+                                {{ feedback.sender_organization.name }}
+                            </div>
+                        {% endif %}
+
+                    {% elif feedback.sender_organization %}
+
+                        <div class="fw-semibold">
+                            {{ feedback.sender_organization.name }}
+                        </div>
+
+                    {% elif feedback.sender %}
+
+                        <div class="fw-semibold">
+                            {{ feedback.sender.get_full_name|default:feedback.sender.username }}
+                        </div>
+
+                    {% else %}
+
+                        <div class="text-muted">
+                            Not specified
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 TO
+            ================================================== -->
+            <div class="row mb-4">
+
+                <div class="col-md-3">
+                    <div class="fw-bold text-muted">
+                        <i class="bi bi-person-check-fill me-2"></i>
+                        To
+                    </div>
+                </div>
+
+                <div class="col-md-9">
+
+                    {% if feedback.recipient_facility %}
+
+                        <div class="fw-semibold">
+                            {{ feedback.recipient_facility.name }}
+                        </div>
+
+                        {% if feedback.recipient_organization %}
+                            <div class="small text-muted">
+                                {{ feedback.recipient_organization.name }}
+                            </div>
+                        {% endif %}
+
+                    {% elif feedback.recipient_organization %}
+
+                        <div class="fw-semibold">
+                            {{ feedback.recipient_organization.name }}
+                        </div>
+
+                    {% else %}
+
+                        <div class="text-muted">
+                            Not specified
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 DATE AND TIME
+            ================================================== -->
+            <div class="row mb-4">
+
+                <div class="col-md-3">
+                    <div class="fw-bold text-muted">
+                        <i class="bi bi-calendar-event me-2"></i>
+                        Date &amp; Time
+                    </div>
+                </div>
+
+                <div class="col-md-9">
+
+                    {% if feedback.created_at %}
+                        <div class="fw-semibold">
+                            {{ feedback.created_at|date:"d F Y, H:i:s" }}
+                        </div>
+                    {% else %}
+                        <div class="text-muted">
+                            Not specified
+                        </div>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 EXACT MESSAGE
+            ================================================== -->
+            <div class="mt-4">
+
+                <div class="fw-bold text-muted mb-2">
+                    <i class="bi bi-chat-square-text me-2"></i>
+                    Exact Message
+                </div>
+
+                <div class="border rounded-3 p-4 bg-light"
+                     style="
+                        min-height: 180px;
+                        white-space: pre-wrap;
+                        word-break: break-word;
+                        line-height: 1.7;
+                     ">
+
+                    {% if feedback.message %}
+                        {{ feedback.message }}
+                    {% else %}
+                        <span class="text-muted">
+                            No message content.
+                        </span>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+        <!-- =====================================================
+             FOOTER
+        ====================================================== -->
+        <div class="card-footer bg-white border-top py-3">
+
+            <a href="{% url 'feedback:dashboard' %}"
+               class="btn btn-outline-secondary">
+
+                <i class="bi bi-arrow-left me-1"></i>
+                Back to Feedback
+
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     SMALL PAGE STYLING
+========================================================== -->
+<style>
+
+    .card {
+        border-radius: 12px;
+    }
+
+    .card-header {
+        border-radius: 12px 12px 0 0 !important;
+    }
+
+    .card-footer {
+        border-radius: 0 0 12px 12px !important;
+    }
+
+    .bg-light {
+        background-color: #f8f9fa !important;
+    }
+
+</style>
+
+{% endblock %}

@@ -1,0 +1,5045 @@
+{% extends "base.html" %}
+
+{% block title %}EHIRS Analytics{% endblock %}
+
+{% block content %}
+
+<style>
+
+    :root {
+        --eh-primary: #0f766e;
+        --eh-primary-dark: #115e59;
+        --eh-blue: #2563eb;
+        --eh-purple: #7c3aed;
+        --eh-orange: #ea580c;
+        --eh-green: #16a34a;
+        --eh-red: #dc2626;
+        --eh-yellow: #ca8a04;
+        --eh-bg: #f4f7fb;
+        --eh-card: #ffffff;
+        --eh-border: #e5e7eb;
+        --eh-text: #172033;
+        --eh-muted: #64748b;
+        --eh-shadow: 0 8px 25px rgba(15, 23, 42, 0.07);
+    }
+
+    body {
+        background: var(--eh-bg);
+    }
+
+    .analytics-page {
+        padding: 24px 10px 50px;
+    }
+
+    /* =========================================================
+       HEADER
+       ========================================================= */
+
+    .analytics-header {
+        background: linear-gradient(135deg, #0f766e, #0d9488);
+        color: white;
+        border-radius: 18px;
+        padding: 25px 28px;
+        margin-bottom: 22px;
+        box-shadow: var(--eh-shadow);
+    }
+
+    .analytics-header h1 {
+        font-size: 28px;
+        font-weight: 800;
+        margin: 0;
+    }
+
+    .analytics-header p {
+        margin: 7px 0 0;
+        opacity: .9;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+    }
+
+    .header-actions .btn {
+        border-radius: 10px;
+        font-weight: 700;
+    }
+
+    /* =========================================================
+       FILTER PANEL
+       ========================================================= */
+
+    .filter-card {
+        background: white;
+        border: 1px solid var(--eh-border);
+        border-radius: 18px;
+        padding: 20px;
+        margin-bottom: 22px;
+        box-shadow: var(--eh-shadow);
+    }
+
+    .filter-title {
+        font-weight: 800;
+        color: var(--eh-text);
+        font-size: 18px;
+        margin-bottom: 4px;
+    }
+
+    .filter-subtitle {
+        color: var(--eh-muted);
+        font-size: 12px;
+        margin-bottom: 18px;
+    }
+
+    .form-label {
+        font-size: 11px;
+        font-weight: 800;
+        color: var(--eh-muted);
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        margin-bottom: 7px;
+    }
+
+    .form-select,
+    .form-control {
+        border-radius: 10px;
+        min-height: 43px;
+        border-color: #dbe2ea;
+    }
+
+    .form-select:focus,
+    .form-control:focus {
+        border-color: var(--eh-primary);
+        box-shadow: 0 0 0 .2rem rgba(15, 118, 110, .12);
+    }
+
+    .apply-btn {
+        min-height: 43px;
+        border-radius: 10px;
+        font-weight: 800;
+        background: var(--eh-primary);
+        border-color: var(--eh-primary);
+    }
+
+    .apply-btn:hover {
+        background: var(--eh-primary-dark);
+        border-color: var(--eh-primary-dark);
+    }
+
+    .reset-btn {
+        min-height: 43px;
+        border-radius: 10px;
+        font-weight: 700;
+    }
+
+    /* =========================================================
+       ORGANIZATION SELECTOR
+       ========================================================= */
+
+    .selector-box {
+        border: 1px solid var(--eh-border);
+        border-radius: 14px;
+        background: #fbfdff;
+        overflow: hidden;
+    }
+
+    .selector-toolbar {
+        padding: 12px;
+        border-bottom: 1px solid var(--eh-border);
+        background: white;
+    }
+
+    .selector-search {
+        position: relative;
+    }
+
+    .selector-search i {
+        position: absolute;
+        left: 12px;
+        top: 13px;
+        color: #94a3b8;
+    }
+
+    .selector-search input {
+        padding-left: 37px;
+        min-height: 40px;
+    }
+
+    .selector-actions {
+        display: flex;
+        gap: 6px;
+        margin-top: 9px;
+        flex-wrap: wrap;
+    }
+
+    .selector-actions button {
+        border-radius: 8px;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .selection-count {
+        margin-top: 9px;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--eh-primary);
+    }
+
+    .organization-tree {
+        max-height: 330px;
+        overflow-y: auto;
+        padding: 10px;
+    }
+
+    .org-node {
+        margin-bottom: 2px;
+    }
+
+    .org-row {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        min-height: 38px;
+        border-radius: 9px;
+        padding: 4px 7px;
+    }
+
+    .org-row:hover {
+        background: #f1f5f9;
+    }
+
+    .org-expand {
+        width: 27px;
+        height: 27px;
+        border: 0;
+        background: transparent;
+        border-radius: 7px;
+        color: #64748b;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+    .org-expand:hover {
+        background: #e2e8f0;
+    }
+
+    .org-expand.empty {
+        visibility: hidden;
+    }
+
+    .org-checkbox {
+        width: 17px;
+        height: 17px;
+        accent-color: var(--eh-primary);
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+    .org-label {
+        flex: 1;
+        min-width: 0;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--eh-text);
+    }
+
+    .org-code {
+        color: #94a3b8;
+        font-size: 10px;
+        margin-left: 4px;
+    }
+
+    .org-type {
+        border-radius: 20px;
+        padding: 3px 7px;
+        font-size: 9px;
+        font-weight: 800;
+        background: #eef2ff;
+        color: #4338ca;
+        white-space: nowrap;
+    }
+
+    .org-children {
+        margin-left: 21px;
+        border-left: 1px dashed #cbd5e1;
+        padding-left: 5px;
+    }
+
+    .org-children.collapsed {
+        display: none;
+    }
+
+    /* =========================================================
+       FACILITY SELECTOR
+       ========================================================= */
+
+    .facility-selector {
+        margin-top: 15px;
+    }
+
+    .facility-list {
+        max-height: 245px;
+        overflow-y: auto;
+        border: 1px solid var(--eh-border);
+        border-radius: 12px;
+        background: white;
+    }
+
+    .facility-item {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 10px 12px;
+        border-bottom: 1px solid #f1f5f9;
+        cursor: pointer;
+    }
+
+    .facility-item:last-child {
+        border-bottom: 0;
+    }
+
+    .facility-item:hover {
+        background: #f8fafc;
+    }
+
+    .facility-checkbox {
+        width: 17px;
+        height: 17px;
+        accent-color: var(--eh-primary);
+    }
+
+    .facility-name {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--eh-text);
+    }
+
+    .facility-org {
+        display: block;
+        font-size: 10px;
+        color: var(--eh-muted);
+        margin-top: 2px;
+    }
+
+    .facility-actions {
+        display: flex;
+        gap: 6px;
+        margin-top: 8px;
+    }
+
+    .facility-actions button {
+        border-radius: 8px;
+        font-size: 10px;
+        font-weight: 700;
+    }
+
+    /* =========================================================
+       PERIOD SELECTOR
+       ========================================================= */
+
+    .period-selector {
+        border: 1px solid var(--eh-border);
+        border-radius: 14px;
+        background: #fbfdff;
+        overflow: hidden;
+    }
+
+    .period-tabs {
+        display: flex;
+        gap: 5px;
+        padding: 10px;
+        background: white;
+        border-bottom: 1px solid var(--eh-border);
+        overflow-x: auto;
+    }
+
+    .period-tab {
+        border: 1px solid #dbe2ea;
+        background: white;
+        color: #475569;
+        border-radius: 9px;
+        padding: 8px 13px;
+        font-size: 11px;
+        font-weight: 800;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .period-tab:hover {
+        border-color: var(--eh-primary);
+        color: var(--eh-primary);
+    }
+
+    .period-tab.active {
+        background: var(--eh-primary);
+        border-color: var(--eh-primary);
+        color: white;
+    }
+
+    /* =========================================================
+       DHIS2 PERIOD NAVIGATION
+       ========================================================= */
+
+    .period-navigation {
+        background: #f8fafc;
+        border-bottom: 1px solid var(--eh-border);
+        padding: 12px;
+    }
+
+    .period-navigation-inner {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .period-nav-button {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        border: 1px solid #dbe2ea;
+        background: white;
+        color: #334155;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all .15s ease;
+        font-size: 16px;
+    }
+
+    .period-nav-button:hover:not(:disabled) {
+        background: var(--eh-primary);
+        border-color: var(--eh-primary);
+        color: white;
+        transform: translateY(-1px);
+    }
+
+    .period-nav-button:disabled {
+        opacity: .4;
+        cursor: not-allowed;
+    }
+
+    .period-current {
+        min-width: 230px;
+        text-align: center;
+        padding: 7px 15px;
+    }
+
+    .period-current-main {
+        display: block;
+        font-size: 15px;
+        font-weight: 800;
+        color: var(--eh-text);
+    }
+
+    .period-current-sub {
+        display: block;
+        margin-top: 2px;
+        font-size: 10px;
+        color: var(--eh-muted);
+    }
+
+    .period-window-info {
+        margin-top: 9px;
+        text-align: center;
+        font-size: 11px;
+        color: var(--eh-muted);
+    }
+
+    .period-window-months {
+        display: inline-flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 5px;
+        margin-left: 5px;
+    }
+
+    .period-month-badge {
+        display: inline-block;
+        padding: 3px 7px;
+        background: #ecfdf5;
+        color: #065f46;
+        border: 1px solid #a7f3d0;
+        border-radius: 20px;
+        font-size: 9px;
+        font-weight: 800;
+    }
+
+    .period-toolbar {
+        padding: 10px 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .period-toolbar-title {
+        font-size: 11px;
+        color: var(--eh-muted);
+        font-weight: 700;
+    }
+
+    .period-actions {
+        display: flex;
+        gap: 5px;
+    }
+
+    .period-actions button {
+        border-radius: 7px;
+        font-size: 10px;
+        font-weight: 700;
+    }
+
+    .period-list {
+        padding: 10px;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 7px;
+        max-height: 270px;
+        overflow-y: auto;
+    }
+
+    .period-option {
+        position: relative;
+    }
+
+    .period-option input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .period-label {
+        display: block;
+        padding: 10px 7px;
+        text-align: center;
+        border: 1px solid #dbe2ea;
+        border-radius: 9px;
+        background: white;
+        cursor: pointer;
+        font-size: 11px;
+        font-weight: 700;
+        color: #475569;
+        transition: all .15s ease;
+    }
+
+    .period-label:hover {
+        border-color: var(--eh-primary);
+    }
+
+    .period-option input:checked + .period-label {
+        background: #ecfdf5;
+        border-color: var(--eh-primary);
+        color: var(--eh-primary-dark);
+        box-shadow: 0 0 0 1px var(--eh-primary);
+    }
+
+    .period-option.period-window-member .period-label {
+        border-color: #99f6e4;
+        background: #f0fdfa;
+    }
+
+    .period-label small {
+        display: block;
+        font-size: 9px;
+        color: #94a3b8;
+        margin-top: 2px;
+    }
+
+    /* =========================================================
+       ACTIVE FILTERS
+       ========================================================= */
+
+    .filter-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin-top: 15px;
+    }
+
+    .filter-badge {
+        background: #ecfdf5;
+        color: #065f46;
+        border: 1px solid #a7f3d0;
+        border-radius: 30px;
+        padding: 6px 11px;
+        font-size: 11px;
+        font-weight: 800;
+    }
+
+    /* =========================================================
+       KPI
+       ========================================================= */
+
+    .kpi-card {
+        position: relative;
+        overflow: hidden;
+        background: white;
+        border: 1px solid var(--eh-border);
+        border-radius: 16px;
+        padding: 20px;
+        min-height: 145px;
+        box-shadow: var(--eh-shadow);
+        transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+    .kpi-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 14px 30px rgba(15, 23, 42, .11);
+    }
+
+    .kpi-card::after {
+        content: "";
+        position: absolute;
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        right: -30px;
+        top: -30px;
+        background: rgba(15, 118, 110, .08);
+    }
+
+    .kpi-icon {
+        width: 43px;
+        height: 43px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        margin-bottom: 12px;
+    }
+
+    .kpi-title {
+        font-size: 11px;
+        font-weight: 800;
+        color: var(--eh-muted);
+        text-transform: uppercase;
+        letter-spacing: .4px;
+    }
+
+    .kpi-value {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--eh-text);
+        margin-top: 3px;
+    }
+
+    .kpi-sub {
+        font-size: 11px;
+        color: var(--eh-muted);
+        margin-top: 2px;
+    }
+
+    .icon-green {
+        background: #dcfce7;
+        color: #15803d;
+    }
+
+    .icon-blue {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .icon-purple {
+        background: #ede9fe;
+        color: #6d28d9;
+    }
+
+    .icon-orange {
+        background: #ffedd5;
+        color: #c2410c;
+    }
+
+    /* =========================================================
+       SECTION CARDS
+       ========================================================= */
+
+    .section-card {
+        background: white;
+        border: 1px solid var(--eh-border);
+        border-radius: 16px;
+        box-shadow: var(--eh-shadow);
+        margin-top: 22px;
+        overflow: hidden;
+    }
+
+    .section-header {
+        padding: 17px 20px;
+        border-bottom: 1px solid var(--eh-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    .section-header h5 {
+        margin: 0;
+        font-weight: 800;
+        color: var(--eh-text);
+    }
+
+    .section-header small {
+        color: var(--eh-muted);
+    }
+
+    .section-body {
+        padding: 20px;
+    }
+
+    /* =========================================================
+       STATUS
+       ========================================================= */
+
+    .status-card {
+        background: white;
+        border: 1px solid var(--eh-border);
+        border-radius: 14px;
+        padding: 17px;
+        box-shadow: var(--eh-shadow);
+        height: 100%;
+    }
+
+    .status-label {
+        font-size: 11px;
+        font-weight: 800;
+        color: var(--eh-muted);
+        text-transform: uppercase;
+    }
+
+    .status-number {
+        font-size: 25px;
+        font-weight: 800;
+        margin-top: 5px;
+    }
+
+    .status-progress {
+        height: 6px;
+        background: #eef2f7;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-top: 12px;
+    }
+
+    .status-progress span {
+        display: block;
+        height: 100%;
+        border-radius: 10px;
+        width: var(--width, 0%);
+        background: var(--eh-primary);
+    }
+
+    /* =========================================================
+       CHARTS
+       ========================================================= */
+
+    .chart-container {
+        position: relative;
+        height: 340px;
+        width: 100%;
+    }
+
+    .chart-container.large {
+        height: 410px;
+    }
+
+    /* =========================================================
+       TABLE
+       ========================================================= */
+
+    .table-responsive {
+        border-radius: 12px;
+    }
+
+    .analytics-table {
+        margin: 0;
+        vertical-align: middle;
+    }
+
+    .analytics-table thead th {
+        background: #f8fafc;
+        color: #64748b;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        font-weight: 800;
+        white-space: nowrap;
+        border-bottom: 1px solid var(--eh-border);
+        padding: 13px 12px;
+    }
+
+    .analytics-table tbody td {
+        padding: 13px 12px;
+        border-bottom: 1px solid #f0f2f5;
+        font-size: 12px;
+    }
+
+    .analytics-table tbody tr:hover {
+        background: #f8fafc;
+    }
+
+    .rank {
+        width: 34px;
+        height: 34px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: #f1f5f9;
+        font-weight: 800;
+        font-size: 11px;
+    }
+
+    .score {
+        font-weight: 800;
+    }
+
+    .score-high {
+        color: #15803d;
+    }
+
+    .score-medium {
+        color: #ca8a04;
+    }
+
+    .score-low {
+        color: #dc2626;
+    }
+
+    .level-badge {
+        border-radius: 30px;
+        padding: 5px 10px;
+        font-size: 10px;
+        font-weight: 800;
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    /* =========================================================
+       MINI LIST
+       ========================================================= */
+
+    .mini-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 13px 0;
+        border-bottom: 1px solid #eef2f6;
+        gap: 10px;
+    }
+
+    .mini-item:last-child {
+        border-bottom: 0;
+    }
+
+    .mini-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--eh-text);
+    }
+
+    .mini-meta {
+        font-size: 10px;
+        color: var(--eh-muted);
+        margin-top: 3px;
+    }
+
+    .mini-score {
+        font-size: 14px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    /* =========================================================
+       INFO
+       ========================================================= */
+
+    .info-box {
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        color: #1e40af;
+        border-radius: 14px;
+        padding: 17px;
+        margin-top: 22px;
+    }
+
+    /* =========================================================
+       EMPTY
+       ========================================================= */
+
+    .empty-state {
+        text-align: center;
+        padding: 45px 20px;
+        color: var(--eh-muted);
+    }
+
+    .empty-state i {
+        font-size: 40px;
+        display: block;
+        margin-bottom: 10px;
+        opacity: .55;
+    }
+
+    /* =========================================================
+       RESPONSIVE
+       ========================================================= */
+
+    @media (max-width: 991px) {
+
+        .header-actions {
+            justify-content: flex-start;
+            margin-top: 15px;
+        }
+
+        .period-list {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+    }
+
+    @media (max-width: 767px) {
+
+        .analytics-page {
+            padding: 12px 5px 30px;
+        }
+
+        .analytics-header {
+            padding: 20px;
+            border-radius: 14px;
+        }
+
+        .analytics-header h1 {
+            font-size: 23px;
+        }
+
+        .chart-container,
+        .chart-container.large {
+            height: 280px;
+        }
+
+        .section-body {
+            padding: 14px;
+        }
+
+        .period-list {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .period-current {
+            min-width: 170px;
+        }
+
+    }
+
+    /* =========================================================
+       PRINT
+       ========================================================= */
+
+    @media print {
+
+        body {
+            background: white !important;
+        }
+
+        .analytics-page {
+            padding: 0;
+        }
+
+        .header-actions,
+        .filter-card {
+            display: none !important;
+        }
+
+        /* Hide sidebar and expand content to full width when printing */
+        .sidebar {
+            display: none !important;
+        }
+
+        .main-content {
+            margin-left: 0 !important;
+            width: 100% !important;
+        }
+
+        .content {
+            padding: 10px !important;
+        }
+
+        .analytics-header,
+        .kpi-card,
+        .section-card,
+        .status-card {
+            box-shadow: none !important;
+        }
+
+        .section-card {
+            break-inside: avoid;
+        }
+
+    }
+    /* =========================================================
+   EHIRS - CLEAR & BOLD TYPOGRAPHY
+   ========================================================= */
+
+/* Main page typography */
+.analytics-page {
+    font-family:
+        "Segoe UI",
+        "Inter",
+        Arial,
+        sans-serif;
+
+    color: var(--eh-text);
+}
+
+/* All normal text */
+.analytics-page,
+.analytics-page p,
+.analytics-page span,
+.analytics-page div,
+.analytics-page label,
+.analytics-page small,
+.analytics-page td,
+.analytics-page th {
+    font-weight: 500;
+}
+
+/* Headings */
+.analytics-page h1,
+.analytics-page h2,
+.analytics-page h3,
+.analytics-page h4,
+.analytics-page h5,
+.analytics-page h6 {
+    font-weight: 800 !important;
+    color: var(--eh-text);
+}
+
+/* Header */
+.analytics-header h1 {
+    font-size: 30px;
+    font-weight: 900 !important;
+    letter-spacing: -0.3px;
+}
+
+.analytics-header p {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* Filter title */
+.filter-title {
+    font-size: 19px;
+    font-weight: 900 !important;
+}
+
+.filter-subtitle {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* Form labels */
+.form-label {
+    font-size: 12px;
+    font-weight: 900 !important;
+    color: #334155;
+    letter-spacing: .6px;
+}
+
+/* Select and input text */
+.form-select,
+.form-control {
+    font-size: 14px;
+    font-weight: 600 !important;
+    color: #172033;
+}
+
+.form-select option {
+    font-weight: 600;
+}
+
+/* Search placeholders */
+.form-control::placeholder {
+    color: #64748b;
+    font-weight: 500;
+    opacity: 1;
+}
+
+/* =========================================================
+   ALL BUTTONS - BOLD AND CLEAR
+   ========================================================= */
+
+.analytics-page .btn {
+    font-family:
+        "Segoe UI",
+        "Inter",
+        Arial,
+        sans-serif;
+
+    font-size: 13px;
+    font-weight: 800 !important;
+    letter-spacing: .1px;
+}
+
+/* Main Apply button */
+.analytics-page .apply-btn {
+    font-size: 14px;
+    font-weight: 900 !important;
+    min-height: 46px;
+    padding: 10px 18px;
+}
+
+/* Reset button */
+.analytics-page .reset-btn {
+    min-height: 46px;
+    min-width: 46px;
+    font-weight: 900 !important;
+}
+
+/* Header buttons */
+.header-actions .btn {
+    font-size: 13px;
+    font-weight: 900 !important;
+    min-height: 40px;
+    padding: 8px 15px;
+}
+
+/* Organization buttons */
+.selector-actions .btn {
+    font-size: 12px;
+    font-weight: 800 !important;
+    padding: 8px 12px;
+}
+
+/* Facility buttons */
+.facility-actions .btn {
+    font-size: 12px;
+    font-weight: 800 !important;
+    padding: 8px 13px;
+}
+
+/* Period action buttons */
+.period-actions .btn {
+    font-size: 12px;
+    font-weight: 800 !important;
+    padding: 8px 12px;
+}
+
+/* =========================================================
+   PERIOD TABS
+   ========================================================= */
+
+.period-tab {
+    font-size: 13px !important;
+    font-weight: 900 !important;
+    padding: 10px 16px;
+    color: #334155;
+}
+
+.period-tab.active {
+    font-weight: 900 !important;
+}
+
+/* =========================================================
+   PERIOD NAVIGATION ARROWS
+   ========================================================= */
+
+.period-nav-button {
+    width: 46px;
+    height: 46px;
+    font-size: 19px;
+    font-weight: 900 !important;
+}
+
+.period-current-main {
+    font-size: 17px;
+    font-weight: 900 !important;
+}
+
+.period-current-sub {
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.period-window-info {
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.period-month-badge {
+    font-size: 10px;
+    font-weight: 900 !important;
+    padding: 5px 9px;
+}
+
+/* Period toolbar */
+.period-toolbar-title {
+    font-size: 12px;
+    font-weight: 800 !important;
+}
+
+/* Period cards */
+.period-label {
+    font-size: 13px;
+    font-weight: 800 !important;
+    color: #334155;
+    padding: 12px 8px;
+}
+
+.period-label small {
+    font-size: 10px;
+    font-weight: 600;
+}
+
+/* Selected period */
+.period-option input:checked + .period-label {
+    font-weight: 900 !important;
+}
+
+/* =========================================================
+   ORGANIZATION TREE
+   ========================================================= */
+
+.org-label {
+    font-size: 14px;
+    font-weight: 800 !important;
+    color: #172033;
+}
+
+.org-code {
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.org-type {
+    font-size: 10px;
+    font-weight: 900 !important;
+}
+
+/* Organization selection count */
+.selection-count {
+    font-size: 12px;
+    font-weight: 800 !important;
+}
+
+/* =========================================================
+   FACILITIES
+   ========================================================= */
+
+.facility-name {
+    font-size: 13px;
+    font-weight: 800 !important;
+    color: #172033;
+}
+
+.facility-org {
+    font-size: 11px;
+    font-weight: 600;
+}
+
+/* =========================================================
+   FILTER BADGES
+   ========================================================= */
+
+.filter-badge {
+    font-size: 12px;
+    font-weight: 900 !important;
+    padding: 7px 12px;
+}
+
+/* =========================================================
+   KPI CARDS
+   ========================================================= */
+
+.kpi-title {
+    font-size: 12px;
+    font-weight: 900 !important;
+}
+
+.kpi-value {
+    font-size: 30px;
+    font-weight: 900 !important;
+}
+
+.kpi-sub {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* =========================================================
+   STATUS CARDS
+   ========================================================= */
+
+.status-label {
+    font-size: 12px;
+    font-weight: 900 !important;
+}
+
+.status-number {
+    font-size: 27px;
+    font-weight: 900 !important;
+}
+
+/* =========================================================
+   SECTION HEADERS
+   ========================================================= */
+
+.section-header h5 {
+    font-size: 17px;
+    font-weight: 900 !important;
+}
+
+.section-header small {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* =========================================================
+   TABLE
+   ========================================================= */
+
+.analytics-table thead th {
+    font-size: 11px;
+    font-weight: 900 !important;
+    color: #334155;
+}
+
+.analytics-table tbody td {
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+}
+
+.analytics-table tbody td strong {
+    font-weight: 900 !important;
+    color: #172033;
+}
+
+.rank {
+    font-size: 12px;
+    font-weight: 900 !important;
+}
+
+.score {
+    font-size: 13px;
+    font-weight: 900 !important;
+}
+
+.level-badge {
+    font-size: 11px;
+    font-weight: 900 !important;
+}
+
+/* =========================================================
+   TOP / BOTTOM / RECENT LISTS
+   ========================================================= */
+
+.mini-title {
+    font-size: 14px;
+    font-weight: 800 !important;
+}
+
+.mini-meta {
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.mini-score {
+    font-size: 15px;
+    font-weight: 900 !important;
+}
+
+/* =========================================================
+   INFORMATION BOX
+   ========================================================= */
+
+.info-box {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.info-box strong {
+    font-size: 14px;
+    font-weight: 900 !important;
+}
+
+/* =========================================================
+   HOVER - BUTTONS
+   ========================================================= */
+
+.analytics-page .btn {
+    transition:
+        transform .15s ease,
+        box-shadow .15s ease,
+        background-color .15s ease;
+}
+
+.analytics-page .btn:hover {
+    transform: translateY(-1px);
+}
+
+/* Make primary actions visually stronger */
+.analytics-page .btn-primary,
+.analytics-page .apply-btn {
+    font-weight: 900 !important;
+    box-shadow: 0 4px 10px rgba(15, 118, 110, .18);
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 767px) {
+
+    .analytics-header h1 {
+        font-size: 24px;
+    }
+
+    .analytics-header p {
+        font-size: 13px;
+    }
+
+    .analytics-page .btn {
+        font-size: 12px;
+        font-weight: 800 !important;
+    }
+
+    .period-tab {
+        font-size: 12px !important;
+        padding: 9px 12px;
+    }
+
+    .period-label {
+        font-size: 12px;
+    }
+
+    .kpi-value {
+        font-size: 26px;
+    }
+
+}
+
+</style>
+
+
+<div class="analytics-page">
+
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
+
+    <div class="analytics-header">
+
+        <div class="row align-items-center">
+
+            <div class="col-lg-8">
+
+                <h1>
+                    <i class="bi bi-bar-chart-line-fill me-2"></i>
+                    EHIRS Analytics
+                </h1>
+
+                <p>
+                    Interactive health information performance monitoring,
+                    comparison and analysis
+                </p>
+
+            </div>
+
+            <div class="col-lg-4">
+
+                <div class="header-actions">
+
+                    <a href="{% url 'dashboard:home' %}"
+                       class="btn btn-light btn-sm">
+
+                        <i class="bi bi-speedometer2 me-1"></i>
+                        Dashboard
+
+                    </a>
+
+                    <button type="button"
+                            class="btn btn-outline-light btn-sm"
+                            onclick="window.print()">
+
+                        <i class="bi bi-printer me-1"></i>
+                        Print
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         FILTER PANEL
+         ===================================================== -->
+
+    <div class="filter-card">
+
+        <div class="filter-title">
+
+            <i class="bi bi-funnel-fill me-2"></i>
+
+            Analytics Filters
+
+        </div>
+
+        <div class="filter-subtitle">
+
+            Select organization units, facilities, year and dynamic
+            reporting periods for analysis and comparison.
+
+        </div>
+
+
+        <form method="get"
+              id="analyticsFilterForm">
+
+
+            <!-- =================================================
+                 ORGANIZATION + FACILITY + YEAR
+                 ================================================= -->
+
+            <div class="row g-3">
+
+
+                <!-- ORGANIZATION -->
+
+                <div class="col-xl-5 col-lg-6">
+
+                    <label class="form-label">
+                        Organization Unit
+                    </label>
+
+                    <div class="selector-box">
+
+                        <div class="selector-toolbar">
+
+                            <div class="selector-search">
+
+                                <i class="bi bi-search"></i>
+
+                                <input type="text"
+                                       id="organizationSearch"
+                                       class="form-control"
+                                       placeholder="Search region, sub-city, zone, woreda...">
+
+                            </div>
+
+
+                            <div class="selector-actions">
+
+                                <button type="button"
+                                        class="btn btn-outline-primary btn-sm"
+                                        id="expandOrganizations">
+
+                                    <i class="bi bi-arrows-expand me-1"></i>
+
+                                    Expand all
+
+                                </button>
+
+
+                                <button type="button"
+                                        class="btn btn-outline-secondary btn-sm"
+                                        id="collapseOrganizations">
+
+                                    <i class="bi bi-arrows-collapse me-1"></i>
+
+                                    Collapse all
+
+                                </button>
+
+
+                                <button type="button"
+                                        class="btn btn-outline-success btn-sm"
+                                        id="selectOrganizations">
+
+                                    <i class="bi bi-check2-all me-1"></i>
+
+                                    Select all
+
+                                </button>
+
+
+                                <button type="button"
+                                        class="btn btn-outline-danger btn-sm"
+                                        id="clearOrganizations">
+
+                                    <i class="bi bi-x-circle me-1"></i>
+
+                                    Clear
+
+                                </button>
+
+                            </div>
+
+
+                            <div class="selection-count">
+
+                                <i class="bi bi-check2-circle me-1"></i>
+
+                                <span id="organizationSelectionCount">
+                                    0
+                                </span>
+
+                                organization unit(s) selected
+
+                            </div>
+
+                        </div>
+
+
+                        <div id="organizationTree"
+                             class="organization-tree">
+
+                            <div class="text-center text-muted py-4">
+
+                                <i class="bi bi-diagram-3 fs-3 d-block mb-2"></i>
+
+                                Loading organization hierarchy...
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- FACILITY -->
+
+                <div class="col-xl-3 col-lg-6">
+
+                    <label class="form-label">
+                        Facilities / Health Centers
+                    </label>
+
+                    <div class="facility-selector">
+
+                        <input type="text"
+                               id="facilitySearch"
+                               class="form-control mb-2"
+                               placeholder="Search facility...">
+
+
+                        <div class="facility-list"
+                             id="facilityList">
+
+                            {% if facilities %}
+
+                                {% for facility in facilities %}
+
+                                    <label class="facility-item">
+
+                                        <input type="checkbox"
+                                               class="facility-checkbox"
+                                               name="facility"
+                                               value="{{ facility.id }}"
+                                               {% if facility.id|stringformat:"s" in selected_facility_ids %}
+                                                   checked
+                                               {% endif %}>
+
+                                        <span>
+
+                                            <span class="facility-name">
+                                                {{ facility.name }}
+                                            </span>
+
+                                            {% if facility.organization %}
+
+                                                <span class="facility-org">
+                                                    {{ facility.organization.name }}
+                                                </span>
+
+                                            {% endif %}
+
+                                        </span>
+
+                                    </label>
+
+                                {% endfor %}
+
+                            {% else %}
+
+                                <div class="text-center text-muted py-4">
+
+                                    <i class="bi bi-hospital fs-3 d-block mb-2"></i>
+
+                                    No accessible facilities
+
+                                </div>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <div class="facility-actions">
+
+                            <button type="button"
+                                    class="btn btn-outline-success btn-sm"
+                                    id="selectFacilities">
+
+                                Select all
+
+                            </button>
+
+
+                            <button type="button"
+                                    class="btn btn-outline-secondary btn-sm"
+                                    id="clearFacilities">
+
+                                Clear
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- YEAR -->
+
+                <div class="col-xl-2 col-lg-3 col-md-6">
+
+                    <label class="form-label">
+                        Year
+                    </label>
+
+                    <select name="year"
+                            id="yearSelector"
+                            class="form-select">
+
+                        <option value="">
+                            All Years
+                        </option>
+
+                        {% for year_option in available_years %}
+
+                            <option value="{{ year_option }}"
+                                {% if selected_year == year_option|stringformat:"s" %}
+                                    selected
+                                {% endif %}>
+
+                                {{ year_option }}
+
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <!-- APPLY -->
+
+                <div class="col-xl-2 col-lg-3 col-md-6 d-flex align-items-end">
+
+                    <div class="d-flex gap-2 w-100">
+
+                        <button type="submit"
+                                class="btn btn-primary apply-btn flex-grow-1">
+
+                            <i class="bi bi-search me-1"></i>
+
+                            Apply
+
+                        </button>
+
+
+                        <a href="{% url 'core:analytics' %}"
+                           class="btn btn-outline-secondary reset-btn"
+                           title="Reset filters">
+
+                            <i class="bi bi-arrow-counterclockwise"></i>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 PERIOD SELECTOR
+                 ================================================= -->
+
+            <div class="row mt-3">
+
+                <div class="col-12">
+
+                    <label class="form-label">
+                        Reporting Period
+                    </label>
+
+
+                    <div class="period-selector">
+
+
+                        <!-- PERIOD TYPE -->
+
+                        <div class="period-tabs">
+
+                            <button type="button"
+                                    class="period-tab {% if not selected_period_type %}active{% endif %}"
+                                    data-period-type="">
+
+                                <i class="bi bi-grid me-1"></i>
+
+                                All
+
+                            </button>
+
+
+                            <button type="button"
+                                    class="period-tab {% if selected_period_type == 'MONTHLY' %}active{% endif %}"
+                                    data-period-type="MONTHLY">
+
+                                <i class="bi bi-calendar-month me-1"></i>
+
+                                Monthly
+
+                            </button>
+
+
+                            <button type="button"
+                                    class="period-tab {% if selected_period_type == 'QUARTERLY' %}active{% endif %}"
+                                    data-period-type="QUARTERLY">
+
+                                <i class="bi bi-calendar3 me-1"></i>
+
+                                Quarterly
+
+                            </button>
+
+
+                            <button type="button"
+                                    class="period-tab {% if selected_period_type == 'BIANNUAL' %}active{% endif %}"
+                                    data-period-type="BIANNUAL">
+
+                                <i class="bi bi-calendar-range me-1"></i>
+
+                                Biannual
+
+                            </button>
+
+
+                            <button type="button"
+                                    class="period-tab {% if selected_period_type == 'ANNUAL' %}active{% endif %}"
+                                    data-period-type="ANNUAL">
+
+                                <i class="bi bi-calendar-check me-1"></i>
+
+                                Annual
+
+                            </button>
+
+                        </div>
+
+
+                        <!-- =================================================
+                             DHIS2 NAVIGATION
+                             ================================================= -->
+
+                        <div class="period-navigation">
+
+                            <div class="period-navigation-inner">
+
+
+                                {% if period_navigation.previous_url %}
+
+                                    <a href="{{ period_navigation.previous_url }}"
+                                       class="period-nav-button"
+                                       title="Previous period">
+
+                                        <i class="bi bi-chevron-left"></i>
+
+                                    </a>
+
+                                {% else %}
+
+                                    <button type="button"
+                                            class="period-nav-button"
+                                            disabled
+                                            title="Previous period">
+
+                                        <i class="bi bi-chevron-left"></i>
+
+                                    </button>
+
+                                {% endif %}
+
+
+                                <div class="period-current">
+
+                                    <span class="period-current-main">
+
+                                        {% if selected_period_window.label %}
+
+                                            {{ selected_period_window.label }}
+
+                                        {% elif selected_period_label %}
+
+                                            {{ selected_period_label }}
+
+                                        {% elif selected_period_type == "MONTHLY" %}
+
+                                            Monthly
+
+                                        {% elif selected_period_type == "QUARTERLY" %}
+
+                                            Quarterly
+
+                                        {% elif selected_period_type == "BIANNUAL" %}
+
+                                            Biannual
+
+                                        {% elif selected_period_type == "ANNUAL" %}
+
+                                            Annual
+
+                                        {% else %}
+
+                                            All periods
+
+                                        {% endif %}
+
+                                    </span>
+
+
+                                    <span class="period-current-sub">
+
+                                        {% if selected_year %}
+
+                                            Year {{ selected_year }}
+
+                                        {% else %}
+
+                                            Select year and period
+
+                                        {% endif %}
+
+                                    </span>
+
+                                </div>
+
+
+                                {% if period_navigation.next_url %}
+
+                                    <a href="{{ period_navigation.next_url }}"
+                                       class="period-nav-button"
+                                       title="Next period">
+
+                                        <i class="bi bi-chevron-right"></i>
+
+                                    </a>
+
+                                {% else %}
+
+                                    <button type="button"
+                                            class="period-nav-button"
+                                            disabled
+                                            title="Next period">
+
+                                        <i class="bi bi-chevron-right"></i>
+
+                                    </button>
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <!-- COMPONENT MONTHS -->
+
+                            {% if selected_period_window.components %}
+
+                                <div class="period-window-info">
+
+                                    <i class="bi bi-calendar3 me-1"></i>
+
+                                    This period contains:
+
+                                    <span class="period-window-months">
+
+                                        {% for component in selected_period_window.components %}
+
+                                            <span class="period-month-badge">
+
+                                                {{ component }}
+
+                                            </span>
+
+                                        {% endfor %}
+
+                                    </span>
+
+                                </div>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <!-- PERIOD TOOLBAR -->
+
+                        <div class="period-toolbar">
+
+                            <div class="period-toolbar-title">
+
+                                <i class="bi bi-calendar-event me-1"></i>
+
+                                Select one or more periods to compare
+
+                            </div>
+
+
+                            <div class="period-actions">
+
+                                <button type="button"
+                                        class="btn btn-outline-success btn-sm"
+                                        id="selectPeriods">
+
+                                    <i class="bi bi-check2-all me-1"></i>
+
+                                    Select visible
+
+                                </button>
+
+
+                                <button type="button"
+                                        class="btn btn-outline-secondary btn-sm"
+                                        id="clearPeriods">
+
+                                    <i class="bi bi-x-circle me-1"></i>
+
+                                    Clear
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- =================================================
+                             PERIOD LIST
+                             ================================================= -->
+
+                        <div class="period-list"
+                             id="periodList">
+
+
+                            {% for period in period_options %}
+
+                                <div class="period-option"
+                                     data-period-id="{{ period.id }}"
+                                     data-period-type="{{ period.period_type }}"
+                                     data-period-year="{{ period.year }}"
+                                     data-period-number="{{ period.period_number|default:'' }}"
+                                     data-period-label="{{ period.label|default:period.name }}">
+
+                                    <input type="checkbox"
+                                           id="period_{{ period.id }}"
+                                           name="period"
+                                           value="{{ period.id }}"
+                                           class="period-checkbox"
+                                           data-period-type="{{ period.period_type }}"
+                                           data-period-year="{{ period.year }}"
+                                           data-period-number="{{ period.period_number|default:'' }}"
+                                           {% if period.selected %}
+                                               checked
+                                           {% endif %}>
+
+
+                                    <label for="period_{{ period.id }}"
+                                           class="period-label">
+
+                                        {{ period.label|default:period.name }}
+
+                                        <small>
+
+                                            {{ period.year }}
+
+                                        </small>
+
+                                    </label>
+
+                                </div>
+
+                            {% empty %}
+
+                                <div class="text-muted small p-3">
+
+                                    <i class="bi bi-calendar-x me-1"></i>
+
+                                    No reporting periods available.
+
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </form>
+
+
+        <!-- =====================================================
+             ACTIVE FILTER BADGES
+             ===================================================== -->
+
+        <div class="filter-badges">
+
+
+            {% if selected_year %}
+
+                <span class="filter-badge">
+
+                    <i class="bi bi-calendar3 me-1"></i>
+
+                    Year: {{ selected_year }}
+
+                </span>
+
+            {% endif %}
+
+
+            {% if selected_period_type %}
+
+                <span class="filter-badge">
+
+                    <i class="bi bi-calendar-range me-1"></i>
+
+                    {{ selected_period_type }}
+
+                </span>
+
+            {% endif %}
+
+
+            {% if selected_period_window.label %}
+
+                <span class="filter-badge">
+
+                    <i class="bi bi-clock-history me-1"></i>
+
+                    {{ selected_period_window.label }}
+
+                </span>
+
+            {% endif %}
+
+
+            {% if selected_organization_names %}
+
+                {% for organization_name in selected_organization_names %}
+
+                    <span class="filter-badge">
+
+                        <i class="bi bi-diagram-3 me-1"></i>
+
+                        {{ organization_name }}
+
+                    </span>
+
+                {% endfor %}
+
+            {% endif %}
+
+
+            {% if selected_facility_ids %}
+
+                <span class="filter-badge">
+
+                    <i class="bi bi-hospital me-1"></i>
+
+                    {{ selected_facility_ids|length }}
+
+                    facility/facilities
+
+                </span>
+
+            {% endif %}
+
+
+            {% if selected_period_ids %}
+
+                <span class="filter-badge">
+
+                    <i class="bi bi-calendar-range me-1"></i>
+
+                    {{ selected_period_ids|length }}
+
+                    period(s) selected
+
+                </span>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         KPI CARDS
+         ========================================================= -->
+
+    <div class="row g-3">
+
+
+        <div class="col-xl-3 col-md-6">
+
+            <div class="kpi-card">
+
+                <div class="kpi-icon icon-blue">
+
+                    <i class="bi bi-clipboard2-data-fill"></i>
+
+                </div>
+
+                <div class="kpi-title">
+                    Total Assessments
+                </div>
+
+                <div class="kpi-value">
+                    {{ total_assessments|default:"0" }}
+                </div>
+
+                <div class="kpi-sub">
+                    Assessment records
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-xl-3 col-md-6">
+
+            <div class="kpi-card">
+
+                <div class="kpi-icon icon-green">
+
+                    <i class="bi bi-graph-up-arrow"></i>
+
+                </div>
+
+                <div class="kpi-title">
+                    Average Assessment
+                </div>
+
+                <div class="kpi-value">
+                    {{ average_assessment|default:"0" }}%
+                </div>
+
+                <div class="kpi-sub">
+                    Assessment performance
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-xl-3 col-md-6">
+
+            <div class="kpi-card">
+
+                <div class="kpi-icon icon-purple">
+
+                    <i class="bi bi-check2-square"></i>
+
+                </div>
+
+                <div class="kpi-title">
+                    Average LQAS
+                </div>
+
+                <div class="kpi-value">
+                    {{ average_lqas|default:"0" }}%
+                </div>
+
+                <div class="kpi-sub">
+                    Data quality agreement
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-xl-3 col-md-6">
+
+            <div class="kpi-card">
+
+                <div class="kpi-icon icon-orange">
+
+                    <i class="bi bi-hospital-fill"></i>
+
+                </div>
+
+                <div class="kpi-title">
+                    Facilities
+                </div>
+
+                <div class="kpi-value">
+                    {{ facility_count|default:"0" }}
+                </div>
+
+                <div class="kpi-sub">
+                    Facilities included
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         MAIN PERFORMANCE TREND CHART
+         ========================================================= -->
+
+    <div class="row g-3">
+
+        <div class="col-12">
+
+            <div class="section-card">
+
+                <div class="section-header">
+
+                    <div>
+
+                        <h5>
+
+                            <i class="bi bi-graph-up me-2"></i>
+
+                            Performance Trend
+
+                        </h5>
+
+                        <small>
+                            Assessment performance over time
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <div class="section-body">
+
+                    <div class="chart-container large">
+
+                        <canvas id="trendChart"></canvas>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         PERIOD + ORGANIZATION
+         ========================================================= -->
+
+    <div class="row g-3">
+
+
+        <div class="col-xl-6">
+
+            <div class="section-card">
+
+                <div class="section-header">
+
+                    <div>
+
+                        <h5>
+
+                            <i class="bi bi-calendar3 me-2"></i>
+
+                            Period Performance
+
+                        </h5>
+
+                        <small>
+                            Compare reporting periods
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <div class="section-body">
+
+                    <div class="chart-container">
+
+                        <canvas id="periodChart"></canvas>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-xl-6">
+
+            <div class="section-card">
+
+                <div class="section-header">
+
+                    <div>
+
+                        <h5>
+
+                            <i class="bi bi-diagram-3-fill me-2"></i>
+
+                            Organization Performance
+
+                        </h5>
+
+                        <small>
+                            Compare selected organization units
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <div class="section-body">
+
+                    <div class="chart-container">
+
+                        <canvas id="organizationChart"></canvas>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         FACILITY COMPARISON
+         ========================================================= -->
+
+    <div class="section-card">
+
+        <div class="section-header">
+
+            <div>
+
+                <h5>
+
+                    <i class="bi bi-hospital me-2"></i>
+
+                    Facility Performance Comparison
+
+                </h5>
+
+                <small>
+                    Assessment, LQAS and combined performance
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <div class="section-body">
+
+            <div class="chart-container large">
+
+                <canvas id="facilityChart"></canvas>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- =========================================================
+         FACILITY RANKING
+         ========================================================= -->
+
+    <div class="section-card">
+
+        <div class="section-header">
+
+            <div>
+
+                <h5>
+
+                    <i class="bi bi-trophy-fill me-2"></i>
+
+                    Facility Ranking
+
+                </h5>
+
+                <small>
+                    Performance ranking across selected facilities
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <div class="section-body p-0">
+
+
+            {% if facility_ranking %}
+
+                <div class="table-responsive">
+
+                    <table class="table analytics-table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>Rank</th>
+                                <th>Facility</th>
+                                <th>Organization</th>
+                                <th>Assessment</th>
+                                <th>LQAS</th>
+                                <th>Combined</th>
+                                <th>Performance</th>
+                                <th>Records</th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+
+                            {% for item in facility_ranking %}
+
+                                <tr>
+
+                                    <td>
+
+                                        <span class="rank">
+
+                                            {{ item.rank }}
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <strong>
+
+                                            {{ item.name }}
+
+                                        </strong>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {{ item.organization|default:"-" }}
+
+                                    </td>
+
+
+                                    <td class="score">
+
+                                        {{ item.assessment_score|default:"0" }}%
+
+                                    </td>
+
+
+                                    <td class="score">
+
+                                        {{ item.lqas_score|default:"0" }}%
+
+                                    </td>
+
+
+                                    <td class="score">
+
+                                        {{ item.combined_score|default:"0" }}%
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <span class="level-badge">
+
+                                            {{ item.performance_level|default:"-" }}
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {{ item.assessment_count|default:"0" }}
+
+                                        /
+
+                                        {{ item.lqas_count|default:"0" }}
+
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            {% else %}
+
+                <div class="empty-state">
+
+                    <i class="bi bi-bar-chart"></i>
+
+                    <strong>
+                        No facility performance data
+                    </strong>
+
+                    <div>
+                        There is no assessment or LQAS data
+                        for the selected filters.
+                    </div>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         TOP / BOTTOM
+         ========================================================= -->
+
+    <div class="row g-3">
+
+
+        <div class="col-xl-6">
+
+            <div class="section-card">
+
+                <div class="section-header">
+
+                    <h5>
+
+                        <i class="bi bi-award-fill me-2"></i>
+
+                        Top Performing Facilities
+
+                    </h5>
+
+                </div>
+
+
+                <div class="section-body">
+
+
+                    {% if top_facilities %}
+
+                        {% for item in top_facilities %}
+
+                            <div class="mini-item">
+
+                                <div>
+
+                                    <div class="mini-title">
+
+                                        {{ item.name }}
+
+                                    </div>
+
+                                    <div class="mini-meta">
+
+                                        {{ item.organization|default:"-" }}
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="mini-score score-high">
+
+                                    {{ item.combined_score|default:"0" }}%
+
+                                </div>
+
+                            </div>
+
+                        {% endfor %}
+
+                    {% else %}
+
+                        <div class="empty-state">
+
+                            No top facility data available.
+
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-xl-6">
+
+            <div class="section-card">
+
+                <div class="section-header">
+
+                    <h5>
+
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+
+                        Facilities Requiring Attention
+
+                    </h5>
+
+                </div>
+
+
+                <div class="section-body">
+
+
+                    {% if bottom_facilities %}
+
+                        {% for item in bottom_facilities %}
+
+                            <div class="mini-item">
+
+                                <div>
+
+                                    <div class="mini-title">
+
+                                        {{ item.name }}
+
+                                    </div>
+
+                                    <div class="mini-meta">
+
+                                        {{ item.organization|default:"-" }}
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="mini-score score-low">
+
+                                    {{ item.combined_score|default:"0" }}%
+
+                                </div>
+
+                            </div>
+
+                        {% endfor %}
+
+                    {% else %}
+
+                        <div class="empty-state">
+
+                            No facility data requiring attention.
+
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         RECENT RECORDS
+         ========================================================= -->
+
+    <div class="row g-3">
+
+
+        <div class="col-xl-6">
+
+            <div class="section-card">
+
+                <div class="section-header">
+
+                    <h5>
+
+                        <i class="bi bi-clock-history me-2"></i>
+
+                    
+<!-- =============================================================
+     CHART.JS
+     ============================================================= -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+
+
+{{ chart_data|json_script:"analytics-chart-data" }}
+
+{{ organization_tree|json_script:"organization-tree-data" }}
+
+{{ dhis2_hierarchy_tree|json_script:"dhis2-hierarchy-tree-data" }}
+
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    /* =========================================================
+       DHIS2 EXPANDABLE PIVOT TABLE RENDERER
+       ========================================================= */
+    let dhis2HierarchyData = [];
+    const dhis2ScriptEl = document.getElementById("dhis2-hierarchy-tree-data");
+    if (dhis2ScriptEl) {
+        try {
+            dhis2HierarchyData = JSON.parse(dhis2ScriptEl.textContent);
+        } catch(e) {
+            console.error("Error parsing DHIS2 hierarchy tree:", e);
+        }
+    }
+
+    const pivotTbody = document.getElementById("dhis2PivotTableBody");
+    const collapsedNodes = new Set(); // Stores node IDs that are collapsed
+
+    function getLevelBadgeClass(unitType) {
+        switch((unitType || "").toUpperCase()) {
+            case "MINISTRY": return "bg-dark text-white";
+            case "REGION": return "bg-primary text-white";
+            case "SUBCITY": return "bg-purple text-white";
+            case "ZONE":
+            case "WOREDA": return "bg-warning text-dark";
+            case "FACILITY": return "bg-success text-white";
+            default: return "bg-secondary text-white";
+        }
+    }
+
+    function getPerfBadgeClass(level) {
+        switch(level) {
+            case "Excellent": return "badge bg-success";
+            case "Good": return "badge bg-primary";
+            case "Needs Improvement": return "badge bg-warning text-dark";
+            case "Critical": return "badge bg-danger";
+            default: return "badge bg-secondary";
+        }
+    }
+
+    function renderDhis2NodeRow(node, level = 0, isVisible = true, parentId = "") {
+        const rowId = `org-row-${node.id}`;
+        const hasChildren = (node.children && node.children.length > 0) || (node.direct_facilities && node.direct_facilities.length > 0);
+        const isCollapsed = collapsedNodes.has(`org-${node.id}`);
+
+        const tr = document.createElement("tr");
+        tr.className = `dhis2-pivot-row level-${level}`;
+        tr.id = rowId;
+        tr.dataset.nodeId = `org-${node.id}`;
+        tr.dataset.parentId = parentId;
+        tr.dataset.level = level;
+        tr.dataset.name = (node.name || "").toLowerCase();
+        if (!isVisible) {
+            tr.style.display = "none";
+        }
+
+        const indentPx = level * 24 + 12;
+        let chevronHtml = "";
+        if (hasChildren) {
+            const iconClass = isCollapsed ? "bi-chevron-right" : "bi-chevron-down";
+            chevronHtml = `<button type="button" class="btn btn-sm btn-link text-dark p-0 me-2 toggle-dhis2-node" data-target="org-${node.id}">
+                <i class="bi ${iconClass} fw-bold fs-6"></i>
+            </button>`;
+        } else {
+            chevronHtml = `<span class="me-4"></span>`;
+        }
+
+        const unitIcon = level === 0 ? "bi-building-fill text-teal" : (level === 1 ? "bi-diagram-2-fill text-primary" : "bi-geo-alt-fill text-purple");
+
+        tr.innerHTML = `
+            <td>
+                <div style="padding-left: ${indentPx}px;" class="d-flex align-items-center">
+                    ${chevronHtml}
+                    <i class="bi ${unitIcon} me-2 fs-6"></i>
+                    <strong class="text-dark fs-6">${node.name}</strong>
+                    ${node.code ? `<small class="text-muted ms-2">(${node.code})</small>` : ''}
+                </div>
+            </td>
+            <td class="text-center">
+                <span class="badge ${getLevelBadgeClass(node.unit_type)} px-2 py-1">${node.unit_type_label || node.unit_type}</span>
+            </td>
+            <td class="text-center fw-bold">${node.facility_count}</td>
+            <td class="text-center text-muted small">${node.assessment_count} assmt / ${node.lqas_count} LQAS</td>
+            <td class="text-end fw-bold text-primary">${node.assessment_score.toFixed(1)}%</td>
+            <td class="text-end fw-bold text-purple">${node.lqas_score.toFixed(1)}%</td>
+            <td class="text-end fw-bold fs-6 text-teal">${node.combined_score.toFixed(1)}%</td>
+            <td class="text-center">
+                <span class="${getPerfBadgeClass(node.performance_level)} px-3 py-1 fs-6">${node.performance_level}</span>
+            </td>
+        `;
+
+        pivotTbody.appendChild(tr);
+
+        // Render Child Orgs
+        if (node.children && node.children.length > 0) {
+            node.children.forEach(child => {
+                renderDhis2NodeRow(child, level + 1, isVisible && !isCollapsed, `org-${node.id}`);
+            });
+        }
+
+        // Render Direct Facilities
+        if (node.direct_facilities && node.direct_facilities.length > 0) {
+            node.direct_facilities.forEach(fac => {
+                const facRow = document.createElement("tr");
+                facRow.className = `dhis2-pivot-row level-${level + 1} facility-row`;
+                facRow.dataset.nodeId = `fac-${fac.id}`;
+                facRow.dataset.parentId = `org-${node.id}`;
+                facRow.dataset.level = level + 1;
+                facRow.dataset.name = (fac.name || "").toLowerCase();
+                if (!isVisible || isCollapsed) {
+                    facRow.style.display = "none";
+                }
+
+                const facIndent = (level + 1) * 24 + 12;
+                facRow.innerHTML = `
+                    <td>
+                        <div style="padding-left: ${facIndent}px;" class="d-flex align-items-center">
+                            <span class="me-4"></span>
+                            <i class="bi bi-hospital-fill text-success me-2 fs-6"></i>
+                            <span class="fw-semibold text-dark">${fac.name}</span>
+                        </div>
+                    </td>
+                    <td class="text-center">
+                        <span class="badge bg-success text-white px-2 py-1">Facility</span>
+                    </td>
+                    <td class="text-center text-muted">1</td>
+                    <td class="text-center text-muted small">${fac.assessment_count || 0} assmt / ${fac.lqas_count || 0} LQAS</td>
+                    <td class="text-end fw-bold text-primary">${(fac.assessment_score || 0).toFixed(1)}%</td>
+                    <td class="text-end fw-bold text-purple">${(fac.lqas_score || 0).toFixed(1)}%</td>
+                    <td class="text-end fw-bold fs-6 text-teal">${(fac.combined_score || 0).toFixed(1)}%</td>
+                    <td class="text-center">
+                        <span class="${getPerfBadgeClass(fac.performance_level)} px-3 py-1 fs-6">${fac.performance_level || 'No Data'}</span>
+                    </td>
+                `;
+                pivotTbody.appendChild(facRow);
+            });
+        }
+    }
+
+    function renderDhis2PivotTable() {
+        if (!pivotTbody) return;
+        pivotTbody.innerHTML = "";
+        if (!dhis2HierarchyData || dhis2HierarchyData.length === 0) {
+            pivotTbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted p-4">No organization units available for current filters.</td></tr>`;
+            return;
+        }
+        dhis2HierarchyData.forEach(topNode => {
+            renderDhis2NodeRow(topNode, 0, true, "");
+        });
+    }
+
+    renderDhis2PivotTable();
+
+    // Event Listener for Toggle Chevron
+    if (pivotTbody) {
+        pivotTbody.addEventListener("click", function(e) {
+            const toggleBtn = e.target.closest(".toggle-dhis2-node");
+            if (!toggleBtn) return;
+            const targetId = toggleBtn.dataset.target;
+            if (collapsedNodes.has(targetId)) {
+                collapsedNodes.delete(targetId);
+            } else {
+                collapsedNodes.add(targetId);
+            }
+            renderDhis2PivotTable();
+        });
+    }
+
+    // Expand All & Collapse All
+    const expandAllBtn = document.getElementById("expandAllDhis2Pivot");
+    if (expandAllBtn) {
+        expandAllBtn.addEventListener("click", function() {
+            collapsedNodes.clear();
+            renderDhis2PivotTable();
+        });
+    }
+
+    const collapseAllBtn = document.getElementById("collapseAllDhis2Pivot");
+    if (collapseAllBtn) {
+        collapseAllBtn.addEventListener("click", function() {
+            function addAllOrgNodes(nodes) {
+                nodes.forEach(n => {
+                    collapsedNodes.add(`org-${n.id}`);
+                    if (n.children) addAllOrgNodes(n.children);
+                });
+            }
+            addAllOrgNodes(dhis2HierarchyData);
+            renderDhis2PivotTable();
+        });
+    }
+
+    // Search filter for DHIS2 Pivot Table
+    const searchInput = document.getElementById("dhis2PivotSearch");
+    if (searchInput) {
+        searchInput.addEventListener("input", function() {
+            const term = this.value.trim().toLowerCase();
+            const rows = pivotTbody.querySelectorAll(".dhis2-pivot-row");
+            if (!term) {
+                renderDhis2PivotTable();
+                return;
+            }
+            rows.forEach(row => {
+                const name = row.dataset.name || "";
+                if (name.includes(term)) {
+                    row.style.display = "";
+                    let parentId = row.dataset.parentId;
+                    while (parentId) {
+                        const parentRow = pivotTbody.querySelector(`[data-node-id="${parentId}"]`);
+                        if (parentRow) {
+                            parentRow.style.display = "";
+                            parentId = parentRow.dataset.parentId;
+                        } else {
+                            break;
+                        }
+                    }
+                } else {
+                    row.style.display = "none";
+                }
+            });
+        });
+    }
+
+
+    /* =========================================================
+       CHART DATA
+       ========================================================= */
+
+    let chartData = {};
+
+    const chartElement =
+        document.getElementById("analytics-chart-data");
+
+
+    if (chartElement) {
+
+        try {
+
+            chartData =
+                JSON.parse(chartElement.textContent);
+
+            if (typeof chartData === "string") {
+
+                chartData =
+                    JSON.parse(chartData);
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Unable to read analytics chart data:",
+                error
+            );
+
+            chartData = {};
+
+        }
+
+    }
+
+
+    const defaults = [
+
+        "trend_labels",
+        "trend_scores",
+
+        "period_labels",
+        "period_scores",
+
+        "organization_labels",
+        "organization_scores",
+
+        "facility_labels",
+        "facility_scores",
+
+        "facility_assessment_scores",
+        "facility_lqas_scores"
+
+    ];
+
+
+    defaults.forEach(function (key) {
+
+        if (!Array.isArray(chartData[key])) {
+
+            chartData[key] = [];
+
+        }
+
+    });
+
+
+    /* =========================================================
+       ORGANIZATION TREE
+       ========================================================= */
+
+    let organizationTree = [];
+
+    const treeElement =
+        document.getElementById("organization-tree-data");
+
+
+    if (treeElement) {
+
+        try {
+
+            organizationTree =
+                JSON.parse(treeElement.textContent);
+
+        } catch (error) {
+
+            console.error(
+                "Unable to read organization hierarchy:",
+                error
+            );
+
+            organizationTree = [];
+
+        }
+
+    }
+
+
+    const treeContainer =
+        document.getElementById("organizationTree");
+
+
+    const selectionCount =
+        document.getElementById(
+            "organizationSelectionCount"
+        );
+
+
+    function updateOrganizationCount() {
+
+        if (!treeContainer || !selectionCount) {
+
+            return;
+
+        }
+
+
+        const selected =
+            treeContainer.querySelectorAll(
+                ".org-checkbox:checked"
+            );
+
+
+        selectionCount.textContent =
+            selected.length;
+
+    }
+
+
+    function getAllChildCheckboxes(nodeElement) {
+
+        return Array.from(
+            nodeElement.querySelectorAll(
+                ".org-checkbox"
+            )
+        );
+
+    }
+
+
+    function updateParentState(nodeElement) {
+
+        const checkbox =
+            nodeElement.querySelector(
+                ":scope > .org-row .org-checkbox"
+            );
+
+
+        const children =
+            nodeElement.querySelectorAll(
+                ":scope > .org-children .org-checkbox"
+            );
+
+
+        if (!checkbox || !children.length) {
+
+            return;
+
+        }
+
+
+        const checkedCount =
+            Array.from(children)
+                .filter(function (item) {
+
+                    return item.checked;
+
+                }).length;
+
+
+        checkbox.checked =
+            checkedCount === children.length;
+
+
+        checkbox.indeterminate =
+            checkedCount > 0 &&
+            checkedCount < children.length;
+
+    }
+
+
+    function renderOrganizationNodes(
+        nodes,
+        parentContainer
+    ) {
+
+
+        nodes.forEach(function (node) {
+
+
+            const nodeElement =
+                document.createElement("div");
+
+
+            nodeElement.className =
+                "org-node";
+
+
+            nodeElement.dataset.name =
+                (node.name || "").toLowerCase();
+
+
+            nodeElement.dataset.type =
+                (node.unit_type || "").toLowerCase();
+
+
+            const row =
+                document.createElement("div");
+
+
+            row.className =
+                "org-row";
+
+
+            const expand =
+                document.createElement("button");
+
+
+            expand.type =
+                "button";
+
+
+            expand.className =
+                "org-expand";
+
+
+            const children =
+                node.children || [];
+
+
+            if (children.length) {
+
+                expand.innerHTML =
+                    '<i class="bi bi-chevron-right"></i>';
+
+            } else {
+
+                expand.classList.add("empty");
+
+            }
+
+
+            const checkbox =
+                document.createElement("input");
+
+
+            checkbox.type =
+                "checkbox";
+
+
+            checkbox.className =
+                "org-checkbox";
+
+
+            checkbox.name =
+                "organization";
+
+
+            checkbox.value =
+                node.id;
+
+
+            if (node.selected) {
+
+                checkbox.checked =
+                    true;
+
+            }
+
+
+            const label =
+                document.createElement("label");
+
+
+            label.className =
+                "org-label";
+
+
+            label.innerHTML = `
+
+                ${node.name || ""}
+
+                ${node.code
+                    ? `<span class="org-code">
+                        (${node.code})
+                       </span>`
+                    : ""}
+
+            `;
+
+
+            const type =
+                document.createElement("span");
+
+
+            type.className =
+                "org-type";
+
+
+            type.textContent =
+                node.unit_type_label ||
+                node.unit_type ||
+                "";
+
+
+            row.appendChild(expand);
+
+            row.appendChild(checkbox);
+
+            row.appendChild(label);
+
+            row.appendChild(type);
+
+
+            nodeElement.appendChild(row);
+
+
+            let childContainer =
+                null;
+
+
+            if (children.length) {
+
+
+                childContainer =
+                    document.createElement("div");
+
+
+                childContainer.className =
+                    "org-children collapsed";
+
+
+                renderOrganizationNodes(
+                    children,
+                    childContainer
+                );
+
+
+                nodeElement.appendChild(
+                    childContainer
+                );
+
+
+                expand.addEventListener(
+                    "click",
+                    function () {
+
+
+                        childContainer.classList.toggle(
+                            "collapsed"
+                        );
+
+
+                        const collapsed =
+                            childContainer.classList.contains(
+                                "collapsed"
+                            );
+
+
+                        expand.innerHTML =
+                            collapsed
+                                ? '<i class="bi bi-chevron-right"></i>'
+                                : '<i class="bi bi-chevron-down"></i>';
+
+                    }
+                );
+
+            }
+
+
+            checkbox.addEventListener(
+                "change",
+                function () {
+
+
+                    if (children.length) {
+
+
+                        const allCheckboxes =
+                            getAllChildCheckboxes(
+                                nodeElement
+                            );
+
+
+                        allCheckboxes.forEach(
+                            function (item) {
+
+                                item.checked =
+                                    checkbox.checked;
+
+                                item.indeterminate =
+                                    false;
+
+                            }
+                        );
+
+                    }
+
+
+                    let parent =
+                        nodeElement.parentElement;
+
+
+                    while (parent) {
+
+
+                        const parentNode =
+                            parent.closest(
+                                ".org-node"
+                            );
+
+
+                        if (!parentNode) {
+
+                            break;
+
+                        }
+
+
+                        updateParentState(
+                            parentNode
+                        );
+
+
+                        parent =
+                            parentNode.parentElement;
+
+                    }
+
+
+                    updateOrganizationCount();
+
+                }
+            );
+
+
+            label.addEventListener(
+                "click",
+                function () {
+
+                    checkbox.click();
+
+                }
+            );
+
+
+            parentContainer.appendChild(
+                nodeElement
+            );
+
+        });
+
+    }
+
+
+    if (treeContainer) {
+
+
+        treeContainer.innerHTML =
+            "";
+
+
+        if (organizationTree.length) {
+
+
+            renderOrganizationNodes(
+                organizationTree,
+                treeContainer
+            );
+
+
+        } else {
+
+
+            treeContainer.innerHTML = `
+
+                <div class="empty-state">
+
+                    <i class="bi bi-diagram-3"></i>
+
+                    <strong>
+                        No accessible organization units
+                    </strong>
+
+                </div>
+
+            `;
+
+        }
+
+
+        updateOrganizationCount();
+
+    }
+
+
+    /* =========================================================
+       ORGANIZATION SELECT ALL
+       ========================================================= */
+
+    const selectOrganizations =
+        document.getElementById(
+            "selectOrganizations"
+        );
+
+
+    if (selectOrganizations) {
+
+
+        selectOrganizations.addEventListener(
+            "click",
+            function () {
+
+
+                document
+                    .querySelectorAll(
+                        "#organizationTree .org-checkbox"
+                    )
+                    .forEach(function (checkbox) {
+
+                        checkbox.checked =
+                            true;
+
+                        checkbox.indeterminate =
+                            false;
+
+                    });
+
+
+                updateOrganizationCount();
+
+            }
+        );
+
+    }
+
+
+    /* =========================================================
+       ORGANIZATION CLEAR
+       ========================================================= */
+
+    const clearOrganizations =
+        document.getElementById(
+            "clearOrganizations"
+        );
+
+
+    if (clearOrganizations) {
+
+
+        clearOrganizations.addEventListener(
+            "click",
+            function () {
+
+
+                document
+                    .querySelectorAll(
+                        "#organizationTree .org-checkbox"
+                    )
+                    .forEach(function (checkbox) {
+
+                        checkbox.checked =
+                            false;
+
+                        checkbox.indeterminate =
+                            false;
+
+                    });
+
+
+                updateOrganizationCount();
+
+            }
+        );
+
+    }
+
+
+    /* =========================================================
+       EXPAND ALL
+       ========================================================= */
+
+    const expandOrganizations =
+        document.getElementById(
+            "expandOrganizations"
+        );
+
+
+    if (expandOrganizations) {
+
+
+        expandOrganizations.addEventListener(
+            "click",
+            function () {
+
+
+                document
+                    .querySelectorAll(
+                        "#organizationTree .org-children"
+                    )
+                    .forEach(function (element) {
+
+                        element.classList.remove(
+                            "collapsed"
+                        );
+
+                    });
+
+
+                document
+                    .querySelectorAll(
+                        "#organizationTree .org-expand:not(.empty)"
+                    )
+                    .forEach(function (button) {
+
+                        button.innerHTML =
+                            '<i class="bi bi-chevron-down"></i>';
+
+                    });
+
+            }
+        );
+
+    }
+
+
+    /* =========================================================
+       COLLAPSE ALL
+       ========================================================= */
+
+    const collapseOrganizations =
+        document.getElementById(
+            "collapseOrganizations"
+        );
+
+
+    if (collapseOrganizations) {
+
+
+        collapseOrganizations.addEventListener(
+            "click",
+            function () {
+
+
+                document
+                    .querySelectorAll(
+                        "#organizationTree .org-children"
+                    )
+                    .forEach(function (element) {
+
+                        element.classList.add(
+                            "collapsed"
+                        );
+
+                    });
+
+
+                document
+                    .querySelectorAll(
+                        "#organizationTree .org-expand:not(.empty)"
+                    )
+                    .forEach(function (button) {
+
+                        button.innerHTML =
+                            '<i class="bi bi-chevron-right"></i>';
+
+                    });
+
+            }
+        );
+
+    }
+
+
+    /* =========================================================
+       ORGANIZATION SEARCH
+       ========================================================= */
+
+    const organizationSearch =
+        document.getElementById(
+            "organizationSearch"
+        );
+
+
+    if (organizationSearch) {
+
+
+        organizationSearch.addEventListener(
+            "input",
+            function () {
+
+
+                const term =
+                    this.value
+                        .trim()
+                        .toLowerCase();
+
+
+                document
+                    .querySelectorAll(
+                        "#organizationTree .org-node"
+                    )
+                    .forEach(function (node) {
+
+
+                        const name =
+                            node.dataset.name ||
+                            "";
+
+
+                        const type =
+                            node.dataset.type ||
+                            "";
+
+
+                        const match =
+                            !term ||
+                            name.includes(term) ||
+                            type.includes(term);
+
+
+                        node.style.display =
+                            match
+                                ? ""
+                                : "none";
+
+                    });
+
+            }
+        );
+
+    }
+
+
+    /* =========================================================
+       FACILITY SEARCH
+       ========================================================= */
+
+    const facilitySearch =
+        document.getElementById(
+            "facilitySearch"
+        );
+
+
+    if (facilitySearch) {
+
+
+        facilitySearch.addEventListener(
+            "input",
+            function () {
+
+
+                const term =
+                    this.value
+                        .trim()
+                        .toLowerCase();
+
+
+                document
+                    .querySelectorAll(
+                        ".facility-item"
+                    )
+                    .forEach(function (item) {
+
+
+                        const text =
+                            item.textContent
+                                .toLowerCase();
+
+
+                        item.style.display =
+                            !term ||
+                            text.includes(term)
+                                ? "flex"
+                                : "none";
+
+                    });
+
+            }
+        );
+
+    }
+
+
+    /* =========================================================
+       FACILITY SELECT ALL
+       ========================================================= */
+
+    const selectFacilities =
+        document.getElementById(
+            "selectFacilities"
+        );
+
+
+    if (selectFacilities) {
+
+
+        selectFacilities.addEventListener(
+            "click",
+            function () {
+
+
+                document
+                    .querySelectorAll(
+                        ".facility-checkbox"
+                    )
+                    .forEach(function (checkbox) {
+
+
+                        const item =
+                            checkbox.closest(
+                                ".facility-item"
+                            );
+
+
+                        if (
+                            item &&
+                            item.style.display !== "none"
+                        ) {
+
+                            checkbox.checked =
+                                true;
+
+                        }
+
+                    });
+
+            }
+        );
+
+    }
+
+
+    /* =========================================================
+       FACILITY CLEAR
+       ========================================================= */
+
+    const clearFacilities =
+        document.getElementById(
+            "clearFacilities"
+        );
+
+
+    if (clearFacilities) {
+
+
+        clearFacilities.addEventListener(
+            "click",
+            function () {
+
+
+                document
+                    .querySelectorAll(
+                        ".facility-checkbox"
+                    )
+                    .forEach(function (checkbox) {
+
+                        checkbox.checked =
+                            false;
+
+                    });
+
+            }
+        );
+
+    }
+
+
+    /* =========================================================
+       PERIOD SELECTOR
+       ========================================================= */
+
+    const periodTabs =
+        document.querySelectorAll(
+            ".period-tab"
+        );
+
+
+    const periodOptions =
+        Array.from(
+            document.querySelectorAll(
+                ".period-option"
+            )
+        );
+
+
+    const periodCheckboxes =
+        Array.from(
+            document.querySelectorAll(
+                ".period-checkbox"
+            )
+        );
+
+
+    const periodList =
+        document.getElementById(
+            "periodList"
+        );
+
+
+    /*
+       Current period type.
+
+       This comes from Django and is used when the page
+       initially loads.
+    */
+
+    let currentPeriodType =
+        "{{ selected_period_type|default:'' }}";
+
+
+    let currentYear =
+        "{{ selected_year|default:'' }}";
+
+
+    /* =========================================================
+       PERIOD COMPONENT LOGIC
+       ========================================================= */
+
+    function getComponentMonths(
+        periodType,
+        periodNumber
+    ) {
+
+
+        const number =
+            parseInt(
+                periodNumber,
+                10
+            );
+
+
+        if (
+            !periodType ||
+            !number ||
+            Number.isNaN(number)
+        ) {
+
+            return [];
+
+        }
+
+
+        if (periodType === "MONTHLY") {
+
+            return [number];
+
+        }
+
+
+        if (periodType === "QUARTERLY") {
+
+            const start =
+                ((number - 1) * 3) + 1;
+
+            return [
+                start,
+                start + 1,
+                start + 2
+            ];
+
+        }
+
+
+        if (periodType === "BIANNUAL") {
+
+            if (number === 1) {
+
+                return [
+                    1, 2, 3,
+                    4, 5, 6
+                ];
+
+            }
+
+            if (number === 2) {
+
+                return [
+                    7, 8, 9,
+                    10, 11, 12
+                ];
+
+            }
+
+        }
+
+
+        if (periodType === "ANNUAL") {
+
+            return [
+                1, 2, 3, 4,
+                5, 6, 7, 8,
+                9, 10, 11, 12
+            ];
+
+        }
+
+
+        return [];
+
+    }
+
+
+    function getMonthName(number) {
+
+        const names = {
+
+            1: "January",
+            2: "February",
+            3: "March",
+            4: "April",
+            5: "May",
+            6: "June",
+            7: "July",
+            8: "August",
+            9: "September",
+            10: "October",
+            11: "November",
+            12: "December"
+
+        };
+
+
+        return names[number] ||
+               "Month " + number;
+
+    }
+
+
+    /*
+       This function highlights the three monthly
+       components when Q1, Q2, Q3 or Q4 is selected.
+    */
+
+    function highlightPeriodWindow(
+        periodType,
+        year,
+        periodNumber
+    ) {
+
+
+        periodOptions.forEach(
+            function (option) {
+
+                option.classList.remove(
+                    "period-window-member"
+                );
+
+            }
+        );
+
+
+        const months =
+            getComponentMonths(
+                periodType,
+                periodNumber
+            );
+
+
+        if (!months.length) {
+
+            return;
+
+        }
+
+
+        periodOptions.forEach(
+            function (option) {
+
+
+                const optionType =
+                    option.dataset.periodType;
+
+
+                const optionYear =
+                    option.dataset.periodYear;
+
+
+                const optionNumber =
+                    parseInt(
+                        option.dataset.periodNumber,
+                        10
+                    );
+
+
+                if (
+                    optionType === "MONTHLY" &&
+                    String(optionYear) === String(year) &&
+                    months.includes(optionNumber)
+                ) {
+
+                    option.classList.add(
+                        "period-window-member"
+                    );
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /* =========================================================
+       FILTER PERIOD OPTIONS
+       ========================================================= */
+
+    function filterPeriods(
+        type
+    ) {
+
+
+        periodOptions.forEach(
+            function (option) {
+
+
+                const optionType =
+                    option.dataset.periodType;
+
+
+                const optionYear =
+                    option.dataset.periodYear;
+
+
+                let visible =
+                    true;
+
+
+                if (
+                    type &&
+                    optionType !== type
+                ) {
+
+                    visible =
+                        false;
+
+                }
+
+
+                if (
+                    currentYear &&
+                    optionYear &&
+                    String(optionYear) !== String(currentYear)
+                ) {
+
+                    visible =
+                        false;
+
+                }
+
+
+                option.style.display =
+                    visible
+                        ? ""
+                        : "none";
+
+            }
+        );
+
+    }
+
+
+    /* =========================================================
+       PERIOD TAB CLICK
+       ========================================================= */
+
+    periodTabs.forEach(
+        function (tab) {
+
+
+            tab.addEventListener(
+                "click",
+                function () {
+
+
+                    const type =
+                        this.dataset.periodType ||
+                        "";
+
+
+                    periodTabs.forEach(
+                        function (item) {
+
+                            item.classList.remove(
+                                "active"
+                            );
+
+                        }
+                    );
+
+
+                    this.classList.add(
+                        "active"
+                    );
+
+
+                    currentPeriodType =
+                        type;
+
+
+                    /*
+                       When user changes the period type,
+                       remove existing period selections.
+                    */
+
+                    periodCheckboxes.forEach(
+                        function (checkbox) {
+
+                            checkbox.checked =
+                                false;
+
+                        }
+                    );
+
+
+                    filterPeriods(
+                        type
+                    );
+
+
+                    /*
+                       For a period type tab, update the
+                       URL parameters without submitting
+                       the entire form.
+                    */
+
+                    const url =
+                        new URL(
+                            window.location.href
+                        );
+
+
+                    if (type) {
+
+                        url.searchParams.set(
+                            "period_type",
+                            type
+                        );
+
+                    } else {
+
+                        url.searchParams.delete(
+                            "period_type"
+                        );
+
+                    }
+
+                    /*
+                       Keep organization/facility/year
+                       selections in the actual form when
+                       Apply is pressed.
+                    */
+
+                }
+            );
+
+        }
+    );
+
+
+    /* =========================================================
+       YEAR CHANGE
+       ========================================================= */
+
+    const yearSelector =
+        document.getElementById(
+            "yearSelector"
+        );
+
+
+    if (yearSelector) {
+
+
+        yearSelector.addEventListener(
+            "change",
+            function () {
+
+
+                currentYear =
+                    this.value;
+
+
+                filterPeriods(
+                    currentPeriodType
+                );
+
+            }
+        );
+
+    }
+
+
+    /* =========================================================
+       INITIAL PERIOD FILTER
+       ========================================================= */
+
+    filterPeriods(
+        currentPeriodType
+    );
+
+
+    /* =========================================================
+       PERIOD CHECKBOX CHANGE
+       ========================================================= */
+
+    periodCheckboxes.forEach(
+        function (checkbox) {
+
+
+            checkbox.addEventListener(
+                "change",
+                function () {
+
+
+                    const type =
+                        this.dataset.periodType;
+
+
+                    const year =
+                        this.dataset.periodYear;
+
+
+                    const number =
+                        this.dataset.periodNumber;
+
+
+                    /*
+                       Quarterly selection:
+
+                       Q1 -> Jan, Feb, Mar
+                       Q2 -> Apr, May, Jun
+                       Q3 -> Jul, Aug, Sep
+                       Q4 -> Oct, Nov, Dec
+
+                       We visually highlight the three
+                       monthly components.
+                    */
+
+                    if (
+                        type === "QUARTERLY"
+                    ) {
+
+                        highlightPeriodWindow(
+                            type,
+                            year,
+                            number
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+    );
+
+
+    /* =========================================================
+       SELECT VISIBLE PERIODS
+       ========================================================= */
+
+    const selectPeriods =
+        document.getElementById(
+            "selectPeriods"
+        );
+
+
+    if (selectPeriods) {
+
+
+        selectPeriods.addEventListener(
+            "click",
+            function () {
+
+
+                periodOptions.forEach(
+                    function (option) {
+
+
+                        if (
+                            option.style.display !==
+                            "none"
+                        ) {
+
+
+                            const checkbox =
+                                option.querySelector(
+                                    ".period-checkbox"
+                                );
+
+
+                            if (checkbox) {
+
+                                checkbox.checked =
+                                    true;
+
+                            }
+
+                        }
+
+                    }
+                );
+
+            }
+        );
+
+    }
+
+
+    /* =========================================================
+       CLEAR PERIODS
+       ========================================================= */
+
+    const clearPeriods =
+        document.getElementById(
+            "clearPeriods"
+        );
+
+
+    if (clearPeriods) {
+
+
+        clearPeriods.addEventListener(
+            "click",
+            function () {
+
+
+                periodCheckboxes.forEach(
+                    function (checkbox) {
+
+                        checkbox.checked =
+                            false;
+
+                    }
+                );
+
+
+                periodOptions.forEach(
+                    function (option) {
+
+                        option.classList.remove(
+                            "period-window-member"
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+    }
+
+
+    
+    /* =========================================================
+       CREATE CHART
+       ========================================================= */
+
+    function createChart(
+        id,
+        config
+    ) {
+
+
+        const canvas =
+            document.getElementById(
+                id
+            );
+
+
+        if (!canvas) {
+
+            return;
+
+        }
+
+
+        new Chart(
+            canvas,
+            config
+        );
+
+    }
+
+
+    /* =========================================================
+       TREND
+       ========================================================= */
+
+    createChart(
+        "trendChart",
+        {
+
+            type: "line",
+
+            data: {
+
+                labels:
+                    chartData.trend_labels,
+
+                datasets: [
+
+                    {
+
+                        label:
+                            "Performance",
+
+                        data:
+                            chartData.trend_scores,
+
+                        borderWidth: 3,
+
+                        tension: .35,
+
+                        fill: true,
+
+                        pointRadius: 4,
+
+                        pointHoverRadius: 7
+
+                    }
+
+                ]
+
+            },
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                interaction: {
+
+                    intersect: false,
+
+                    mode: "index"
+
+                },
+
+                plugins: {
+
+                    legend: {
+
+                        position: "top"
+
+                    },
+
+                    tooltip: {
+
+                        callbacks: {
+
+                            label:
+                                function (context) {
+
+                                    return " " +
+                                        context.parsed.y +
+                                        "%";
+
+                                }
+
+                        }
+
+                    }
+
+                },
+
+                scales: {
+
+                    y: {
+
+                        beginAtZero: true,
+
+                        max: 100,
+
+                        ticks: {
+
+                            callback:
+                                function (value) {
+
+                                    return value + "%";
+
+                                }
+
+                        }
+
+                    },
+
+                    x: {
+
+                        grid: {
+
+                            display: false
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+    );
+
+
+    /* statusChart removed - status distribution no longer displayed */
+
+
+    /* =========================================================
+       PERIOD CHART
+       ========================================================= */
+
+    createChart(
+        "periodChart",
+        {
+
+            type: "bar",
+
+            data: {
+
+                labels:
+                    chartData.period_labels,
+
+                datasets: [
+
+                    {
+
+                        label:
+                            "Average Performance",
+
+                        data:
+                            chartData.period_scores,
+
+                        borderRadius: 8,
+
+                        borderSkipped: false
+
+                    }
+
+                ]
+
+            },
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                plugins: {
+
+                    legend: {
+
+                        display: false
+
+                    },
+
+                    tooltip: {
+
+                        callbacks: {
+
+                            label:
+                                function (context) {
+
+                                    return " " +
+                                        context.parsed.y +
+                                        "%";
+
+                                }
+
+                        }
+
+                    }
+
+                },
+
+                scales: {
+
+                    y: {
+
+                        beginAtZero: true,
+
+                        max: 100,
+
+                        ticks: {
+
+                            callback:
+                                function (value) {
+
+                                    return value + "%";
+
+                                }
+
+                        }
+
+                    },
+
+                    x: {
+
+                        grid: {
+
+                            display: false
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+    );
+
+
+    /* =========================================================
+       ORGANIZATION CHART
+       ========================================================= */
+
+    createChart(
+        "organizationChart",
+        {
+
+            type: "bar",
+
+            data: {
+
+                labels:
+                    chartData.organization_labels,
+
+                datasets: [
+
+                    {
+
+                        label:
+                            "Performance",
+
+                        data:
+                            chartData.organization_scores,
+
+                        borderRadius: 8,
+
+                        borderSkipped: false
+
+                    }
+
+                ]
+
+            },
+
+            options: {
+
+                indexAxis: "y",
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                plugins: {
+
+                    legend: {
+
+                        display: false
+
+                    },
+
+                    tooltip: {
+
+                        callbacks: {
+
+                            label:
+                                function (context) {
+
+                                    return " " +
+                                        context.parsed.x +
+                                        "%";
+
+                                }
+
+                        }
+
+                    }
+
+                },
+
+                scales: {
+
+                    x: {
+
+                        beginAtZero: true,
+
+                        max: 100,
+
+                        ticks: {
+
+                            callback:
+                                function (value) {
+
+                                    return value + "%";
+
+                                }
+
+                        }
+
+                    },
+
+                    y: {
+
+                        grid: {
+
+                            display: false
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+    );
+
+
+    /* =========================================================
+       FACILITY CHART
+       ========================================================= */
+
+    createChart(
+        "facilityChart",
+        {
+
+            type: "bar",
+
+            data: {
+
+                labels:
+                    chartData.facility_labels,
+
+                datasets: [
+
+                    {
+
+                        label:
+                            "Combined",
+
+                        data:
+                            chartData.facility_scores,
+
+                        borderRadius: 6,
+
+                        borderSkipped: false
+
+                    },
+
+                    {
+
+                        label:
+                            "Assessment",
+
+                        data:
+                            chartData.facility_assessment_scores,
+
+                        borderRadius: 6,
+
+                        borderSkipped: false
+
+                    },
+
+                    {
+
+                        label:
+                            "LQAS",
+
+                        data:
+                            chartData.facility_lqas_scores,
+
+                        borderRadius: 6,
+
+                        borderSkipped: false
+
+                    }
+
+                ]
+
+            },
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                interaction: {
+
+                    mode: "index",
+
+                    intersect: false
+
+                },
+
+                plugins: {
+
+                    legend: {
+
+                        position: "top"
+
+                    },
+
+                    tooltip: {
+
+                        callbacks: {
+
+                            label:
+                                function (context) {
+
+                                    return context.dataset.label +
+                                        ": " +
+                                        context.parsed.y +
+                                        "%";
+
+                                }
+
+                        }
+
+                    }
+
+                },
+
+                scales: {
+
+                    y: {
+
+                        beginAtZero: true,
+
+                        max: 100,
+
+                        ticks: {
+
+                            callback:
+                                function (value) {
+
+                                    return value + "%";
+
+                                }
+
+                        }
+
+                    },
+
+                    x: {
+
+                        grid: {
+
+                            display: false
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+    );
+
+});
+</script>
+{% endblock %}

@@ -1,0 +1,929 @@
+{% extends "base.html" %}
+
+{% block title %}Feedback | EHIRS{% endblock %}
+
+{% block content %}
+
+<style>
+
+/* =========================================================
+   EHIRS FEEDBACK PAGE
+   ========================================================= */
+
+.feedback-page {
+    padding-bottom: 35px;
+}
+
+/* Hero */
+.feedback-hero {
+    background: linear-gradient(135deg, #198754 0%, #146c43 100%);
+    color: white;
+    border-radius: 18px;
+    padding: 30px;
+    margin-bottom: 25px;
+    box-shadow: 0 8px 25px rgba(25, 135, 84, 0.18);
+}
+
+.feedback-hero h2 {
+    font-weight: 800;
+    margin-bottom: 6px;
+}
+
+.feedback-hero p {
+    margin-bottom: 0;
+    opacity: .9;
+}
+
+.feedback-icon-large {
+    width: 68px;
+    height: 68px;
+    border-radius: 16px;
+    background: rgba(255,255,255,.16);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+}
+
+/* Cards */
+.feedback-card {
+    border: 1px solid #e9ecef;
+    border-radius: 16px;
+    background: white;
+    box-shadow: 0 3px 15px rgba(0,0,0,.06);
+    transition: .25s ease;
+}
+
+.feedback-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,.10);
+}
+
+/* Statistics */
+.stat-card {
+    padding: 22px;
+    height: 100%;
+}
+
+.stat-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 13px;
+    background: #e9f7ef;
+    color: #198754;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 23px;
+}
+
+.stat-label {
+    color: #6c757d;
+    font-size: 13px;
+}
+
+.stat-value {
+    color: #198754;
+    font-size: 27px;
+    font-weight: 800;
+}
+
+/* Section heading */
+.section-heading {
+    margin: 30px 0 15px;
+}
+
+.section-heading h5 {
+    font-weight: 800;
+    margin-bottom: 3px;
+}
+
+.section-heading span {
+    color: #6c757d;
+    font-size: 13px;
+}
+
+/* Form */
+.feedback-form-card {
+    padding: 25px;
+}
+
+.form-label {
+    font-weight: 650;
+    color: #343a40;
+}
+
+.form-control,
+.form-select {
+    border-radius: 9px;
+    padding: 10px 12px;
+    border-color: #dee2e6;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #198754;
+    box-shadow: 0 0 0 .2rem rgba(25,135,84,.12);
+}
+
+/* Rating */
+.rating-box {
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 17px;
+    background: #f8faf9;
+}
+
+.rating-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-right: 18px;
+    font-size: 14px;
+}
+
+/* Feedback categories */
+.category-card {
+    padding: 22px;
+    height: 100%;
+}
+
+.category-icon {
+    width: 55px;
+    height: 55px;
+    border-radius: 13px;
+    background: #e9f7ef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 25px;
+    margin-bottom: 15px;
+}
+
+.category-card h6 {
+    font-weight: 750;
+}
+
+.category-card p {
+    color: #6c757d;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+/* Feedback history */
+.history-card {
+    overflow: hidden;
+}
+
+.history-header {
+    background: #198754;
+    color: white;
+    padding: 16px 20px;
+}
+
+.history-header h5 {
+    margin: 0;
+    font-weight: 750;
+}
+
+.feedback-table th {
+    background: #f1f8f4;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    color: #495057;
+    padding: 14px;
+}
+
+.feedback-table td {
+    padding: 15px 14px;
+    vertical-align: middle;
+}
+
+.status-badge {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    background: #e9f7ef;
+    color: #198754;
+}
+
+/* Information box */
+.feedback-info {
+    background: #f1f8f4;
+    border: 1px solid #dcefe3;
+    border-radius: 15px;
+    padding: 22px;
+}
+
+.feedback-info h6 {
+    font-weight: 750;
+    color: #198754;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+
+    .feedback-hero {
+        padding: 22px;
+    }
+
+    .feedback-icon-large {
+        display: none;
+    }
+
+}
+
+</style>
+
+<div class="feedback-page">
+
+```
+<!-- =====================================================
+     HEADER
+     ===================================================== -->
+
+<div class="feedback-hero">
+
+    <div class="d-flex justify-content-between align-items-center">
+
+        <div class="d-flex align-items-center gap-3">
+
+            <div class="feedback-icon-large">
+                💬
+            </div>
+
+            <div>
+                <h2>
+                    EHIRS Feedback Center
+                </h2>
+
+                <p>
+                    Submit feedback, report challenges and help improve
+                    the Ethiopian Health Information Revolution System.
+                </p>
+            </div>
+
+        </div>
+
+        <a href="{% url 'dashboard:home' %}"
+           class="btn btn-light px-4">
+            ← Dashboard
+        </a>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     STATISTICS
+     ===================================================== -->
+
+<div class="row g-4">
+
+
+    <div class="col-xl-3 col-md-6">
+
+        <div class="feedback-card stat-card">
+
+            <div class="d-flex align-items-center gap-3">
+
+                <div class="stat-icon">
+                    💬
+                </div>
+
+                <div>
+                    <div class="stat-label">
+                        Total Feedback
+                    </div>
+
+                    <div class="stat-value">
+                        0
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-xl-3 col-md-6">
+
+        <div class="feedback-card stat-card">
+
+            <div class="d-flex align-items-center gap-3">
+
+                <div class="stat-icon">
+                    ⏳
+                </div>
+
+                <div>
+                    <div class="stat-label">
+                        Pending
+                    </div>
+
+                    <div class="stat-value">
+                        0
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-xl-3 col-md-6">
+
+        <div class="feedback-card stat-card">
+
+            <div class="d-flex align-items-center gap-3">
+
+                <div class="stat-icon">
+                    🔄
+                </div>
+
+                <div>
+                    <div class="stat-label">
+                        Under Review
+                    </div>
+
+                    <div class="stat-value">
+                        0
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-xl-3 col-md-6">
+
+        <div class="feedback-card stat-card">
+
+            <div class="d-flex align-items-center gap-3">
+
+                <div class="stat-icon">
+                    ✅
+                </div>
+
+                <div>
+                    <div class="stat-label">
+                        Resolved
+                    </div>
+
+                    <div class="stat-value">
+                        0
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     SUBMIT FEEDBACK
+     ===================================================== -->
+
+<div class="section-heading">
+
+    <h5>
+        Submit Feedback
+    </h5>
+
+    <span>
+        Tell us about your experience with EHIRS.
+    </span>
+
+</div>
+
+
+<div class="feedback-card feedback-form-card">
+
+    <form method="post">
+
+        {% csrf_token %}
+
+        <div class="row g-4">
+
+
+            <!-- Category -->
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Feedback Category
+                </label>
+
+                <select class="form-select"
+                        name="category">
+
+                    <option value="">
+                        Select category
+                    </option>
+
+                    <option value="assessment">
+                        Assessment
+                    </option>
+
+                    <option value="lqas">
+                        LQAS
+                    </option>
+
+                    <option value="dashboard">
+                        Dashboard
+                    </option>
+
+                    <option value="reports">
+                        Reports
+                    </option>
+
+                    <option value="technical">
+                        Technical Problem
+                    </option>
+
+                    <option value="data">
+                        Data Quality
+                    </option>
+
+                    <option value="other">
+                        Other
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- Priority -->
+            <div class="col-md-6">
+
+                <label class="form-label">
+                    Priority
+                </label>
+
+                <select class="form-select"
+                        name="priority">
+
+                    <option value="normal">
+                        Normal
+                    </option>
+
+                    <option value="important">
+                        Important
+                    </option>
+
+                    <option value="urgent">
+                        Urgent
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- Subject -->
+            <div class="col-12">
+
+                <label class="form-label">
+                    Subject
+                </label>
+
+                <input type="text"
+                       class="form-control"
+                       name="subject"
+                       placeholder="Enter feedback subject">
+
+            </div>
+
+
+            <!-- Message -->
+            <div class="col-12">
+
+                <label class="form-label">
+                    Feedback / Message
+                </label>
+
+                <textarea class="form-control"
+                          name="message"
+                          rows="5"
+                          placeholder="Describe your feedback, problem or suggestion..."></textarea>
+
+            </div>
+
+
+            <!-- Rating -->
+            <div class="col-12">
+
+                <label class="form-label">
+                    Overall EHIRS Experience
+                </label>
+
+                <div class="rating-box">
+
+                    <label class="rating-option">
+                        <input type="radio"
+                               name="rating"
+                               value="5">
+                        ⭐ Excellent
+                    </label>
+
+                    <label class="rating-option">
+                        <input type="radio"
+                               name="rating"
+                               value="4">
+                        👍 Good
+                    </label>
+
+                    <label class="rating-option">
+                        <input type="radio"
+                               name="rating"
+                               value="3">
+                        😐 Average
+                    </label>
+
+                    <label class="rating-option">
+                        <input type="radio"
+                               name="rating"
+                               value="2">
+                        👎 Poor
+                    </label>
+
+                    <label class="rating-option">
+                        <input type="radio"
+                               name="rating"
+                               value="1">
+                        😞 Very Poor
+                    </label>
+
+                </div>
+
+            </div>
+
+
+            <!-- Submit -->
+            <div class="col-12">
+
+                <div class="d-flex justify-content-end">
+
+                    <button type="submit"
+                            class="btn btn-success px-4">
+
+                        📤 Submit Feedback
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+<!-- =====================================================
+     FEEDBACK CATEGORIES
+     ===================================================== -->
+
+<div class="section-heading">
+
+    <h5>
+        What Can You Report?
+    </h5>
+
+    <span>
+        Choose the area related to your feedback.
+    </span>
+
+</div>
+
+
+<div class="row g-4">
+
+
+    <div class="col-xl-3 col-md-6">
+
+        <div class="feedback-card category-card">
+
+            <div class="category-icon">
+                📋
+            </div>
+
+            <h6>
+                Assessments
+            </h6>
+
+            <p>
+                Report issues related to assessment forms,
+                indicators, scoring or submission.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-xl-3 col-md-6">
+
+        <div class="feedback-card category-card">
+
+            <div class="category-icon">
+                📊
+            </div>
+
+            <h6>
+                LQAS
+            </h6>
+
+            <p>
+                Report problems with LQAS data entry,
+                calculations or verification.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-xl-3 col-md-6">
+
+        <div class="feedback-card category-card">
+
+            <div class="category-icon">
+                📈
+            </div>
+
+            <h6>
+                Reports & Analytics
+            </h6>
+
+            <p>
+                Report incorrect results, charts,
+                statistics or reporting problems.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-xl-3 col-md-6">
+
+        <div class="feedback-card category-card">
+
+            <div class="category-icon">
+                🛠️
+            </div>
+
+            <h6>
+                Technical Support
+            </h6>
+
+            <p>
+                Report system errors, login problems,
+                performance issues or other technical problems.
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     FEEDBACK HISTORY
+     ===================================================== -->
+
+<div class="section-heading">
+
+    <h5>
+        My Feedback
+    </h5>
+
+    <span>
+        Track feedback submitted through EHIRS.
+    </span>
+
+</div>
+
+
+<div class="feedback-card history-card">
+
+    <div class="history-header">
+
+        <div class="d-flex justify-content-between align-items-center">
+
+            <h5>
+                Feedback History
+            </h5>
+
+            <span>
+                0 submissions
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <div class="table-responsive">
+
+        <table class="table table-hover feedback-table mb-0">
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Subject
+                    </th>
+
+                    <th>
+                        Category
+                    </th>
+
+                    <th>
+                        Date
+                    </th>
+
+                    <th>
+                        Status
+                    </th>
+
+                    <th>
+                        Action
+                    </th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <tr>
+
+                    <td>
+                        <strong>
+                            No feedback submitted
+                        </strong>
+
+                        <div class="small text-muted">
+                            Your submitted feedback will appear here.
+                        </div>
+                    </td>
+
+                    <td>
+                        —
+                    </td>
+
+                    <td>
+                        —
+                    </td>
+
+                    <td>
+
+                        <span class="status-badge">
+                            No records
+                        </span>
+
+                    </td>
+
+                    <td>
+
+                        <button class="btn btn-sm btn-outline-success"
+                                disabled>
+                            View
+                        </button>
+
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     INFORMATION
+     ===================================================== -->
+
+<div class="section-heading">
+
+    <h5>
+        Feedback Process
+    </h5>
+
+</div>
+
+
+<div class="feedback-info">
+
+    <div class="row g-4">
+
+
+        <div class="col-md-4">
+
+            <div class="d-flex gap-3">
+
+                <div class="category-icon flex-shrink-0">
+                    1️⃣
+                </div>
+
+                <div>
+
+                    <h6>
+                        Submit
+                    </h6>
+
+                    <p class="small text-muted mb-0">
+                        Submit your feedback or report a problem
+                        using the feedback form.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-4">
+
+            <div class="d-flex gap-3">
+
+                <div class="category-icon flex-shrink-0">
+                    2️⃣
+                </div>
+
+                <div>
+
+                    <h6>
+                        Review
+                    </h6>
+
+                    <p class="small text-muted mb-0">
+                        Authorized EHIRS support staff review
+                        and classify the submitted feedback.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-4">
+
+            <div class="d-flex gap-3">
+
+                <div class="category-icon flex-shrink-0">
+                    3️⃣
+                </div>
+
+                <div>
+
+                    <h6>
+                        Resolution
+                    </h6>
+
+                    <p class="small text-muted mb-0">
+                        The responsible team addresses the issue
+                        and updates its resolution status.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+</div>
+
+</div>
+
+{% endblock %}

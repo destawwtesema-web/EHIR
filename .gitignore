@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+venv/
+.venv/
+env/
+ENV/
+
+# Django
+*.log
+staticfiles/
+
+# Database
+db.sqlite3
+db.sqlite3-journal
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# VS Code
+.vscode/
+
+# PyCharm
+.idea/
+
+# Operating system
+.DS_Store
+Thumbs.db
+
+# Python build files
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Temporary files
+*.tmp
+*.temp

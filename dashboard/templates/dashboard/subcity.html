@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Sub-city Dashboard - EHIRS{% endblock %}
+
+{% block page_heading %}
+Sub-city Dashboard — {{ profile.organization.name }}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .header {
+        background: #6a1b9a;
+        color: white;
+        padding: 20px 30px;
+        border-radius: 10px;
+        margin-bottom: 25px;
+    }
+
+    .card {
+        background: white;
+        padding: 25px;
+        border-radius: 10px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+
+    .number {
+        font-size: 32px;
+        font-weight: bold;
+    }
+
+    .dashboard-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .dashboard-table th, .dashboard-table td {
+        padding: 12px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+    }
+
+    .dashboard-table th {
+        background: #f3e5f5;
+    }
+
+    .dashboard-btn {
+        display: inline-block;
+        padding: 10px 16px;
+        border-radius: 6px;
+        background: #6a1b9a;
+        color: white;
+        text-decoration: none;
+        margin-right: 10px;
+    }
+
+    .secondary {
+        background: #455a64;
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="header">
+    <h1 class="h2 mb-1">Sub-city Dashboard</h1>
+    <p class="mb-0">{{ profile.organization.name }}</p>
+</div>
+
+<div style="margin-bottom:25px;">
+    <a href="{% url 'accounts:user_management' %}" class="dashboard-btn">
+        <i class="bi bi-people-fill me-1"></i> User Management
+    </a>
+
+    <a href="{% url 'lqas:dashboard' %}" class="dashboard-btn">
+        LQAS
+    </a>
+
+    <a href="{% url 'assessments:dashboard' %}" class="dashboard-btn">
+        Assessments
+    </a>
+
+    <form method="post" action="{% url 'accounts:logout' %}" class="d-inline">
+        {% csrf_token %}
+        <button type="submit" class="dashboard-btn secondary border-0" style="cursor: pointer;">
+            Logout
+        </button>
+    </form>
+</div>
+
+<div class="card">
+    <h3>Health Centers</h3>
+    <div class="number">
+        {{ total_facilities|default:facilities.count }}
+    </div>
+</div>
+
+<div class="card">
+    <h2>Facilities</h2>
+
+    <div class="table-responsive">
+        <table class="dashboard-table">
+            <thead>
+                <tr>
+                    <th>Facility</th>
+                    <th>Code</th>
+                    <th>Type</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for facility in facilities %}
+                <tr>
+                    <td>{{ facility.name }}</td>
+                    <td>{{ facility.code }}</td>
+                    <td>{{ facility.get_facility_type_display }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="text-center py-3">
+                        No facilities available.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

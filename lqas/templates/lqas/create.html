@@ -1,0 +1,1335 @@
+{% extends "base.html" %}
+
+{% block title %}New LQAS Assessment{% endblock %}
+
+{% block content %}
+
+<div class="mb-4">
+
+```
+<h2 class="fw-bold">
+    New LQAS Assessment
+</h2>
+
+<p class="text-muted mb-1">
+    Enter LQAS data elements manually and compare
+    the Tally Sheet, Register and Report values.
+</p>
+
+<small class="text-muted">
+    You have 12 available data-element rows. Leave unused rows blank.
+</small>
+```
+
+</div>
+
+<form method="post" id="lqasForm">
+
+```
+{% csrf_token %}
+
+
+<!-- ==================================================
+     ASSESSMENT INFORMATION
+=================================================== -->
+
+<div class="card border-0 shadow-sm mb-4">
+
+    <div class="card-header bg-success text-white">
+
+        <h5 class="mb-0">
+            Assessment Information
+        </h5>
+
+    </div>
+
+
+    <div class="card-body">
+
+        <div class="row g-3">
+
+            <!-- FACILITY USER -->
+
+            {% if profile.is_facility_user %}
+
+                {% for facility in facilities %}
+
+                    <input
+                        type="hidden"
+                        name="facility"
+                        value="{{ facility.id }}"
+                    >
+
+                    <div class="col-md-6">
+
+                        <label class="form-label fw-bold">
+                            Facility
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            value="{{ facility.name }} — {{ facility.code }}"
+                            readonly
+                        >
+
+                    </div>
+
+                {% endfor %}
+
+            {% else %}
+
+                <div class="col-md-6">
+
+                    <label class="form-label fw-bold">
+                        Facility
+                    </label>
+
+                    <select
+                        name="facility"
+                        class="form-select"
+                        required
+                    >
+
+                        <option value="">
+                            Select facility
+                        </option>
+
+                        {% for facility in facilities %}
+
+                            <option value="{{ facility.id }}">
+
+                                {{ facility.name }}
+                                — {{ facility.code }}
+
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+            {% endif %}
+
+
+            <!-- YEAR -->
+
+            <div class="col-md-3">
+
+                <label class="form-label fw-bold">
+                    Ethiopian Year
+                </label>
+
+                <input
+                    type="number"
+                    name="year"
+                    class="form-control"
+                    min="2008"
+                    value="2018"
+                    required
+                >
+
+            </div>
+
+
+            <!-- PERIOD -->
+
+            <div class="col-md-3">
+
+                <label class="form-label fw-bold">
+                    Period
+                </label>
+
+                <select
+                    name="period"
+                    class="form-select"
+                    required
+                >
+
+                    <option value="">
+                        Select period
+                    </option>
+
+                    <option value="MONTHLY-1">
+                        Monthly - 1
+                    </option>
+
+                    <option value="MONTHLY-2">
+                        Monthly - 2
+                    </option>
+
+                    <option value="MONTHLY-3">
+                        Monthly - 3
+                    </option>
+
+                    <option value="MONTHLY-4">
+                        Monthly - 4
+                    </option>
+
+                    <option value="MONTHLY-5">
+                        Monthly - 5
+                    </option>
+
+                    <option value="MONTHLY-6">
+                        Monthly - 6
+                    </option>
+
+                    <option value="MONTHLY-7">
+                        Monthly - 7
+                    </option>
+
+                    <option value="MONTHLY-8">
+                        Monthly - 8
+                    </option>
+
+                    <option value="MONTHLY-9">
+                        Monthly - 9
+                    </option>
+
+                    <option value="MONTHLY-10">
+                        Monthly - 10
+                    </option>
+
+                    <option value="MONTHLY-11">
+                        Monthly - 11
+                    </option>
+
+                    <option value="MONTHLY-12">
+                        Monthly - 12
+                    </option>
+
+                    <option value="QUARTERLY-1">
+                        Quarterly - 1
+                    </option>
+
+                    <option value="QUARTERLY-2">
+                        Quarterly - 2
+                    </option>
+
+                    <option value="QUARTERLY-3">
+                        Quarterly - 3
+                    </option>
+
+                    <option value="QUARTERLY-4">
+                        Quarterly - 4
+                    </option>
+
+                    <option value="BIANNUAL-1">
+                        Biannual - 1
+                    </option>
+
+                    <option value="BIANNUAL-2">
+                        Biannual - 2
+                    </option>
+
+                    <option value="ANNUAL">
+                        Annual
+                    </option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ==================================================
+     LQAS DATA ELEMENTS
+=================================================== -->
+
+<div class="card border-0 shadow-sm">
+
+    <div class="card-header bg-success text-white">
+
+        <div class="d-flex justify-content-between align-items-center">
+
+            <div>
+
+                <h5 class="mb-1">
+                    LQAS Data Elements
+                </h5>
+
+                <small>
+                    Enter the data element names manually.
+                </small>
+
+            </div>
+
+            <span
+                class="badge bg-light text-success"
+            >
+                12 Rows
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <div class="card-body p-0">
+
+        <div class="table-responsive">
+
+            <table
+                class="table table-bordered table-hover mb-0 align-middle"
+                id="lqasTable"
+            >
+
+                <thead class="table-light">
+
+                    <tr>
+
+                        <th
+                            style="width: 55px;"
+                            class="text-center"
+                        >
+                            #
+                        </th>
+
+                        <th style="width: 35%;">
+                            Data Element Name
+                        </th>
+
+                        <th>
+                            Count on Tally Sheet
+                        </th>
+
+                        <th>
+                            Register
+                        </th>
+
+                        <th>
+                            Report
+                        </th>
+
+                        <th
+                            style="width: 100px;"
+                            class="text-center"
+                        >
+                            Match
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="lqasRows">
+
+                    <!-- ==================================================
+                         ROW 1
+                    =================================================== -->
+
+                    <tr class="lqas-row">
+
+                        <td class="text-center fw-bold">
+                            1
+                        </td>
+
+                        <td>
+
+                            <input
+                                type="text"
+                                name="data_element_name"
+                                class="form-control data-element-input"
+                                placeholder="Enter data element name"
+                            >
+
+                        </td>
+
+                        <td>
+
+                            <input
+                                type="number"
+                                name="tally_sheet"
+                                class="form-control count-input"
+                                min="0"
+                                placeholder="0"
+                            >
+
+                        </td>
+
+                        <td>
+
+                            <input
+                                type="number"
+                                name="register"
+                                class="form-control count-input"
+                                min="0"
+                                placeholder="0"
+                            >
+
+                        </td>
+
+                        <td>
+
+                            <input
+                                type="number"
+                                name="report"
+                                class="form-control count-input"
+                                min="0"
+                                placeholder="0"
+                            >
+
+                        </td>
+
+                        <td class="text-center">
+
+                            <span class="match-result badge bg-secondary">
+                                —
+                            </span>
+
+                        </td>
+
+                    </tr>
+
+
+                    <!-- ROW 2 -->
+
+                    <tr class="lqas-row">
+
+                        <td class="text-center fw-bold">2</td>
+
+                        <td>
+                            <input
+                                type="text"
+                                name="data_element_name"
+                                class="form-control data-element-input"
+                                placeholder="Enter data element name"
+                            >
+                        </td>
+
+                        <td>
+                            <input
+                                type="number"
+                                name="tally_sheet"
+                                class="form-control count-input"
+                                min="0"
+                                placeholder="0"
+                            >
+                        </td>
+
+                        <td>
+                            <input
+                                type="number"
+                                name="register"
+                                class="form-control count-input"
+                                min="0"
+                                placeholder="0"
+                            >
+                        </td>
+
+                        <td>
+                            <input
+                                type="number"
+                                name="report"
+                                class="form-control count-input"
+                                min="0"
+                                placeholder="0"
+                            >
+                        </td>
+
+                        <td class="text-center">
+                            <span class="match-result badge bg-secondary">—</span>
+                        </td>
+
+                    </tr>
+
+
+                    <!-- ROW 3 -->
+
+                    <tr class="lqas-row">
+
+                        <td class="text-center fw-bold">3</td>
+
+                        <td>
+                            <input type="text" name="data_element_name"
+                                   class="form-control data-element-input"
+                                   placeholder="Enter data element name">
+                        </td>
+
+                        <td>
+                            <input type="number" name="tally_sheet"
+                                   class="form-control count-input"
+                                   min="0" placeholder="0">
+                        </td>
+
+                        <td>
+                            <input type="number" name="register"
+                                   class="form-control count-input"
+                                   min="0" placeholder="0">
+                        </td>
+
+                        <td>
+                            <input type="number" name="report"
+                                   class="form-control count-input"
+                                   min="0" placeholder="0">
+                        </td>
+
+                        <td class="text-center">
+                            <span class="match-result badge bg-secondary">—</span>
+                        </td>
+
+                    </tr>
+
+
+                    <!-- ROW 4 -->
+
+                    <tr class="lqas-row">
+
+                        <td class="text-center fw-bold">4</td>
+
+                        <td>
+                            <input type="text" name="data_element_name"
+                                   class="form-control data-element-input"
+                                   placeholder="Enter data element name">
+                        </td>
+
+                        <td>
+                            <input type="number" name="tally_sheet"
+                                   class="form-control count-input"
+                                   min="0" placeholder="0">
+                        </td>
+
+                        <td>
+                            <input type="number" name="register"
+                                   class="form-control count-input"
+                                   min="0" placeholder="0">
+                        </td>
+
+                        <td>
+                            <input type="number" name="report"
+                                   class="form-control count-input"
+                                   min="0" placeholder="0">
+                        </td>
+
+                        <td class="text-center">
+                            <span class="match-result badge bg-secondary">—</span>
+                        </td>
+
+                    </tr>
+
+
+                    <!-- ROW 5 -->
+
+                    <tr class="lqas-row">
+
+                        <td class="text-center fw-bold">5</td>
+
+                        <td>
+                            <input type="text" name="data_element_name"
+                                   class="form-control data-element-input"
+                                   placeholder="Enter data element name">
+                        </td>
+
+                        <td>
+                            <input type="number" name="tally_sheet"
+                                   class="form-control count-input"
+                                   min="0" placeholder="0">
+                        </td>
+
+                        <td>
+                            <input type="number" name="register"
+                                   class="form-control count-input"
+                                   min="0" placeholder="0">
+                        </td>
+
+                        <td>
+                            <input type="number" name="report"
+                                   class="form-control count-input"
+                                   min="0" placeholder="0">
+                        </td>
+
+                        <td class="text-center">
+                            <span class="match-result badge bg-secondary">—</span>
+                        </td>
+
+                    </tr>
+
+
+                    <!-- ROW 6 -->
+
+                    <tr class="lqas-row">
+
+                        <td class="text-center fw-bold">6</td>
+
+                        <td>
+                            <input type="text" name="data_element_name"
+                                   class="form-control data-element-input"
+                                   placeholder="Enter data element name">
+                        </td>
+
+                        <td>
+                            <input type="number" name="tally_sheet"
+                                   class="form-control count-input"
+                                   min="0" placeholder="0">
+                        </td>
+
+                        <td>
+                            <input type="number" name="register"
+                                   class="form-control count-input"
+                                   min="0" placeholder="0">
+                        </td>
+
+                        <td>
+                            <input type="number" name="report"
+                                   class="form-control count-input"
+                                   min="0" placeholder="0">
+                        </td>
+
+                        <td class="text-center">
+                            <span class="match-result badge bg-secondary">—</span>
+                        </td>
+
+                    </tr>
+
+
+                    <!-- ROW 7 -->
+
+                    <tr class="lqas-row">
+
+                        <td class="text-center fw-bold">7</td>
+
+                        <td>
+                            <input type="text" name="data_element_name"
+                                   class="form-control data-element-input"
+                                   placeholder="Enter data element name">
+                        </td>
+
+                        <td>
+                            <input type="number" name="tally_sheet"
+                                   class="form-control count-input"
+                                   min="0" placeholder="0">
+                        </td>
+
+                        <td>
+                            <input type="number" name="register"
+                                   class="form-control count-input"
+                                   min="0" placeholder="0">
+                        </td>
+
+                        <td>
+                            <input type="number" name="report"
+                                   class="form-control count-input"
+                                   min="0" placeholder="0">
+                        </td>
+
+                        <td class="text-center">
+                            <span class="match-result badge bg-secondary">—</span>
+                        </td>
+
+                    </tr>
+
+
+                    <!-- ROW 8 -->
+
+                    <tr class="lqas-row">
+
+                        <td class="text-center fw-bold">8</td>
+
+                        <td>
+                            <input type="text" name="data_element_name"
+                                   class="form-control data-element-input"
+                                   placeholder="Enter data element name">
+                        </td>
+
+                        <td>
+                            <input type="number" name="tally_sheet"
+                                   class="form-control count-input"
+                                   min="0" placeholder="0">
+                        </td>
+
+                        <td>
+                            <input type="number" name="register"
+                                   class="form-control count-input"
+                                   min="0" placeholder="0">
+                        </td>
+
+                        <td>
+                            <input type="number" name="report"
+                                   class="form-control count-input"
+                                   min="0" placeholder="0">
+                        </td>
+
+                        <td class="text-center">
+                            <span class="match-result badge bg-secondary">—</span>
+                        </td>
+
+                    </tr>
+
+
+                    <!-- ROW 9 -->
+
+                    <tr class="lqas-row">
+
+                        <td class="text-center fw-bold">9</td>
+
+                        <td>
+                            <input type="text" name="data_element_name"
+                                   class="form-control data-element-input"
+                                   placeholder="Enter data element name">
+                        </td>
+
+                        <td>
+                            <input type="number" name="tally_sheet"
+                                   class="form-control count-input"
+                                   min="0" placeholder="0">
+                        </td>
+
+                        <td>
+                            <input type="number" name="register"
+                                   class="form-control count-input"
+                                   min="0" placeholder="0">
+                        </td>
+
+                        <td>
+                            <input type="number" name="report"
+                                   class="form-control count-input"
+                                   min="0" placeholder="0">
+                        </td>
+
+                        <td class="text-center">
+                            <span class="match-result badge bg-secondary">—</span>
+                        </td>
+
+                    </tr>
+
+
+                    <!-- ROW 10 -->
+
+                    <tr class="lqas-row">
+
+                        <td class="text-center fw-bold">10</td>
+
+                        <td>
+                            <input type="text" name="data_element_name"
+                                   class="form-control data-element-input"
+                                   placeholder="Enter data element name">
+                        </td>
+
+                        <td>
+                            <input type="number" name="tally_sheet"
+                                   class="form-control count-input"
+                                   min="0" placeholder="0">
+                        </td>
+
+                        <td>
+                            <input type="number" name="register"
+                                   class="form-control count-input"
+                                   min="0" placeholder="0">
+                        </td>
+
+                        <td>
+                            <input type="number" name="report"
+                                   class="form-control count-input"
+                                   min="0" placeholder="0">
+                        </td>
+
+                        <td class="text-center">
+                            <span class="match-result badge bg-secondary">—</span>
+                        </td>
+
+                    </tr>
+
+
+                    <!-- ROW 11 -->
+
+                    <tr class="lqas-row">
+
+                        <td class="text-center fw-bold">11</td>
+
+                        <td>
+                            <input type="text" name="data_element_name"
+                                   class="form-control data-element-input"
+                                   placeholder="Enter data element name">
+                        </td>
+
+                        <td>
+                            <input type="number" name="tally_sheet"
+                                   class="form-control count-input"
+                                   min="0" placeholder="0">
+                        </td>
+
+                        <td>
+                            <input type="number" name="register"
+                                   class="form-control count-input"
+                                   min="0" placeholder="0">
+                        </td>
+
+                        <td>
+                            <input type="number" name="report"
+                                   class="form-control count-input"
+                                   min="0" placeholder="0">
+                        </td>
+
+                        <td class="text-center">
+                            <span class="match-result badge bg-secondary">—</span>
+                        </td>
+
+                    </tr>
+
+
+                    <!-- ROW 12 -->
+
+                    <tr class="lqas-row">
+
+                        <td class="text-center fw-bold">12</td>
+
+                        <td>
+                            <input type="text" name="data_element_name"
+                                   class="form-control data-element-input"
+                                   placeholder="Enter data element name">
+                        </td>
+
+                        <td>
+                            <input type="number" name="tally_sheet"
+                                   class="form-control count-input"
+                                   min="0" placeholder="0">
+                        </td>
+
+                        <td>
+                            <input type="number" name="register"
+                                   class="form-control count-input"
+                                   min="0" placeholder="0">
+                        </td>
+
+                        <td>
+                            <input type="number" name="report"
+                                   class="form-control count-input"
+                                   min="0" placeholder="0">
+                        </td>
+
+                        <td class="text-center">
+                            <span class="match-result badge bg-secondary">—</span>
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+
+                <!-- ==================================================
+                     SUMMARY
+                =================================================== -->
+
+                <tfoot class="table-light">
+
+                    <tr>
+
+                        <th
+                            colspan="5"
+                            class="text-end"
+                        >
+                            Completed Data Elements
+                        </th>
+
+                        <th class="text-center">
+
+                            <span id="totalCount">
+                                0
+                            </span>
+
+                            / 12
+
+                        </th>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <th
+                            colspan="5"
+                            class="text-end"
+                        >
+                            Matched Elements
+                        </th>
+
+                        <th class="text-center">
+
+                            <span id="matchedCount">
+                                0
+                            </span>
+
+                        </th>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <th
+                            colspan="5"
+                            class="text-end"
+                        >
+                            LQAS Percentage
+                        </th>
+
+                        <th class="text-center">
+
+                            <span
+                                id="percentage"
+                                class="fs-5 fw-bold"
+                            >
+                                0.00%
+                            </span>
+
+                        </th>
+
+                    </tr>
+
+                </tfoot>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==================================================
+         FOOTER
+    =================================================== -->
+
+    <div class="card-footer d-flex justify-content-between">
+
+        <div class="text-muted small">
+
+            <strong>Note:</strong>
+            Data Element Name is entered manually.
+            You may leave unused rows blank.
+
+        </div>
+
+        <div>
+
+            <a
+                href="{% url 'lqas:dashboard' %}"
+                class="btn btn-secondary"
+            >
+                Cancel
+            </a>
+
+            <button
+                type="submit"
+                class="btn btn-success"
+                id="submitBtn"
+            >
+                Submit LQAS Assessment
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+```
+
+</form>
+
+<!-- ==========================================================
+     JAVASCRIPT
+=========================================================== -->
+
+<script>
+
+/*
+==================================================
+GET ALL LQAS ROWS
+==================================================
+*/
+
+function getRows() {
+
+    return document.querySelectorAll(
+        "#lqasRows .lqas-row"
+    );
+
+}
+
+
+/*
+==================================================
+CALCULATE MATCH FOR ONE ROW
+==================================================
+*/
+
+function calculateRowMatch(row) {
+
+    const nameInput = row.querySelector(
+        ".data-element-input"
+    );
+
+    const tallyInput = row.querySelector(
+        'input[name="tally_sheet"]'
+    );
+
+    const registerInput = row.querySelector(
+        'input[name="register"]'
+    );
+
+    const reportInput = row.querySelector(
+        'input[name="report"]'
+    );
+
+    const badge = row.querySelector(
+        ".match-result"
+    );
+
+
+    const name = nameInput.value.trim();
+
+    const tally = tallyInput.value;
+
+    const register = registerInput.value;
+
+    const report = reportInput.value;
+
+
+    /*
+    --------------------------------------------------
+    EMPTY ROW
+    --------------------------------------------------
+    */
+
+    if (
+        name === ""
+        &&
+        tally === ""
+        &&
+        register === ""
+        &&
+        report === ""
+    ) {
+
+        badge.textContent = "—";
+
+        badge.className =
+            "match-result badge bg-secondary";
+
+        return {
+            completed: false,
+            matched: false
+        };
+
+    }
+
+
+    /*
+    --------------------------------------------------
+    INCOMPLETE ROW
+    --------------------------------------------------
+    */
+
+    if (
+        name === ""
+        ||
+        tally === ""
+        ||
+        register === ""
+        ||
+        report === ""
+    ) {
+
+        badge.textContent = "—";
+
+        badge.className =
+            "match-result badge bg-warning text-dark";
+
+        return {
+            completed: false,
+            matched: false
+        };
+
+    }
+
+
+    /*
+    --------------------------------------------------
+    MATCH
+    --------------------------------------------------
+    */
+
+    if (
+        Number(tally) === Number(register)
+        &&
+        Number(register) === Number(report)
+    ) {
+
+        badge.textContent = "YES";
+
+        badge.className =
+            "match-result badge bg-success";
+
+        return {
+            completed: true,
+            matched: true
+        };
+
+    }
+
+
+    /*
+    --------------------------------------------------
+    NOT MATCHED
+    --------------------------------------------------
+    */
+
+    badge.textContent = "NO";
+
+    badge.className =
+        "match-result badge bg-danger";
+
+    return {
+        completed: true,
+        matched: false
+    };
+
+}
+
+
+/*
+==================================================
+UPDATE SUMMARY
+==================================================
+*/
+
+function updateSummary() {
+
+    const rows = getRows();
+
+    let completed = 0;
+
+    let matched = 0;
+
+
+    rows.forEach(function(row) {
+
+        const result = calculateRowMatch(row);
+
+        if (result.completed) {
+
+            completed++;
+
+        }
+
+        if (result.matched) {
+
+            matched++;
+
+        }
+
+    });
+
+
+    document.getElementById(
+        "totalCount"
+    ).textContent = completed;
+
+
+    document.getElementById(
+        "matchedCount"
+    ).textContent = matched;
+
+
+    const percentage =
+        completed > 0
+            ? (matched / completed) * 100
+            : 0;
+
+
+    document.getElementById(
+        "percentage"
+    ).textContent =
+        percentage.toFixed(2) + "%";
+
+}
+
+
+/*
+==================================================
+ATTACH INPUT EVENTS
+==================================================
+*/
+
+document.querySelectorAll(
+    "#lqasRows input"
+).forEach(function(input) {
+
+    input.addEventListener(
+        "input",
+        updateSummary
+    );
+
+});
+
+
+/*
+==================================================
+INITIAL CALCULATION
+==================================================
+*/
+
+updateSummary();
+
+
+/*
+==================================================
+FINAL FORM VALIDATION
+==================================================
+*/
+
+document.getElementById(
+    "lqasForm"
+).addEventListener(
+    "submit",
+    function(event) {
+
+        const rows = getRows();
+
+        let completedRows = 0;
+
+        let invalidRows = [];
+
+
+        rows.forEach(function(row, index) {
+
+            const name = row.querySelector(
+                ".data-element-input"
+            ).value.trim();
+
+            const tally = row.querySelector(
+                'input[name="tally_sheet"]'
+            ).value;
+
+            const register = row.querySelector(
+                'input[name="register"]'
+            ).value;
+
+            const report = row.querySelector(
+                'input[name="report"]'
+            ).value;
+
+
+            /*
+            ------------------------------------------
+            COMPLETELY EMPTY ROW
+            ------------------------------------------
+            */
+
+            if (
+                name === ""
+                &&
+                tally === ""
+                &&
+                register === ""
+                &&
+                report === ""
+            ) {
+
+                return;
+
+            }
+
+
+            /*
+            ------------------------------------------
+            PARTIALLY COMPLETED ROW
+            ------------------------------------------
+            */
+
+            if (
+                name === ""
+                ||
+                tally === ""
+                ||
+                register === ""
+                ||
+                report === ""
+            ) {
+
+                invalidRows.push(index + 1);
+
+                return;
+
+            }
+
+
+            /*
+            ------------------------------------------
+            VALID COMPLETED ROW
+            ------------------------------------------
+            */
+
+            if (
+                Number(tally) < 0
+                ||
+                Number(register) < 0
+                ||
+                Number(report) < 0
+            ) {
+
+                invalidRows.push(index + 1);
+
+                return;
+
+            }
+
+
+            completedRows++;
+
+        });
+
+
+        /*
+        ------------------------------------------
+        AT LEAST ONE DATA ELEMENT
+        ------------------------------------------
+        */
+
+        if (completedRows === 0) {
+
+            event.preventDefault();
+
+            alert(
+                "Please enter at least one data element."
+            );
+
+            return;
+
+        }
+
+
+        /*
+        ------------------------------------------
+        INVALID ROWS
+        ------------------------------------------
+        */
+
+        if (invalidRows.length > 0) {
+
+            event.preventDefault();
+
+            alert(
+                "Please complete all fields in row(s): "
+                +
+                invalidRows.join(", ")
+                +
+                "."
+            );
+
+            return;
+
+        }
+
+    }
+);
+
+</script>
+
+{% endblock %}
